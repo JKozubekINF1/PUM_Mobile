@@ -200,6 +200,30 @@ abstract class AppLocalizations {
   /// **'Incorrect login credentials'**
   String get badLoginMessage;
 
+  /// No description provided for @emailTakenMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Email is already taken'**
+  String get emailTakenMessage;
+
+  /// No description provided for @incorrectEmailMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Incorrect email'**
+  String get incorrectEmailMessage;
+
+  /// No description provided for @incorrectPasswordMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Incorrect password'**
+  String get incorrectPasswordMessage;
+
+  /// No description provided for @failedToRepeatPasswordMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to repeat password'**
+  String get failedToRepeatPasswordMessage;
+
   /// No description provided for @noConnectionMessage.
   ///
   /// In en, this message translates to:

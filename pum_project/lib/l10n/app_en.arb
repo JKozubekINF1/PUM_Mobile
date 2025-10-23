@@ -17,6 +17,10 @@
     "registerSuccessfulMessage": "Registration successful",
     "emptyFieldMessage": "Fill out all required fields",
     "badLoginMessage": "Incorrect login credentials",
+    "emailTakenMessage": "Email is already taken",
+    "incorrectEmailMessage": "Incorrect email",
+    "incorrectPasswordMessage": "Incorrect password",
+    "failedToRepeatPasswordMessage": "Failed to repeat password",
     "noConnectionMessage": "Lost connection to the server, check your internet connection",
     "genericErrorMessage": "An error has occurred, try again later"
 }

@@ -15,9 +15,27 @@ class _RegisterPageState extends State<RegisterPage> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _confirmPasswordController = TextEditingController();
+  bool _processing = false;
   bool _obscurePassword1 = true;
   bool _obscurePassword2 = true;
+  bool _validCredentials = false;
   String _message = '';
+
+  void _setProcessing(bool processing) {
+    if (mounted) {
+      setState(() {
+        _processing = processing;
+      });
+    }
+  }
+
+  void _setValidCredentials(bool valid) {
+    if (mounted) {
+      setState(() {
+        _validCredentials = valid;
+      });
+    }
+  }
 
   void _setMessage(String message) {
     if (mounted) {
@@ -27,8 +45,35 @@ class _RegisterPageState extends State<RegisterPage> {
     }
   }
 
-  Future<void> _register() async {
+  void _checkCredentials() {
     _setMessage('');
+    _setProcessing(true);
+    _setValidCredentials(true);
+    if (_passwordController.text != _confirmPasswordController.text) {
+      _setMessage(AppLocalizations.of(context)!.failedToRepeatPasswordMessage);
+      _setValidCredentials(false);
+    }
+    if (!RegExp(r"^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[^A-Za-z0-9]).{6,20}$")
+        .hasMatch(_passwordController.text.trim())) {
+      _setMessage(AppLocalizations.of(context)!.incorrectPasswordMessage);
+      _setValidCredentials(false);
+    }
+    if (!RegExp(r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+")
+        .hasMatch(_emailController.text.trim())) {
+      _setMessage(AppLocalizations.of(context)!.incorrectEmailMessage);
+      _setValidCredentials(false);
+    }
+    if (_emailController.text.trim().isEmpty || _passwordController.text.trim().isEmpty) {
+      _setMessage(AppLocalizations.of(context)!.emptyFieldMessage);
+      _setValidCredentials(false);
+    }
+    if (_validCredentials) {
+      _register();
+    }
+    _setProcessing(false);
+  }
+
+  Future<void> _register() async {
     try {
       final apiService = Provider.of<ApiService>(context, listen: false);
       await apiService.register(
@@ -41,7 +86,21 @@ class _RegisterPageState extends State<RegisterPage> {
         Navigator.pushReplacementNamed(context, '/login');
       }
     } catch (e) {
+      _setMessage(_formatError(e.toString()));
       debugPrint('$e');
+    } finally {
+      _setProcessing(false);
+    }
+  }
+
+  String _formatError(String raw) {
+    final msg = raw.replaceFirst('Exception: ', '').toLowerCase();
+    if (msg.contains('network') || msg.contains('timeout')) {
+      return AppLocalizations.of(context)!.noConnectionMessage;
+    } else if (msg.contains('not a subtype')) {
+      return AppLocalizations.of(context)!.incorrectEmailMessage;
+    } else{
+      return AppLocalizations.of(context)!.genericErrorMessage;
     }
   }
 
@@ -135,7 +194,7 @@ class _RegisterPageState extends State<RegisterPage> {
       width: double.infinity,
       child: ElevatedButton(
         onPressed: (){
-          _register();
+          _processing ? null : _checkCredentials();
         },
         style: ElevatedButton.styleFrom(
           backgroundColor: const Color(0xFF375534),

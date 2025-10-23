@@ -44,7 +44,7 @@ class ApiService {
         return json.decode(utf8.decode(response.bodyBytes));
       } else {
         final errorBody = json.decode(utf8.decode(response.bodyBytes));
-        throw Exception(errorBody['message'] ?? '${response.statusCode}');
+        throw Exception(errorBody['message'] ?? 'Error: ${response.statusCode}');
       }
     } catch (e) {
       throw Exception('$e');
@@ -78,5 +78,9 @@ class ApiService {
     } catch (e) {
       throw Exception('$e');
     }
+  }
+
+  Future<String?> getUsername() async {
+    return await _storage.read(key: 'email');
   }
 }

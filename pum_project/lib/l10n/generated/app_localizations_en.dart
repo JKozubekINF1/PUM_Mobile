@@ -60,6 +60,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String get badLoginMessage => 'Incorrect login credentials';
 
   @override
+  String get emailTakenMessage => 'Email is already taken';
+
+  @override
+  String get incorrectEmailMessage => 'Incorrect email';
+
+  @override
+  String get incorrectPasswordMessage => 'Incorrect password';
+
+  @override
+  String get failedToRepeatPasswordMessage => 'Failed to repeat password';
+
+  @override
   String get noConnectionMessage =>
       'Lost connection to the server, check your internet connection';
 
