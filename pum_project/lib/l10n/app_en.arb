@@ -4,6 +4,7 @@
     "appTitle": "App",
     "loginPageTitle": "Login",
     "registerPageTitle": "Register",
+    "trackPageTitle": "Map",
     "usernameLabel": "Username",
     "emailLabel": "Email",
     "passwordLabel": "Password",
@@ -22,5 +23,8 @@
     "incorrectPasswordMessage": "Incorrect password",
     "failedToRepeatPasswordMessage": "Failed to repeat password",
     "noConnectionMessage": "Lost connection to the server, check your internet connection",
+    "noLocationServicesMessage": "Location services are disabled, turn on your location",
+    "noLocationPermissionsMessage": "Location services permissions were denied",
+    "noLocationPermissionsForeverMessage": "Location services permissions are permanently denied, check your app settings",
     "genericErrorMessage": "An error has occurred, try again later"
 }

@@ -122,6 +122,12 @@ abstract class AppLocalizations {
   /// **'Register'**
   String get registerPageTitle;
 
+  /// No description provided for @trackPageTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Map'**
+  String get trackPageTitle;
+
   /// No description provided for @usernameLabel.
   ///
   /// In en, this message translates to:
@@ -229,6 +235,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Lost connection to the server, check your internet connection'**
   String get noConnectionMessage;
+
+  /// No description provided for @noLocationServicesMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Location services are disabled, turn on your location'**
+  String get noLocationServicesMessage;
+
+  /// No description provided for @noLocationPermissionsMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Location services permissions were denied'**
+  String get noLocationPermissionsMessage;
+
+  /// No description provided for @noLocationPermissionsForeverMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Location services permissions are permanently denied, check your app settings'**
+  String get noLocationPermissionsForeverMessage;
 
   /// No description provided for @genericErrorMessage.
   ///

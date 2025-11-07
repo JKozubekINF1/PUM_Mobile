@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:pum_project/login.dart';
 import 'package:pum_project/register.dart';
 import 'package:pum_project/resetpassword.dart';
+import 'package:pum_project/track.dart';
 import 'l10n/generated/app_localizations.dart';
 import 'package:pum_project/services/api_connection.dart';
 import 'package:provider/provider.dart';
@@ -31,6 +32,7 @@ class MyApp extends StatelessWidget {
         '/login' : (BuildContext context)=>LoginPage(),
         '/register' : (BuildContext context)=>RegisterPage(),
         '/resetpassword' : (BuildContext context)=>ResetPage(),
+        '/track' : (BuildContext context)=>TrackPage(),
       },
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.red),
@@ -79,6 +81,17 @@ class _HomePageState extends State<HomePage> {
                   context,
                   MaterialPageRoute<void>(
                     builder: (context) => const RegisterPage(),
+                  ),
+                );
+              },
+            ),
+            ElevatedButton(
+              child: const Text('Map'),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute<void>(
+                    builder: (context) => const TrackPage(),
                   ),
                 );
               },

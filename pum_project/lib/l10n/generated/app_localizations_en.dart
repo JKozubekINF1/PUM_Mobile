@@ -21,6 +21,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get registerPageTitle => 'Register';
 
   @override
+  String get trackPageTitle => 'Map';
+
+  @override
   String get usernameLabel => 'Username';
 
   @override
@@ -74,6 +77,18 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get noConnectionMessage =>
       'Lost connection to the server, check your internet connection';
+
+  @override
+  String get noLocationServicesMessage =>
+      'Location services are disabled, turn on your location';
+
+  @override
+  String get noLocationPermissionsMessage =>
+      'Location services permissions were denied';
+
+  @override
+  String get noLocationPermissionsForeverMessage =>
+      'Location services permissions are permanently denied, check your app settings';
 
   @override
   String get genericErrorMessage => 'An error has occurred, try again later';
