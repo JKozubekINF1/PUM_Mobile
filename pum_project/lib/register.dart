@@ -21,6 +21,14 @@ class _RegisterPageState extends State<RegisterPage> {
   bool _validCredentials = false;
   String _message = '';
 
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    _confirmPasswordController.dispose();
+    super.dispose();
+  }
+
   void _setProcessing(bool processing) {
     if (mounted) {
       setState(() {

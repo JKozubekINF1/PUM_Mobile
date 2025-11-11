@@ -24,6 +24,9 @@ class AppLocalizationsPl extends AppLocalizations {
   String get trackPageTitle => 'Map';
 
   @override
+  String get resultPageTitle => 'Results';
+
+  @override
   String get usernameLabel => 'Username';
 
   @override
@@ -49,6 +52,12 @@ class AppLocalizationsPl extends AppLocalizations {
 
   @override
   String get registerButtonLabel => 'Register';
+
+  @override
+  String get beginActivityButtonLabel => 'START ACTIVITY';
+
+  @override
+  String get stopActivityButtonLabel => 'STOP ACTIVITY';
 
   @override
   String get loginSuccessfulMessage => 'Login Successful';

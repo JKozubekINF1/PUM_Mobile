@@ -19,6 +19,13 @@ class _LoginPageState extends State<LoginPage> {
   bool _validCredentials = false;
   String _message = '';
 
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
+
   void _setProcessing(bool processing) {
     if (mounted) {
       setState(() {

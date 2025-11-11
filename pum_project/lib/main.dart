@@ -3,6 +3,7 @@ import 'package:pum_project/login.dart';
 import 'package:pum_project/register.dart';
 import 'package:pum_project/resetpassword.dart';
 import 'package:pum_project/track.dart';
+import 'package:pum_project/activityresult.dart';
 import 'l10n/generated/app_localizations.dart';
 import 'package:pum_project/services/api_connection.dart';
 import 'package:provider/provider.dart';
@@ -33,6 +34,16 @@ class MyApp extends StatelessWidget {
         '/register' : (BuildContext context)=>RegisterPage(),
         '/resetpassword' : (BuildContext context)=>ResetPage(),
         '/track' : (BuildContext context)=>TrackPage(),
+        '/results' : (BuildContext context) {
+          final args = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
+          return ResultScreen(
+            duration: args['Duration'],
+            route: args['RouteList'],
+            distance: args['Distance'],
+            speed: args['Speed'],
+            speedavg: args['SpeedAvg'],
+          );
+        },
       },
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.red),

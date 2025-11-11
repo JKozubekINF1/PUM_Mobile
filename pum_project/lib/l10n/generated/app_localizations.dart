@@ -128,6 +128,12 @@ abstract class AppLocalizations {
   /// **'Map'**
   String get trackPageTitle;
 
+  /// No description provided for @resultPageTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Results'**
+  String get resultPageTitle;
+
   /// No description provided for @usernameLabel.
   ///
   /// In en, this message translates to:
@@ -181,6 +187,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Register'**
   String get registerButtonLabel;
+
+  /// No description provided for @beginActivityButtonLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'START ACTIVITY'**
+  String get beginActivityButtonLabel;
+
+  /// No description provided for @stopActivityButtonLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'STOP ACTIVITY'**
+  String get stopActivityButtonLabel;
 
   /// No description provided for @loginSuccessfulMessage.
   ///
