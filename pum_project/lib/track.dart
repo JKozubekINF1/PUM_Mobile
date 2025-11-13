@@ -273,7 +273,6 @@ class _TrackPageState extends State<TrackPage> {
   }
 
   Widget _buildCoordinatesText() {
-    // Temp text, delete later
     return Text(
       "${_currentPosition.latitude}, ${_currentPosition.longitude}",
       textAlign: TextAlign.center,

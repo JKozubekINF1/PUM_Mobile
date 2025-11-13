@@ -4,18 +4,22 @@ import 'package:pum_project/register.dart';
 import 'package:pum_project/resetpassword.dart';
 import 'package:pum_project/track.dart';
 import 'package:pum_project/activityresult.dart';
+import 'package:pum_project/home_page.dart';
 import 'l10n/generated/app_localizations.dart';
 import 'package:pum_project/services/api_connection.dart';
 import 'package:provider/provider.dart';
+import 'providers/auth_provider.dart';
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
   runApp(
-      MultiProvider(
-          providers: [
-            Provider<ApiService>(create: (context) => ApiService()),
-          ],
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider<AuthProvider>(create: (_) => AuthProvider()),
+        Provider<ApiService>(create: (_) => ApiService()),
+      ],
       child: const MyApp(),
-      ),
+    ),
   );
 }
 
@@ -29,11 +33,11 @@ class MyApp extends StatelessWidget {
         return "App";
       },
       routes: {
-        '/' : (BuildContext context)=>HomePage(),
-        '/login' : (BuildContext context)=>LoginPage(),
-        '/register' : (BuildContext context)=>RegisterPage(),
-        '/resetpassword' : (BuildContext context)=>ResetPage(),
-        '/track' : (BuildContext context)=>TrackPage(),
+        '/' : (BuildContext context)=>const HomePage(),
+        '/login' : (BuildContext context)=>const LoginPage(),
+        '/register' : (BuildContext context)=>const RegisterPage(),
+        '/resetpassword' : (BuildContext context)=>const ResetPage(),
+        '/track' : (BuildContext context)=>const TrackPage(),
         '/results' : (BuildContext context) {
           final args = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
           return ResultScreen(
@@ -50,66 +54,6 @@ class MyApp extends StatelessWidget {
       ),
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
-    );
-  }
-}
-
-class HomePage extends StatefulWidget {
-  const HomePage({super.key});
-
-  @override
-  State<HomePage> createState() => _HomePageState();
-}
-
-class _HomePageState extends State<HomePage> {
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Text("Title"),
-      ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            ElevatedButton(
-              child: const Text('Login'),
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute<void>(
-                    builder: (context) => const LoginPage(),
-                  ),
-                );
-              },
-            ),
-            ElevatedButton(
-              child: const Text('Register'),
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute<void>(
-                    builder: (context) => const RegisterPage(),
-                  ),
-                );
-              },
-            ),
-            ElevatedButton(
-              child: const Text('Map'),
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute<void>(
-                    builder: (context) => const TrackPage(),
-                  ),
-                );
-              },
-            )
-          ],
-        ),
-      ),
     );
   }
 }

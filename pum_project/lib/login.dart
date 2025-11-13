@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'l10n/generated/app_localizations.dart';
 import 'package:pum_project/services/api_connection.dart';
 import 'package:provider/provider.dart';
+import 'providers/auth_provider.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({
@@ -60,33 +61,42 @@ class _LoginPageState extends State<LoginPage> {
     }
     if (_validCredentials) {
       _login();
+    } else {
+      _setProcessing(false);
     }
-    _setProcessing(false);
   }
 
   Future<void> _login() async {
     _setMessage('');
     try {
       final apiService = Provider.of<ApiService>(context, listen: false);
-      await apiService.login(
+      final authProvider = Provider.of<AuthProvider>(context, listen: false); // Pobieramy AuthProvider
+
+      final responseData = await apiService.login( // Logowanie w ApiService
         _emailController.text.trim(),
         _passwordController.text,
       );
+
+      final token = responseData['token'];
+      if (token != null) {
+        await authProvider.saveToken(token); // To wywoła notifyListeners
+      }
+
       _setMessage(AppLocalizations.of(context)!.loginSuccessfulMessage);
+
       if (mounted) {
-        Navigator.pushReplacementNamed(context, '/');
+        Navigator.pushNamedAndRemoveUntil(context, '/', (route) => false);
       }
     } catch (e) {
       _setMessage(_formatError(e.toString()));
       debugPrint('$e');
-    } finally {
       _setProcessing(false);
     }
   }
 
   String _formatError(String raw) {
     final msg = raw.replaceFirst('Exception: ', '').toLowerCase();
-    if (msg.contains('network') || msg.contains('timeout')) {
+    if (msg.contains('network') || msg.contains('timeout') || msg.contains('server error')) {
       return AppLocalizations.of(context)!.noConnectionMessage;
     } else if (msg.contains('credentials')) {
       return AppLocalizations.of(context)!.badLoginMessage;
@@ -123,7 +133,7 @@ class _LoginPageState extends State<LoginPage> {
       controller: _emailController,
       decoration: InputDecoration(
         labelText: AppLocalizations.of(context)!.emailLabel,
-        border: OutlineInputBorder(),
+        border: const OutlineInputBorder(),
       ),
     );
   }
@@ -142,7 +152,7 @@ class _LoginPageState extends State<LoginPage> {
             });
           },
         ),
-        border: OutlineInputBorder(),
+        border: const OutlineInputBorder(),
       ),
     );
   }
@@ -155,7 +165,7 @@ class _LoginPageState extends State<LoginPage> {
           Navigator.pushNamed(context, '/register');
         },
         child: Text(
-          AppLocalizations.of(context)!.registerDuringLoginLabel, style: TextStyle(color: Color(0xFF375534)),
+          AppLocalizations.of(context)!.registerDuringLoginLabel, style: const TextStyle(color: Color(0xFF375534)),
         ),
       ),
     );
@@ -169,7 +179,7 @@ class _LoginPageState extends State<LoginPage> {
           Navigator.pushNamed(context, '/resetpassword');
         },
         child: Text(
-          AppLocalizations.of(context)!.forgotPasswordLabel, style: TextStyle(color: Color(0xFF375534)),
+          AppLocalizations.of(context)!.forgotPasswordLabel, style: const TextStyle(color: Color(0xFF375534)),
         ),
       ),
     );
@@ -179,18 +189,20 @@ class _LoginPageState extends State<LoginPage> {
     return SizedBox(
       width: double.infinity,
       child: ElevatedButton(
-        onPressed: (){
-          _processing ? null : _checkCredentials();
-        },
-        style: ElevatedButton.styleFrom(
-          backgroundColor: const Color(0xFF375534),
-          foregroundColor: Colors.white,
-          padding: const EdgeInsets.symmetric(vertical: 14),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
+          onPressed: (){
+            _processing ? null : _checkCredentials();
+          },
+          style: ElevatedButton.styleFrom(
+            backgroundColor: const Color(0xFF375534),
+            foregroundColor: Colors.white,
+            padding: const EdgeInsets.symmetric(vertical: 14),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
           ),
-        ),
-        child: Text(AppLocalizations.of(context)!.loginButtonLabel)
+          child: _processing
+              ? const CircularProgressIndicator(color: Colors.white)
+              : Text(AppLocalizations.of(context)!.loginButtonLabel)
       ),
     );
   }
