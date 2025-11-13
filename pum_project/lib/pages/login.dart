@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'l10n/generated/app_localizations.dart';
+import '../l10n/generated/app_localizations.dart';
 import 'package:pum_project/services/api_connection.dart';
 import 'package:provider/provider.dart';
-import 'providers/auth_provider.dart';
+import '../providers/auth_provider.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({
@@ -70,16 +70,16 @@ class _LoginPageState extends State<LoginPage> {
     _setMessage('');
     try {
       final apiService = Provider.of<ApiService>(context, listen: false);
-      final authProvider = Provider.of<AuthProvider>(context, listen: false); // Pobieramy AuthProvider
+      final authProvider = Provider.of<AuthProvider>(context, listen: false);
 
-      final responseData = await apiService.login( // Logowanie w ApiService
+      final responseData = await apiService.login(
         _emailController.text.trim(),
         _passwordController.text,
       );
 
       final token = responseData['token'];
       if (token != null) {
-        await authProvider.saveToken(token); // To wywoła notifyListeners
+        await authProvider.saveToken(token);
       }
 
       _setMessage(AppLocalizations.of(context)!.loginSuccessfulMessage);

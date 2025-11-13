@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'l10n/generated/app_localizations.dart';
+import '../l10n/generated/app_localizations.dart';
 import 'package:pum_project/services/api_connection.dart';
 import 'package:provider/provider.dart';
 

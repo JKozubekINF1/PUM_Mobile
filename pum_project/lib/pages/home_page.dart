@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'providers/auth_provider.dart';
+import '../providers/auth_provider.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -10,6 +10,25 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _checkAndShowLoginSuccess();
+    });
+  }
+
+  void _checkAndShowLoginSuccess() {
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+
+    if (authProvider.showLoginSuccess) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Zalogowano pomyślnie!')),
+      );
+      authProvider.clearLoginSuccess();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -41,17 +60,28 @@ class _HomePageState extends State<HomePage> {
 
             authProvider.isAuthenticated
                 ?
-            ElevatedButton(
-              child: const Text('Wyloguj'),
-              onPressed: () async {
-                await authProvider.logout();
+            Column(
+              children: [
+                ElevatedButton(
+                  child: const Text('Profil'),
+                  onPressed: () {
+                    Navigator.pushNamed(context, '/profile');
+                  },
+                ),
+                const SizedBox(height: 10),
+                ElevatedButton(
+                  child: const Text('Wyloguj'),
+                  onPressed: () async {
+                    await authProvider.logout();
 
-                if (mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Zostałeś wylogowany.')),
-                  );
-                }
-              },
+                    if (mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Zostałeś wylogowany.')),
+                      );
+                    }
+                  },
+                ),
+              ],
             )
                 :
             Column(

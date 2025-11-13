@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:pum_project/models/profile_data.dart';
 
 class ApiService {
   final String baseUrl = 'https://localhost:7123'; //http://10.0.2.2:5123
@@ -100,8 +101,52 @@ class ApiService {
     }
   }
 
-  Future<String?> getUsername() async {
-    return await _storage.read(key: 'email');
+  Future<ProfileData> fetchProfile() async {
+    final url = Uri.parse('$baseUrl/api/Profile');
+    try {
+      final response = await _client.get(
+        url,
+        headers: await _getHeaders(requiresAuth: true),
+      );
+
+      final responseBody = json.decode(utf8.decode(response.bodyBytes));
+
+      if (response.statusCode == 200) {
+        return ProfileData.fromJson(responseBody);
+      } else if (response.statusCode == 401) {
+        await clearAuthData();
+        throw Exception('Unauthorized. Token expired or invalid.');
+      } else {
+        throw Exception(responseBody['message'] ?? 'Failed to fetch profile: ${response.statusCode}');
+      }
+    } catch (e) {
+      throw Exception('Network error during profile fetch: $e');
+    }
+  }
+
+  Future<void> updateProfile(ProfileData profile) async {
+    final url = Uri.parse('$baseUrl/api/Profile');
+    try {
+      final response = await _client.put(
+        url,
+        headers: await _getHeaders(requiresAuth: true),
+        body: json.encode(profile.toJson()),
+      );
+
+      if (response.statusCode == 200) {
+        debugPrint('[DEBUG API] Profile updated successfully.');
+        return;
+      } else if (response.statusCode == 400 || response.statusCode == 401) {
+        final responseBody = json.decode(utf8.decode(response.bodyBytes));
+        if (response.statusCode == 401) await clearAuthData();
+        throw Exception(responseBody['message'] ?? 'Validation or unauthorized failed.');
+      } else {
+        final responseBody = json.decode(utf8.decode(response.bodyBytes));
+        throw Exception(responseBody['message'] ?? 'Failed to update profile: ${response.statusCode}');
+      }
+    } catch (e) {
+      throw Exception('Network error during profile update: $e');
+    }
   }
 
   Future<void> logout() async {

@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:pum_project/login.dart';
-import 'package:pum_project/register.dart';
-import 'package:pum_project/resetpassword.dart';
-import 'package:pum_project/track.dart';
-import 'package:pum_project/activityresult.dart';
-import 'package:pum_project/home_page.dart';
+import 'package:pum_project/pages/login.dart';
+import 'package:pum_project/pages/register.dart';
+import 'package:pum_project/pages/resetpassword.dart';
+import 'package:pum_project/pages/track.dart';
+import 'package:pum_project/pages/activityresult.dart';
+import 'package:pum_project/pages/home_page.dart';
+import 'package:pum_project/pages/profile_page.dart';
 import 'l10n/generated/app_localizations.dart';
 import 'package:pum_project/services/api_connection.dart';
 import 'package:provider/provider.dart';
@@ -38,6 +39,7 @@ class MyApp extends StatelessWidget {
         '/register' : (BuildContext context)=>const RegisterPage(),
         '/resetpassword' : (BuildContext context)=>const ResetPage(),
         '/track' : (BuildContext context)=>const TrackPage(),
+        '/profile' : (BuildContext context)=>const ProfilePage(),
         '/results' : (BuildContext context) {
           final args = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
           return ResultScreen(

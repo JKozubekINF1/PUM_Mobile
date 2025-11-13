@@ -6,10 +6,12 @@ class AuthProvider extends ChangeNotifier {
 
   String? _token;
   bool _isLoading = true;
+  bool _showLoginSuccess = false;
 
   String? get token => _token;
   bool get isAuthenticated => _token != null;
   bool get isLoading => _isLoading;
+  bool get showLoginSuccess => _showLoginSuccess;
 
   AuthProvider() {
     _loadToken();
@@ -26,6 +28,16 @@ class AuthProvider extends ChangeNotifier {
 
   Future<void> saveToken(String token) async {
     _token = token;
+    notifyListeners();
+  }
+
+  void markLoginSuccess() {
+    _showLoginSuccess = true;
+    notifyListeners();
+  }
+
+  void clearLoginSuccess() {
+    _showLoginSuccess = false;
     notifyListeners();
   }
 
