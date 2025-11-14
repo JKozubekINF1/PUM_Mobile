@@ -1,26 +1,28 @@
 import 'package:flutter/material.dart';
+import 'package:pum_project/pages/firstvisitpage.dart';
+import 'package:pum_project/pages/home.dart';
 import 'package:pum_project/pages/login.dart';
 import 'package:pum_project/pages/register.dart';
 import 'package:pum_project/pages/resetpassword.dart';
 import 'package:pum_project/pages/track.dart';
 import 'package:pum_project/pages/activityresult.dart';
-import 'package:pum_project/pages/home_page.dart';
-import 'package:pum_project/pages/profile_page.dart';
+import 'package:pum_project/pages/profilepage.dart';
 import 'l10n/generated/app_localizations.dart';
 import 'package:pum_project/services/api_connection.dart';
+import 'package:pum_project/theme/app_theme.dart';
 import 'package:provider/provider.dart';
 import 'providers/auth_provider.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
   runApp(
-    MultiProvider(
-      providers: [
-        ChangeNotifierProvider<AuthProvider>(create: (_) => AuthProvider()),
-        Provider<ApiService>(create: (_) => ApiService()),
-      ],
+      MultiProvider(
+          providers: [
+            ChangeNotifierProvider<AuthProvider>(create: (_) => AuthProvider()),
+            Provider<ApiService>(create: (context) => ApiService()),
+          ],
       child: const MyApp(),
-    ),
+      ),
   );
 }
 
@@ -34,7 +36,8 @@ class MyApp extends StatelessWidget {
         return "App";
       },
       routes: {
-        '/' : (BuildContext context)=>const HomePage(),
+        '/' : (BuildContext context)=>const FirstVisitPage(),
+        '/home' : (BuildContext context)=>const HomePage(),
         '/login' : (BuildContext context)=>const LoginPage(),
         '/register' : (BuildContext context)=>const RegisterPage(),
         '/resetpassword' : (BuildContext context)=>const ResetPage(),
@@ -46,14 +49,11 @@ class MyApp extends StatelessWidget {
             duration: args['Duration'],
             route: args['RouteList'],
             distance: args['Distance'],
-            speed: args['Speed'],
             speedavg: args['SpeedAvg'],
           );
         },
       },
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.red),
-      ),
+      theme: AppTheme.lightTheme,
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
     );

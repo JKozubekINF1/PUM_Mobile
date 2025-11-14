@@ -98,181 +98,343 @@ abstract class AppLocalizations {
     Locale('pl'),
   ];
 
-  /// No description provided for @language.
+  /// Full name of the language
   ///
   /// In en, this message translates to:
   /// **'English'**
   String get language;
 
-  /// No description provided for @appTitle.
+  /// Name of the app
   ///
   /// In en, this message translates to:
   /// **'App'**
   String get appTitle;
 
-  /// No description provided for @loginPageTitle.
+  /// Title of welcome page that usually appears on the app bar
+  ///
+  /// In en, this message translates to:
+  /// **'Welcome'**
+  String get firstVisitPageTitle;
+
+  /// Title of login page that usually appears on the app bar
   ///
   /// In en, this message translates to:
   /// **'Login'**
   String get loginPageTitle;
 
-  /// No description provided for @registerPageTitle.
+  /// Title of register page that usually appears on the app bar
   ///
   /// In en, this message translates to:
   /// **'Register'**
   String get registerPageTitle;
 
-  /// No description provided for @trackPageTitle.
+  /// Title of home page that usually appears on the app bar
+  ///
+  /// In en, this message translates to:
+  /// **'Homepage'**
+  String get homePageTitle;
+
+  /// Title of map page that usually appears on the app bar
   ///
   /// In en, this message translates to:
   /// **'Map'**
   String get trackPageTitle;
 
-  /// No description provided for @resultPageTitle.
+  /// Title of map page that usually appears on the app bar
   ///
   /// In en, this message translates to:
   /// **'Results'**
   String get resultPageTitle;
 
-  /// No description provided for @usernameLabel.
+  /// Title of profile page that usually appears on the app bar
+  ///
+  /// In en, this message translates to:
+  /// **'Your Profile'**
+  String get profilePageTitle;
+
+  /// Label text that appears on a popup window before warning the user
+  ///
+  /// In en, this message translates to:
+  /// **'Warning'**
+  String get warningLabel;
+
+  /// Label text for the accept button during prompts
+  ///
+  /// In en, this message translates to:
+  /// **'Agree'**
+  String get acceptOptionLabel;
+
+  /// Label text for the decline button during prompts
+  ///
+  /// In en, this message translates to:
+  /// **'Decline'**
+  String get declineOptionLabel;
+
+  /// Label text for the username text field
   ///
   /// In en, this message translates to:
   /// **'Username'**
   String get usernameLabel;
 
-  /// No description provided for @emailLabel.
+  /// Label text for the email text field
   ///
   /// In en, this message translates to:
   /// **'Email'**
   String get emailLabel;
 
-  /// No description provided for @passwordLabel.
+  /// Label text for the password text field
   ///
   /// In en, this message translates to:
   /// **'Password'**
   String get passwordLabel;
 
-  /// No description provided for @confirmPasswordLabel.
+  /// Label text for the repeat password text field
   ///
   /// In en, this message translates to:
   /// **'Repeat password'**
   String get confirmPasswordLabel;
 
-  /// No description provided for @forgotPasswordLabel.
+  /// Label text for a hyperlink to the reset password page
   ///
   /// In en, this message translates to:
   /// **'Forgot password?'**
   String get forgotPasswordLabel;
 
-  /// No description provided for @registerDuringLoginLabel.
+  /// Label text for a hyperlink to the register page that appears on the login page
   ///
   /// In en, this message translates to:
   /// **'Don\'t have an account? Sign up'**
   String get registerDuringLoginLabel;
 
-  /// No description provided for @loginDuringRegisterLabel.
+  /// Label text for a hyperlink to the login page that appears on the register page
   ///
   /// In en, this message translates to:
   /// **'Already have an account? Login'**
   String get loginDuringRegisterLabel;
 
-  /// No description provided for @loginButtonLabel.
+  /// Label text for a hyperlink to the login page
   ///
   /// In en, this message translates to:
   /// **'Login'**
   String get loginButtonLabel;
 
-  /// No description provided for @registerButtonLabel.
+  /// Label text for a hyperlink to the register page
   ///
   /// In en, this message translates to:
   /// **'Register'**
   String get registerButtonLabel;
 
-  /// No description provided for @beginActivityButtonLabel.
+  /// Label text for a logout button
+  ///
+  /// In en, this message translates to:
+  /// **'Logout'**
+  String get logoutButtonLabel;
+
+  /// Label text for a hyperlink to the profile page
+  ///
+  /// In en, this message translates to:
+  /// **'Profile'**
+  String get profileButtonLabel;
+
+  /// Label text for an option that opens the app in offline mode
+  ///
+  /// In en, this message translates to:
+  /// **'or open in offline mode'**
+  String get offlineModeTextLabel;
+
+  /// Label text for the first name text field
+  ///
+  /// In en, this message translates to:
+  /// **'First Name'**
+  String get profileFirstNameLabel;
+
+  /// Label text for the last name text field
+  ///
+  /// In en, this message translates to:
+  /// **'Last Name'**
+  String get profileLastNameLabel;
+
+  /// Label text for the gender dropdown menu
+  ///
+  /// In en, this message translates to:
+  /// **'Gender'**
+  String get profileGenderLabel;
+
+  /// Label text for the user date of birth
+  ///
+  /// In en, this message translates to:
+  /// **'Date of birth'**
+  String get profileDayOfBirthLabel;
+
+  /// Label text that appears as a part of optional options
+  ///
+  /// In en, this message translates to:
+  /// **'Optional'**
+  String get optionalLabel;
+
+  /// Label text for the male gender option
+  ///
+  /// In en, this message translates to:
+  /// **'Male'**
+  String get profileGenderMaleLabel;
+
+  /// Label text for the female gender option
+  ///
+  /// In en, this message translates to:
+  /// **'Female'**
+  String get profileGenderFemaleLabel;
+
+  /// Label text for the other gender option
+  ///
+  /// In en, this message translates to:
+  /// **'Other'**
+  String get profileGenderOtherLabel;
+
+  /// Label text for the user height
+  ///
+  /// In en, this message translates to:
+  /// **'Height'**
+  String get profileHeightLabel;
+
+  /// Label text for the user weight
+  ///
+  /// In en, this message translates to:
+  /// **'Weight'**
+  String get profileWeightLabel;
+
+  /// Label text for choosing the user profile picture
+  ///
+  /// In en, this message translates to:
+  /// **'Profile Picture'**
+  String get profileAvatarLabel;
+
+  /// Label text for the save changes button
+  ///
+  /// In en, this message translates to:
+  /// **'Save Changes'**
+  String get saveChangesLabel;
+
+  /// Label text for the start activity button
   ///
   /// In en, this message translates to:
   /// **'START ACTIVITY'**
   String get beginActivityButtonLabel;
 
-  /// No description provided for @stopActivityButtonLabel.
+  /// Label text for the stop activity button
   ///
   /// In en, this message translates to:
   /// **'STOP ACTIVITY'**
   String get stopActivityButtonLabel;
 
-  /// No description provided for @loginSuccessfulMessage.
+  /// Message that appears on the first visit page, prompting the user to login or create an account
+  ///
+  /// In en, this message translates to:
+  /// **'Log in or create a new account'**
+  String get welcomeNewUserMessage;
+
+  /// Message that appears on the first visit page, warning the user of the limitations of the offline mode
+  ///
+  /// In en, this message translates to:
+  /// **'Some app features are unavailable in offline mode. Are you sure you want to proceed?'**
+  String get offlineModeWarningMessage;
+
+  /// Message that appears on the login page after a successful login
   ///
   /// In en, this message translates to:
   /// **'Login Successful'**
   String get loginSuccessfulMessage;
 
-  /// No description provided for @registerSuccessfulMessage.
+  /// Message that appears on the register page after a successful registration
   ///
   /// In en, this message translates to:
   /// **'Registration successful'**
   String get registerSuccessfulMessage;
 
-  /// No description provided for @emptyFieldMessage.
+  /// Message that appears after a successful logout
+  ///
+  /// In en, this message translates to:
+  /// **'You have been logged out'**
+  String get logoutSuccessfulMessage;
+
+  /// Message that appears after a failure of not filling out all required fields
   ///
   /// In en, this message translates to:
   /// **'Fill out all required fields'**
   String get emptyFieldMessage;
 
-  /// No description provided for @badLoginMessage.
+  /// Message that appears after a failure of filling out incorrect credentials on the login page
   ///
   /// In en, this message translates to:
   /// **'Incorrect login credentials'**
   String get badLoginMessage;
 
-  /// No description provided for @emailTakenMessage.
+  /// Message that appears after a failure of submitting an already taken email
   ///
   /// In en, this message translates to:
   /// **'Email is already taken'**
   String get emailTakenMessage;
 
-  /// No description provided for @incorrectEmailMessage.
+  /// Message that appears after a failure of submitting an incorrect email on the register page
   ///
   /// In en, this message translates to:
   /// **'Incorrect email'**
   String get incorrectEmailMessage;
 
-  /// No description provided for @incorrectPasswordMessage.
+  /// Message that appears after a failure of submitting an incorrect password on the register page
   ///
   /// In en, this message translates to:
   /// **'Incorrect password'**
   String get incorrectPasswordMessage;
 
-  /// No description provided for @failedToRepeatPasswordMessage.
+  /// Message that appears after a failure of not repeating the password on the register page
   ///
   /// In en, this message translates to:
   /// **'Failed to repeat password'**
   String get failedToRepeatPasswordMessage;
 
-  /// No description provided for @noConnectionMessage.
+  /// Message that appears after a failure of submitting a valid number
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a valid number'**
+  String get enterValidNumberMessage;
+
+  /// Message that appears after a successful profile edit
+  ///
+  /// In en, this message translates to:
+  /// **'Profile updated successfully'**
+  String get profileUpdateSuccessfulMessage;
+
+  /// Message that appears after an unsuccessful profile edit
+  ///
+  /// In en, this message translates to:
+  /// **'Profile failed to update'**
+  String get profileUpdateFailedMessage;
+
+  /// Message that appears after losing connection to the server
   ///
   /// In en, this message translates to:
   /// **'Lost connection to the server, check your internet connection'**
   String get noConnectionMessage;
 
-  /// No description provided for @noLocationServicesMessage.
+  /// Message that appears when the location services are disabled when they're needed
   ///
   /// In en, this message translates to:
   /// **'Location services are disabled, turn on your location'**
   String get noLocationServicesMessage;
 
-  /// No description provided for @noLocationPermissionsMessage.
+  /// Message that appears when the location services permissions were denied when they're needed
   ///
   /// In en, this message translates to:
   /// **'Location services permissions were denied'**
   String get noLocationPermissionsMessage;
 
-  /// No description provided for @noLocationPermissionsForeverMessage.
+  /// Message that appears when the location services permissions are denied forever when they're needed
   ///
   /// In en, this message translates to:
   /// **'Location services permissions are permanently denied, check your app settings'**
   String get noLocationPermissionsForeverMessage;
 
-  /// No description provided for @genericErrorMessage.
+  /// A generic error message used in most cases
   ///
   /// In en, this message translates to:
   /// **'An error has occurred, try again later'**

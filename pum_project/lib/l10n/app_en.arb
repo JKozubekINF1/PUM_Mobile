@@ -1,33 +1,231 @@
 {
     "@@locale": "en",
     "language": "English",
+        "@language": {
+            "description": "Full name of the language"
+        },
     "appTitle": "App",
+        "@appTitle": {
+            "description": "Name of the app"
+        },
+    "firstVisitPageTitle": "Welcome",
+        "@firstVisitPageTitle": {
+            "description": "Title of welcome page that usually appears on the app bar"
+        },
     "loginPageTitle": "Login",
+        "@loginPageTitle": {
+            "description": "Title of login page that usually appears on the app bar"
+        },
     "registerPageTitle": "Register",
+        "@registerPageTitle": {
+            "description": "Title of register page that usually appears on the app bar"
+        },
+    "homePageTitle": "Homepage",
+        "@homePageTitle": {
+            "description": "Title of home page that usually appears on the app bar"
+        },
     "trackPageTitle": "Map",
+        "@trackPageTitle": {
+            "description": "Title of map page that usually appears on the app bar"
+        },
     "resultPageTitle": "Results",
+        "@resultPageTitle": {
+            "description": "Title of map page that usually appears on the app bar"
+        },
+    "profilePageTitle": "Your Profile",
+        "@profilePageTitle": {
+            "description": "Title of profile page that usually appears on the app bar"
+        },
+    "warningLabel": "Warning",
+        "@warningLabel": {
+            "description": "Label text that appears on a popup window before warning the user"
+        },
+    "acceptOptionLabel": "Agree",
+        "@acceptOptionLabel": {
+            "description": "Label text for the accept button during prompts"
+        },
+    "declineOptionLabel": "Decline",
+        "@declineOptionLabel": {
+            "description": "Label text for the decline button during prompts"
+        },
     "usernameLabel": "Username",
+        "@usernameLabel": {
+            "description": "Label text for the username text field"
+        },
     "emailLabel": "Email",
+        "@emailLabel": {
+            "description": "Label text for the email text field"
+        },
     "passwordLabel": "Password",
+        "@passwordLabel": {
+            "description": "Label text for the password text field"
+        },
     "confirmPasswordLabel": "Repeat password",
+        "@confirmPasswordLabel": {
+            "description": "Label text for the repeat password text field"
+        },
     "forgotPasswordLabel": "Forgot password?",
+        "@forgotPasswordLabel": {
+            "description": "Label text for a hyperlink to the reset password page"
+        },
     "registerDuringLoginLabel": "Don't have an account? Sign up",
+        "@registerDuringLoginLabel": {
+            "description": "Label text for a hyperlink to the register page that appears on the login page"
+        },
     "loginDuringRegisterLabel": "Already have an account? Login",
+        "@loginDuringRegisterLabel": {
+            "description": "Label text for a hyperlink to the login page that appears on the register page"
+        },
     "loginButtonLabel": "Login",
+        "@loginButtonLabel": {
+            "description": "Label text for a hyperlink to the login page"
+        },
     "registerButtonLabel": "Register",
+        "@registerButtonLabel": {
+            "description": "Label text for a hyperlink to the register page"
+        },
+    "logoutButtonLabel": "Logout",
+        "@logoutButtonLabel": {
+            "description": "Label text for a logout button"
+        },
+    "profileButtonLabel": "Profile",
+        "@profileButtonLabel": {
+            "description": "Label text for a hyperlink to the profile page"
+        },
+    "offlineModeTextLabel": "or open in offline mode",
+        "@offlineModeTextLabel": {
+            "description": "Label text for an option that opens the app in offline mode"
+        },
+    "profileFirstNameLabel": "First Name",
+        "@profileFirstNameLabel": {
+            "description": "Label text for the first name text field"
+        },
+    "profileLastNameLabel": "Last Name",
+        "@profileLastNameLabel": {
+            "description": "Label text for the last name text field"
+        },
+    "profileGenderLabel": "Gender",
+        "@profileGenderLabel": {
+            "description": "Label text for the gender dropdown menu"
+        },
+    "profileDayOfBirthLabel": "Date of birth",
+        "@profileDayOfBirthLabel": {
+            "description": "Label text for the user date of birth"
+        },
+    "optionalLabel": "Optional",
+        "@optionalLabel": {
+            "description": "Label text that appears as a part of optional options"
+        },
+    "profileGenderMaleLabel": "Male",
+        "@profileGenderMaleLabel": {
+            "description": "Label text for the male gender option"
+        },
+    "profileGenderFemaleLabel": "Female",
+        "@profileGenderFemaleLabel": {
+            "description": "Label text for the female gender option"
+        },
+    "profileGenderOtherLabel": "Other",
+        "@profileGenderOtherLabel": {
+            "description": "Label text for the other gender option"
+        },
+    "profileHeightLabel": "Height",
+        "@profileHeightLabel": {
+            "description": "Label text for the user height"
+        },
+    "profileWeightLabel": "Weight",
+        "@profileWeightLabel": {
+            "description": "Label text for the user weight"
+        },
+    "profileAvatarLabel": "Profile Picture",
+        "@profileAvatarLabel": {
+            "description": "Label text for choosing the user profile picture"
+        },
+    "saveChangesLabel": "Save Changes",
+        "@saveChangesLabel": {
+            "description": "Label text for the save changes button"
+        },
     "beginActivityButtonLabel": "START ACTIVITY",
+        "@beginActivityButtonLabel": {
+            "description": "Label text for the start activity button"
+        },
     "stopActivityButtonLabel": "STOP ACTIVITY",
+        "@stopActivityButtonLabel": {
+            "description": "Label text for the stop activity button"
+        },
+    "welcomeNewUserMessage": "Log in or create a new account",
+        "@welcomeNewUserMessage": {
+            "description": "Message that appears on the first visit page, prompting the user to login or create an account"
+        },
+    "offlineModeWarningMessage": "Some app features are unavailable in offline mode. Are you sure you want to proceed?",
+        "@offlineModeWarningMessage": {
+            "description": "Message that appears on the first visit page, warning the user of the limitations of the offline mode"
+        },
     "loginSuccessfulMessage": "Login Successful",
+        "@loginSuccessfulMessage": {
+            "description": "Message that appears on the login page after a successful login"
+        },
     "registerSuccessfulMessage": "Registration successful",
+        "@registerSuccessfulMessage": {
+            "description": "Message that appears on the register page after a successful registration"
+        },
+    "logoutSuccessfulMessage": "You have been logged out",
+        "@logoutSuccessfulMessage": {
+            "description": "Message that appears after a successful logout"
+        },
     "emptyFieldMessage": "Fill out all required fields",
+        "@emptyFieldMessage": {
+            "description": "Message that appears after a failure of not filling out all required fields"
+        },
     "badLoginMessage": "Incorrect login credentials",
+        "@badLoginMessage": {
+            "description": "Message that appears after a failure of filling out incorrect credentials on the login page"
+        },
     "emailTakenMessage": "Email is already taken",
+        "@emailTakenMessage": {
+            "description": "Message that appears after a failure of submitting an already taken email"
+        },
     "incorrectEmailMessage": "Incorrect email",
+        "@incorrectEmailMessage": {
+            "description": "Message that appears after a failure of submitting an incorrect email on the register page"
+        },
     "incorrectPasswordMessage": "Incorrect password",
+        "@incorrectPasswordMessage": {
+            "description": "Message that appears after a failure of submitting an incorrect password on the register page"
+        },
     "failedToRepeatPasswordMessage": "Failed to repeat password",
+        "@failedToRepeatPasswordMessage": {
+            "description": "Message that appears after a failure of not repeating the password on the register page"
+        },
+    "enterValidNumberMessage": "Enter a valid number",
+        "@enterValidNumberMessage": {
+            "description": "Message that appears after a failure of submitting a valid number"
+        },
+    "profileUpdateSuccessfulMessage": "Profile updated successfully",
+        "@profileUpdateSuccessfulMessage": {
+            "description": "Message that appears after a successful profile edit"
+        },
+    "profileUpdateFailedMessage": "Profile failed to update",
+        "@profileUpdateFailedMessage": {
+            "description": "Message that appears after an unsuccessful profile edit"
+        },
     "noConnectionMessage": "Lost connection to the server, check your internet connection",
+        "@noConnectionMessage": {
+            "description": "Message that appears after losing connection to the server"
+        },
     "noLocationServicesMessage": "Location services are disabled, turn on your location",
+        "@noLocationServicesMessage": {
+            "description": "Message that appears when the location services are disabled when they're needed"
+        },
     "noLocationPermissionsMessage": "Location services permissions were denied",
+        "@noLocationPermissionsMessage": {
+            "description": "Message that appears when the location services permissions were denied when they're needed"
+        },
     "noLocationPermissionsForeverMessage": "Location services permissions are permanently denied, check your app settings",
-    "genericErrorMessage": "An error has occurred, try again later"
+        "@noLocationPermissionsForeverMessage": {
+            "description": "Message that appears when the location services permissions are denied forever when they're needed"
+        },
+    "genericErrorMessage": "An error has occurred, try again later",
+        "@genericErrorMessage": {
+            "description": "A generic error message used in most cases"
+        }
 }

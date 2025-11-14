@@ -10,7 +10,6 @@ class ResultScreen extends StatelessWidget {
     required this.duration,
     required this.route,
     required this.distance,
-    required this.speed,
     required this.speedavg,
     super.key,
   });
@@ -18,7 +17,6 @@ class ResultScreen extends StatelessWidget {
   final int duration;
   final List<LatLng> route;
   final int distance;
-  final double speed;
   final double speedavg;
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
@@ -82,7 +80,7 @@ class ResultScreen extends StatelessWidget {
 
   Widget _buildStatsText() {
     return Text(
-      "TIME: $duration seconds\nDISTANCE: $distance meters\nSPEED: $speed m/s\nSPEED AVERAGE: $speedavg m/s",
+      "TIME: $duration seconds\nDISTANCE: $distance meters\nSPEED AVERAGE: $speedavg m/s",
       textAlign: TextAlign.center,
     );
   }

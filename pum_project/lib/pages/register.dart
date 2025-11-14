@@ -19,7 +19,6 @@ class _RegisterPageState extends State<RegisterPage> {
   bool _obscurePassword1 = true;
   bool _obscurePassword2 = true;
   bool _validCredentials = false;
-  String _message = '';
 
   @override
   void dispose() {
@@ -45,34 +44,25 @@ class _RegisterPageState extends State<RegisterPage> {
     }
   }
 
-  void _setMessage(String message) {
-    if (mounted) {
-      setState(() {
-        _message = message;
-      });
-    }
-  }
-
   void _checkCredentials() {
-    _setMessage('');
     _setProcessing(true);
     _setValidCredentials(true);
-    if (_passwordController.text != _confirmPasswordController.text) {
-      _setMessage(AppLocalizations.of(context)!.failedToRepeatPasswordMessage);
-      _setValidCredentials(false);
-    }
-    if (!RegExp(r"^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[^A-Za-z0-9]).{6,20}$")
-        .hasMatch(_passwordController.text.trim())) {
-      _setMessage(AppLocalizations.of(context)!.incorrectPasswordMessage);
-      _setValidCredentials(false);
-    }
-    if (!RegExp(r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+")
-        .hasMatch(_emailController.text.trim())) {
-      _setMessage(AppLocalizations.of(context)!.incorrectEmailMessage);
-      _setValidCredentials(false);
-    }
     if (_emailController.text.trim().isEmpty || _passwordController.text.trim().isEmpty) {
-      _setMessage(AppLocalizations.of(context)!.emptyFieldMessage);
+    _displaySnackbar(AppLocalizations.of(context)!.emptyFieldMessage);
+    _setValidCredentials(false);
+    }
+    else if (_passwordController.text != _confirmPasswordController.text) {
+      _displaySnackbar(AppLocalizations.of(context)!.failedToRepeatPasswordMessage);
+      _setValidCredentials(false);
+    }
+    else if (!RegExp(r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+")
+        .hasMatch(_emailController.text.trim())) {
+    _displaySnackbar(AppLocalizations.of(context)!.incorrectEmailMessage);
+    _setValidCredentials(false);
+    }
+    else if (!RegExp(r"^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[^A-Za-z0-9]).{6,20}$")
+        .hasMatch(_passwordController.text.trim())) {
+      _displaySnackbar(AppLocalizations.of(context)!.incorrectPasswordMessage);
       _setValidCredentials(false);
     }
     if (_validCredentials) {
@@ -89,12 +79,12 @@ class _RegisterPageState extends State<RegisterPage> {
         _passwordController.text,
         _confirmPasswordController.text,
       );
-      _setMessage(AppLocalizations.of(context)!.registerSuccessfulMessage);
+      _displaySnackbar(AppLocalizations.of(context)!.registerSuccessfulMessage);
       if (mounted) {
         Navigator.pushReplacementNamed(context, '/login');
       }
     } catch (e) {
-      _setMessage(_formatError(e.toString()));
+      _displaySnackbar(_formatError(e.toString()));
       debugPrint('$e');
     } finally {
       _setProcessing(false);
@@ -112,25 +102,117 @@ class _RegisterPageState extends State<RegisterPage> {
     }
   }
 
+  void _displaySnackbar(String message) {
+    var snackBar = SnackBar(content: Text(message));
+    ScaffoldMessenger.of(context).showSnackBar(snackBar);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Text(AppLocalizations.of(context)!.registerPageTitle), const SizedBox(height: 30),
-            _buildEmailField(), const SizedBox(height: 16),
-            _buildPasswordField(), const SizedBox(height: 16),
-            _buildConfirmPasswordField(), const SizedBox(height: 16),
-            _buildRegisterButton(), const SizedBox(height: 20),
-            _buildLoginText(), const SizedBox(height: 24),
-            _buildMessageText(), const SizedBox(height: 24),
-          ],
+      body: Column(
+        children: [
+          Flexible(
+            flex: 1,
+            child: _buildPageTitle(),
+          ),
+          Flexible(
+            flex: 2,
+            child: _buildRegisterColumn(),
+          ),
+          Flexible(
+            flex: 1,
+            child: _buildSubmitColumn(),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildRegisterColumn() {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: <Widget>[
+        Flexible(
+          flex: 1,
+          child: SizedBox(
+            width: double.infinity,
+            height: 50,
+            child: _buildEmailField(),
+          ),
         ),
+        Flexible(
+          flex: 1,
+          child: const SizedBox(
+            width: double.infinity,
+            height: 10,
+          ),
+        ),
+        Flexible(
+          flex: 1,
+          child: SizedBox(
+            width: double.infinity,
+            height: 50,
+            child: _buildPasswordField(),
+          ),
+        ),
+        Flexible(
+          flex: 1,
+          child: const SizedBox(
+            width: double.infinity,
+            height: 10,
+          ),
+        ),
+        Flexible(
+          flex: 1,
+          child: SizedBox(
+            width: double.infinity,
+            height: 50,
+            child: _buildConfirmPasswordField(),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSubmitColumn() {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: <Widget>[
+        Flexible(
+          flex: 1,
+          child: SizedBox(
+            width: double.infinity,
+            height: 50,
+            child: _buildRegisterButton(),
+          ),
+        ),
+        Flexible(
+          flex: 1,
+          child: const SizedBox(
+            width: double.infinity,
+            height: 10,
+          ),
+        ),
+        Flexible(
+          flex: 1,
+          child: SizedBox(
+            width: double.infinity,
+            height: 50,
+            child: _buildLoginText(),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildPageTitle() {
+    return Align(
+      alignment: Alignment.center,
+      child: Text(
+        AppLocalizations.of(context)!.registerPageTitle, style: Theme.of(context).textTheme.bodyLarge,
       ),
     );
   }
@@ -141,7 +223,7 @@ class _RegisterPageState extends State<RegisterPage> {
       decoration: InputDecoration(
         labelText: AppLocalizations.of(context)!.emailLabel,
         border: OutlineInputBorder(),
-      ),
+      ), style: Theme.of(context).textTheme.bodyMedium,
     );
   }
 
@@ -160,7 +242,7 @@ class _RegisterPageState extends State<RegisterPage> {
           },
         ),
         border: OutlineInputBorder(),
-      ),
+      ), style: Theme.of(context).textTheme.bodyMedium,
     );
   }
 
@@ -179,7 +261,7 @@ class _RegisterPageState extends State<RegisterPage> {
           },
         ),
         border: OutlineInputBorder(),
-      ),
+      ), style: Theme.of(context).textTheme.bodyMedium,
     );
   }
 
@@ -191,7 +273,7 @@ class _RegisterPageState extends State<RegisterPage> {
           Navigator.pushNamed(context, '/login');
         },
         child: Text(
-          AppLocalizations.of(context)!.loginDuringRegisterLabel, style: TextStyle(color: Color(0xFF375534)),
+          AppLocalizations.of(context)!.loginDuringRegisterLabel, style: Theme.of(context).textTheme.bodyMedium,
         ),
       ),
     );
@@ -204,26 +286,8 @@ class _RegisterPageState extends State<RegisterPage> {
         onPressed: (){
           _processing ? null : _checkCredentials();
         },
-        style: ElevatedButton.styleFrom(
-          backgroundColor: const Color(0xFF375534),
-          foregroundColor: Colors.white,
-          padding: const EdgeInsets.symmetric(vertical: 14),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-        ),
         child: Text(AppLocalizations.of(context)!.registerButtonLabel)
       ),
-    );
-  }
-
-  Widget _buildMessageText() {
-    if (_message.isEmpty) {
-      return const SizedBox.shrink();
-    }
-    return Text(
-      _message,
-      textAlign: TextAlign.center,
     );
   }
 }

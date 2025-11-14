@@ -194,7 +194,6 @@ class _TrackPageState extends State<TrackPage> {
         'Duration': _duration.inSeconds,
         'RouteList': _routeList,
         "Distance": _maxDistance,
-        "Speed": _speed,
         "SpeedAvg": _speedAvg
       });
       _resetStats();

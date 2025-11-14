@@ -18,7 +18,6 @@ class _LoginPageState extends State<LoginPage> {
   bool _processing = false;
   bool _obscurePassword = true;
   bool _validCredentials = false;
-  String _message = '';
 
   @override
   void dispose() {
@@ -43,20 +42,11 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 
-  void _setMessage(String message) {
-    if (mounted) {
-      setState(() {
-        _message = message;
-      });
-    }
-  }
-
   void _checkCredentials() {
-    _setMessage('');
     _setProcessing(true);
     _setValidCredentials(true);
     if (_emailController.text.trim().isEmpty || _passwordController.text.trim().isEmpty) {
-      _setMessage(AppLocalizations.of(context)!.emptyFieldMessage);
+      _displaySnackbar(AppLocalizations.of(context)!.emptyFieldMessage);
       _setValidCredentials(false);
     }
     if (_validCredentials) {
@@ -67,28 +57,23 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   Future<void> _login() async {
-    _setMessage('');
     try {
       final apiService = Provider.of<ApiService>(context, listen: false);
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
-
       final responseData = await apiService.login(
         _emailController.text.trim(),
         _passwordController.text,
       );
-
       final token = responseData['token'];
       if (token != null) {
         await authProvider.saveToken(token);
       }
-
-      _setMessage(AppLocalizations.of(context)!.loginSuccessfulMessage);
-
+      _displaySnackbar(AppLocalizations.of(context)!.loginSuccessfulMessage);
       if (mounted) {
-        Navigator.pushNamedAndRemoveUntil(context, '/', (route) => false);
+        Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);
       }
     } catch (e) {
-      _setMessage(_formatError(e.toString()));
+      _displaySnackbar(_formatError(e.toString()));
       debugPrint('$e');
       _setProcessing(false);
     }
@@ -105,25 +90,118 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 
+  void _displaySnackbar(String message) {
+    var snackBar = SnackBar(content: Text(message));
+    ScaffoldMessenger.of(context).showSnackBar(snackBar);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Text(AppLocalizations.of(context)!.loginPageTitle), const SizedBox(height: 30),
-            _buildEmailField(), const SizedBox(height: 16),
-            _buildPasswordField(), const SizedBox(height: 16),
-            _buildForgotPasswordText(), const SizedBox(height: 24),
-            _buildLoginButton(), const SizedBox(height: 20),
-            _buildRegisterText(), const SizedBox(height: 24),
-            _buildMessageText(), const SizedBox(height: 24),
-          ],
+      body: Column(
+        children: [
+          Flexible(
+            flex: 1,
+            child: _buildPageTitle(),
+          ),
+          Flexible(
+            flex: 2,
+            child: _buildLoginColumn(),
+          ),
+          Flexible(
+            flex: 1,
+            child: _buildSubmitColumn(),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLoginColumn() {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: <Widget>[
+        Flexible(
+          flex: 1,
+          child: SizedBox(
+            width: double.infinity,
+            height: 50,
+            child: _buildEmailField(),
+          ),
         ),
+        Flexible(
+          flex: 1,
+          child: const SizedBox(
+            width: double.infinity,
+            height: 10,
+          ),
+        ),
+        Flexible(
+          flex: 1,
+          child: SizedBox(
+            width: double.infinity,
+            height: 50,
+            child: _buildPasswordField(),
+          ),
+        ),
+        Flexible(
+          flex: 1,
+          child: const SizedBox(
+            width: double.infinity,
+            height: 10,
+          ),
+        ),
+        Flexible(
+          flex: 1,
+          child: SizedBox(
+            width: double.infinity,
+            height: 50,
+            child: _buildForgotPasswordText(),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSubmitColumn() {
+    return Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: <Widget>[
+          Flexible(
+            flex: 1,
+            child: SizedBox(
+              width: double.infinity,
+              height: 50,
+              child: _buildLoginButton(),
+            ),
+          ),
+          Flexible(
+            flex: 1,
+            child: const SizedBox(
+              width: double.infinity,
+              height: 10,
+            ),
+          ),
+          Flexible(
+            flex: 1,
+            child: SizedBox(
+              width: double.infinity,
+              height: 50,
+              child: _buildRegisterText(),
+            ),
+          ),
+        ],
+    );
+  }
+
+  Widget _buildPageTitle() {
+    return Align(
+      alignment: Alignment.center,
+      child: Text(
+        AppLocalizations.of(context)!.loginPageTitle,
+        style: Theme.of(context).textTheme.bodyLarge,
       ),
     );
   }
@@ -135,6 +213,7 @@ class _LoginPageState extends State<LoginPage> {
         labelText: AppLocalizations.of(context)!.emailLabel,
         border: const OutlineInputBorder(),
       ),
+      style: Theme.of(context).textTheme.bodyMedium,
     );
   }
 
@@ -154,6 +233,7 @@ class _LoginPageState extends State<LoginPage> {
         ),
         border: const OutlineInputBorder(),
       ),
+      style: Theme.of(context).textTheme.bodyMedium,
     );
   }
 
@@ -165,7 +245,8 @@ class _LoginPageState extends State<LoginPage> {
           Navigator.pushNamed(context, '/register');
         },
         child: Text(
-          AppLocalizations.of(context)!.registerDuringLoginLabel, style: const TextStyle(color: Color(0xFF375534)),
+          AppLocalizations.of(context)!.registerDuringLoginLabel,
+          style: Theme.of(context).textTheme.bodyMedium,
         ),
       ),
     );
@@ -179,7 +260,8 @@ class _LoginPageState extends State<LoginPage> {
           Navigator.pushNamed(context, '/resetpassword');
         },
         child: Text(
-          AppLocalizations.of(context)!.forgotPasswordLabel, style: const TextStyle(color: Color(0xFF375534)),
+          AppLocalizations.of(context)!.forgotPasswordLabel,
+          style: Theme.of(context).textTheme.bodyMedium,
         ),
       ),
     );
@@ -189,31 +271,13 @@ class _LoginPageState extends State<LoginPage> {
     return SizedBox(
       width: double.infinity,
       child: ElevatedButton(
-          onPressed: (){
-            _processing ? null : _checkCredentials();
-          },
-          style: ElevatedButton.styleFrom(
-            backgroundColor: const Color(0xFF375534),
-            foregroundColor: Colors.white,
-            padding: const EdgeInsets.symmetric(vertical: 14),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
-          ),
-          child: _processing
-              ? const CircularProgressIndicator(color: Colors.white)
-              : Text(AppLocalizations.of(context)!.loginButtonLabel)
+        onPressed: (){
+          _processing ? null : _checkCredentials();
+        },
+        child: _processing
+            ? const CircularProgressIndicator(color: Colors.white)
+            : Text(AppLocalizations.of(context)!.loginButtonLabel)
       ),
-    );
-  }
-
-  Widget _buildMessageText() {
-    if (_message.isEmpty) {
-      return const SizedBox.shrink();
-    }
-    return Text(
-      _message,
-      textAlign: TextAlign.center,
     );
   }
 }
