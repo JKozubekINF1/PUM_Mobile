@@ -36,6 +36,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get profilePageTitle => 'Your Profile';
 
   @override
+  String get settingsPageTitle => 'App Settings';
+
+  @override
   String get warningLabel => 'Warning';
 
   @override
@@ -75,7 +78,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get logoutButtonLabel => 'Logout';
 
   @override
-  String get profileButtonLabel => 'Profile';
+  String get profileButtonLabel => 'Show Profile';
+
+  @override
+  String get settingsButtonLabel => 'App Settings';
 
   @override
   String get offlineModeTextLabel => 'or open in offline mode';
@@ -123,11 +129,17 @@ class AppLocalizationsEn extends AppLocalizations {
   String get stopActivityButtonLabel => 'STOP ACTIVITY';
 
   @override
+  String get settingsLanguageLabel => 'App language';
+
+  @override
   String get welcomeNewUserMessage => 'Log in or create a new account';
 
   @override
   String get offlineModeWarningMessage =>
       'Some app features are unavailable in offline mode. Are you sure you want to proceed?';
+
+  @override
+  String get logoutWarningMessage => 'Are you sure you want to logout?';
 
   @override
   String get loginSuccessfulMessage => 'Login Successful';

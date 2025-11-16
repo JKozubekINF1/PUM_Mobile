@@ -9,178 +9,191 @@ class AppLocalizationsPl extends AppLocalizations {
   AppLocalizationsPl([String locale = 'pl']) : super(locale);
 
   @override
-  String get language => 'English';
+  String get language => 'Polish';
 
   @override
-  String get appTitle => 'Polish_Test';
+  String get appTitle => 'App';
 
   @override
-  String get firstVisitPageTitle => 'Welcome';
+  String get firstVisitPageTitle => 'Witaj';
 
   @override
-  String get loginPageTitle => 'Login';
+  String get loginPageTitle => 'Logowanie';
 
   @override
-  String get registerPageTitle => 'Register';
+  String get registerPageTitle => 'Rejestracja';
 
   @override
-  String get homePageTitle => 'Homepage';
+  String get homePageTitle => 'Strona główna';
 
   @override
-  String get trackPageTitle => 'Map';
+  String get trackPageTitle => 'Mapa';
 
   @override
-  String get resultPageTitle => 'Results';
+  String get resultPageTitle => 'Wyniki';
 
   @override
-  String get profilePageTitle => 'Your Profile';
+  String get profilePageTitle => 'Twój Profil';
 
   @override
-  String get warningLabel => 'Warning';
+  String get settingsPageTitle => 'Ustawienia';
 
   @override
-  String get acceptOptionLabel => 'Agree';
+  String get warningLabel => 'Uwaga';
 
   @override
-  String get declineOptionLabel => 'Decline';
+  String get acceptOptionLabel => 'Tak';
 
   @override
-  String get usernameLabel => 'Username';
+  String get declineOptionLabel => 'Nie';
+
+  @override
+  String get usernameLabel => 'Nazwa użytkownika';
 
   @override
   String get emailLabel => 'Email';
 
   @override
-  String get passwordLabel => 'Password';
+  String get passwordLabel => 'Hasło';
 
   @override
-  String get confirmPasswordLabel => 'Repeat password';
+  String get confirmPasswordLabel => 'Powtórz hasło';
 
   @override
-  String get forgotPasswordLabel => 'Forgot password?';
+  String get forgotPasswordLabel => 'Zapomniałeś hasła?';
 
   @override
-  String get registerDuringLoginLabel => 'Don\'t have an account? Sign up';
+  String get registerDuringLoginLabel => 'Nie masz konta? Zarejestruj się';
 
   @override
-  String get loginDuringRegisterLabel => 'Already have an account? Login';
+  String get loginDuringRegisterLabel => 'Już masz konto? Zaloguj się';
 
   @override
-  String get loginButtonLabel => 'Login';
+  String get loginButtonLabel => 'Zaloguj się';
 
   @override
-  String get registerButtonLabel => 'Register';
+  String get registerButtonLabel => 'Zarejestruj się';
 
   @override
-  String get logoutButtonLabel => 'Logout';
+  String get logoutButtonLabel => 'Wyloguj się';
 
   @override
-  String get profileButtonLabel => 'Profile';
+  String get profileButtonLabel => 'Pokaż profil';
 
   @override
-  String get offlineModeTextLabel => 'or open in offline mode';
+  String get settingsButtonLabel => 'Ustawienia';
 
   @override
-  String get profileFirstNameLabel => 'First Name';
+  String get offlineModeTextLabel => 'albo otwórz w trybie offline';
 
   @override
-  String get profileLastNameLabel => 'Last Name';
+  String get profileFirstNameLabel => 'Imię';
 
   @override
-  String get profileGenderLabel => 'Gender';
+  String get profileLastNameLabel => 'Nazwisko';
 
   @override
-  String get profileDayOfBirthLabel => 'Date of birth';
+  String get profileGenderLabel => 'Płeć';
 
   @override
-  String get optionalLabel => 'Optional';
+  String get profileDayOfBirthLabel => 'Data urodzin';
 
   @override
-  String get profileGenderMaleLabel => 'Male';
+  String get optionalLabel => 'Opcjonalne';
 
   @override
-  String get profileGenderFemaleLabel => 'Female';
+  String get profileGenderMaleLabel => 'Mężczyzna';
 
   @override
-  String get profileGenderOtherLabel => 'Other';
+  String get profileGenderFemaleLabel => 'Kobieta';
 
   @override
-  String get profileHeightLabel => 'Height';
+  String get profileGenderOtherLabel => 'Inne';
 
   @override
-  String get profileWeightLabel => 'Weight';
+  String get profileHeightLabel => 'Wzrost';
 
   @override
-  String get profileAvatarLabel => 'Profile Picture';
+  String get profileWeightLabel => 'Waga';
 
   @override
-  String get saveChangesLabel => 'Save Changes';
+  String get profileAvatarLabel => 'Zdjęcie Profilowe';
 
   @override
-  String get beginActivityButtonLabel => 'START ACTIVITY';
+  String get saveChangesLabel => 'Zapisz Zmiany';
 
   @override
-  String get stopActivityButtonLabel => 'STOP ACTIVITY';
+  String get beginActivityButtonLabel => 'ROZPOCZNIJ AKTYWNOŚĆ';
 
   @override
-  String get welcomeNewUserMessage => 'Log in or create a new account';
+  String get stopActivityButtonLabel => 'ZATRZYMAJ AKTYWNOŚĆ';
+
+  @override
+  String get settingsLanguageLabel => 'Język Aplikacji';
+
+  @override
+  String get welcomeNewUserMessage => 'Zaloguj się lub załóż nowe konto';
 
   @override
   String get offlineModeWarningMessage =>
-      'Some app features are unavailable in offline mode. Are you sure you want to proceed?';
+      'Niektóre funkcje są niedostępne w trybie offline. Czy chcesz kontynuować?';
 
   @override
-  String get loginSuccessfulMessage => 'Login Successful';
+  String get logoutWarningMessage => 'Na pewno chcesz się wylogować?';
 
   @override
-  String get registerSuccessfulMessage => 'Registration successful';
+  String get loginSuccessfulMessage => 'Logowanie zakończone sukcesem';
 
   @override
-  String get logoutSuccessfulMessage => 'You have been logged out';
+  String get registerSuccessfulMessage => 'Rejestracja zakończona sukcesem';
 
   @override
-  String get emptyFieldMessage => 'Fill out all required fields';
+  String get logoutSuccessfulMessage => 'Zostałeś wylogowany';
 
   @override
-  String get badLoginMessage => 'Incorrect login credentials';
+  String get emptyFieldMessage => 'Wypełnij wszystkie wymagane pola';
 
   @override
-  String get emailTakenMessage => 'Email is already taken';
+  String get badLoginMessage => 'Niepoprawne dane logowania';
 
   @override
-  String get incorrectEmailMessage => 'Incorrect email';
+  String get emailTakenMessage => 'Podany email jest zajęty';
 
   @override
-  String get incorrectPasswordMessage => 'Incorrect password';
+  String get incorrectEmailMessage => 'Niepoprawny email';
 
   @override
-  String get failedToRepeatPasswordMessage => 'Failed to repeat password';
+  String get incorrectPasswordMessage => 'Niepoprawne hasło';
 
   @override
-  String get enterValidNumberMessage => 'Enter a valid number';
+  String get failedToRepeatPasswordMessage => 'Nie udało się powtórzyć hasła';
 
   @override
-  String get profileUpdateSuccessfulMessage => 'Profile updated successfully';
+  String get enterValidNumberMessage => 'Wprowadź poprawną wartość';
 
   @override
-  String get profileUpdateFailedMessage => 'Profile failed to update';
+  String get profileUpdateSuccessfulMessage => 'Profil został zaaktualizowany';
+
+  @override
+  String get profileUpdateFailedMessage =>
+      'Aktualizacja profilu nie powiodła się';
 
   @override
   String get noConnectionMessage =>
-      'Lost connection to the server, check your internet connection';
+      'Stracono połączenie z serwerem, sprawdź swoje połączenie internetowe';
 
   @override
   String get noLocationServicesMessage =>
-      'Location services are disabled, turn on your location';
+      'Usługi lokalizacyjne są wyłączone, uruchom lokalizacje';
 
   @override
   String get noLocationPermissionsMessage =>
-      'Location services permissions were denied';
+      'Uprawnienia usług lokalizacyjnych zostały odrzucone';
 
   @override
   String get noLocationPermissionsForeverMessage =>
-      'Location services permissions are permanently denied, check your app settings';
+      'Uprawnienia usług lokalizacyjnych są permamentnie odrzucone, sprawdź ustawienia systemowe';
 
   @override
-  String get genericErrorMessage => 'An error has occurred, try again later';
+  String get genericErrorMessage => 'Wystąpił błąd, spróbuj później';
 }

@@ -21,7 +21,6 @@ class _TrackPageState extends State<TrackPage> {
   LatLng _currentPosition = LatLng(0, 0);
   LatLng _lastPosition = LatLng(0,0);
   bool _permissions = false;
-  String _message = "";
   bool _activityState = false;
   Duration _duration = Duration();
   Timer? _timer;
@@ -40,14 +39,6 @@ class _TrackPageState extends State<TrackPage> {
     if (mounted) {
       setState(() {
         _permissions = permissions;
-      });
-    }
-  }
-
-  void _setMessage(String text) {
-    if (mounted) {
-      setState(() {
-        _message = text;
       });
     }
   }
@@ -74,19 +65,19 @@ class _TrackPageState extends State<TrackPage> {
 
     serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
-      _setMessage(AppLocalizations.of(context)!.noLocationServicesMessage);
+      if (mounted) _displaySnackbar(AppLocalizations.of(context)!.noLocationServicesMessage);
     }
 
     permission = await Geolocator.checkPermission();
     if (permission == LocationPermission.denied) {
       permission = await Geolocator.requestPermission();
       if (permission == LocationPermission.denied) {
-        _setMessage(AppLocalizations.of(context)!.noLocationPermissionsMessage);
+        if (mounted) _displaySnackbar(AppLocalizations.of(context)!.noLocationPermissionsMessage);
       }
     }
 
     if (permission == LocationPermission.deniedForever) {
-      _setMessage(AppLocalizations.of(context)!.noLocationPermissionsForeverMessage);
+      if (mounted) _displaySnackbar(AppLocalizations.of(context)!.noLocationPermissionsForeverMessage);
     }
     _setPermissions(true);
   }
@@ -200,6 +191,11 @@ class _TrackPageState extends State<TrackPage> {
     }
   }
 
+  void _displaySnackbar(String message) {
+    var snackBar = SnackBar(content: Text(message));
+    ScaffoldMessenger.of(context).showSnackBar(snackBar);
+  }
+
   @override
   void initState() {
     super.initState();
@@ -210,24 +206,46 @@ class _TrackPageState extends State<TrackPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        title: Text(AppLocalizations.of(context)!.trackPageTitle),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
-              Text(AppLocalizations.of(context)!.trackPageTitle), const SizedBox(height: 10),
-              SizedBox(
-                height: 400,
-                width: double.infinity,
-                child: _buildMap(),
+              Expanded(
+                flex: 3,
+                child: SizedBox(
+                  width: double.infinity,
+                  child: _buildMap(),
+                ),
               ),
+
+              // PO TESTACH DO USUNIECIA
               _buildCoordinatesText(), const SizedBox(height: 24),
-              _buildMessageText(), const SizedBox(height: 24),
-              _buildStartStopButton(), const SizedBox(height: 20),
-              _buildStopwatch(), const SizedBox(height: 3),
-              _buildDistanceMeter(), const SizedBox(height: 3),
-              _buildSpeedMeter(), const SizedBox(height: 3),
-              _buildSpeedAvgMeter(), const SizedBox(height: 3),
+
+              Expanded(
+                child: SizedBox(
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: _buildStopwatch(),
+                      ),
+                      Expanded(
+                        child: _buildSpeedMeter(),
+                      ),
+                      Expanded(
+                        child: _buildDistanceMeter(),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+
+              // PO TESTACH DO USUNIECIA
+              _buildSpeedAvgMeter(),
+
+              _buildStartStopButton(),
             ],
         ),
       ),
@@ -250,9 +268,6 @@ class _TrackPageState extends State<TrackPage> {
           urlTemplate: 'https://{s}.tile-cyclosm.openstreetmap.fr/cyclosm/{z}/{x}/{y}.png',
           userAgentPackageName: 'Pum_Project/1.0',
         ),
-        SimpleAttributionWidget(
-          source: Text('OpenStreetMap contributors'),
-        ),
         MarkerLayer(
           markers: [
             Marker(
@@ -267,6 +282,13 @@ class _TrackPageState extends State<TrackPage> {
             ),
           ],
         ),
+        RichAttributionWidget(
+          attributions: [
+            TextSourceAttribution(
+              'OpenStreetMap contributors',
+            ),
+          ],
+        ),
       ],
     );
   }
@@ -278,17 +300,11 @@ class _TrackPageState extends State<TrackPage> {
     );
   }
 
-  Widget _buildMessageText() {
-    return Text(
-      _message,
-      textAlign: TextAlign.center,
-    );
-  }
-
   Widget _buildStartStopButton() {
-    return SizedBox(
-      width: double.infinity,
-      child: ElevatedButton(
+    return Flexible(
+      child: SizedBox(
+        width: double.infinity,
+        child: ElevatedButton(
           onPressed: (){
             _activityButton();
           },
@@ -301,34 +317,35 @@ class _TrackPageState extends State<TrackPage> {
             ),
           ),
           child: _activityState ? Text(AppLocalizations.of(context)!.stopActivityButtonLabel) : Text(AppLocalizations.of(context)!.beginActivityButtonLabel),
+        ),
       ),
     );
   }
 
   Widget _buildStopwatch() {
     return Text(
-      "TIME: ${_duration.inSeconds} seconds",
+      "TIME:\n${_duration.inSeconds}\nseconds",
       textAlign: TextAlign.center,
     );
   }
 
   Widget _buildDistanceMeter() {
     return Text(
-      "DISTANCE: $_maxDistance meters",
+      "DISTANCE:\n$_maxDistance\nmeters",
       textAlign: TextAlign.center,
     );
   }
 
   Widget _buildSpeedMeter() {
     return Text(
-      "SPEED: $_speed m/s",
+      "SPEED:\n$_speed\nm/s",
       textAlign: TextAlign.center,
     );
   }
 
   Widget _buildSpeedAvgMeter() {
     return Text(
-      "SPEED AVG: $_speedAvg m/s",
+      "SPEED AVG:\n$_speedAvg\nm/s",
       textAlign: TextAlign.center,
     );
   }

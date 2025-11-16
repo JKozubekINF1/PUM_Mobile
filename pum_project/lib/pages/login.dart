@@ -3,6 +3,7 @@ import '../l10n/generated/app_localizations.dart';
 import 'package:pum_project/services/api_connection.dart';
 import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
+import '../models/profile_data.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({
@@ -68,9 +69,9 @@ class _LoginPageState extends State<LoginPage> {
       if (token != null) {
         await authProvider.saveToken(token);
       }
-      _displaySnackbar(AppLocalizations.of(context)!.loginSuccessfulMessage);
       if (mounted) {
-        Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);
+        _displaySnackbar(AppLocalizations.of(context)!.loginSuccessfulMessage);
+        _checkIfProfileInitialized();
       }
     } catch (e) {
       _displaySnackbar(_formatError(e.toString()));
@@ -93,6 +94,26 @@ class _LoginPageState extends State<LoginPage> {
   void _displaySnackbar(String message) {
     var snackBar = SnackBar(content: Text(message));
     ScaffoldMessenger.of(context).showSnackBar(snackBar);
+  }
+
+  bool _profileInitializationRequirement(ProfileData profile) {
+    return (!(profile.firstName==null));
+  }
+
+  Future<void> _checkIfProfileInitialized() async {
+    try {
+      final apiService = Provider.of<ApiService>(context, listen: false);
+      final profile = await apiService.fetchProfile();
+      final initialized = _profileInitializationRequirement(profile);
+
+      if (initialized) {
+        if (mounted) Navigator.pushNamedAndRemoveUntil(context, '/home', (_) => false);
+      } else {
+        if (mounted) Navigator.pushNamedAndRemoveUntil(context, '/profile/edit', (_) => false);
+      }
+    } catch (e) {
+      debugPrint("$e");
+    }
   }
 
   @override

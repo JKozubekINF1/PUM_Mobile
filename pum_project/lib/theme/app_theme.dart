@@ -37,6 +37,9 @@ class AppTheme {
           floatingLabelStyle: TextStyle(fontSize: 24),
         ),
       ),
+      dropdownMenuTheme: DropdownMenuThemeData(
+        textStyle: TextStyle(fontSize: 18),
+      ),
     );
   }
 }

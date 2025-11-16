@@ -3,15 +3,16 @@ import 'package:provider/provider.dart';
 import '../services/api_connection.dart';
 import '../models/profile_data.dart';
 import '../l10n/generated/app_localizations.dart';
+import '../providers/auth_provider.dart';
 
-class ProfilePage extends StatefulWidget {
-  const ProfilePage({super.key});
+class EditProfilePage extends StatefulWidget {
+  const EditProfilePage({super.key});
 
   @override
-  State<ProfilePage> createState() => _ProfilePageState();
+  State<EditProfilePage> createState() => _EditProfilePageState();
 }
 
-class _ProfilePageState extends State<ProfilePage> {
+class _EditProfilePageState extends State<EditProfilePage> {
   final _formKey = GlobalKey<FormState>();
   late Future<ProfileData> _profileFuture;
 
@@ -86,10 +87,10 @@ class _ProfilePageState extends State<ProfilePage> {
 
       await apiService.updateProfile(updatedProfile);
 
-      _displaySnackbar(AppLocalizations.of(context)!.profileUpdateSuccessfulMessage);
+      if (mounted) _displaySnackbar(AppLocalizations.of(context)!.profileUpdateSuccessfulMessage);
 
     } catch (e) {
-      _displaySnackbar('${AppLocalizations.of(context)!.profileUpdateFailedMessage}. ${e.toString().replaceFirst('Exception: ', '')}');
+      if (mounted) _displaySnackbar('${AppLocalizations.of(context)!.profileUpdateFailedMessage}. ${e.toString().replaceFirst('Exception: ', '')}');
     } finally {
       setState(() {
         _profileFuture = _loadProfile();
@@ -102,11 +103,56 @@ class _ProfilePageState extends State<ProfilePage> {
     ScaffoldMessenger.of(context).showSnackBar(snackBar);
   }
 
+  void _logout() async {
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    await authProvider.logout();
+    if (mounted) {
+      _displaySnackbar(AppLocalizations.of(context)!.logoutSuccessfulMessage);
+      Navigator.pushNamedAndRemoveUntil(context, "/", (route) => false);
+    }
+  }
+
+  Future<void> _logoutPopupWindow() async {
+    return showDialog<void>(
+        context: context,
+        barrierDismissible: true,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text(AppLocalizations.of(context)!.warningLabel),
+            content: SingleChildScrollView(
+              child: ListBody(
+                children: <Widget>[
+                  Text(AppLocalizations.of(context)!.logoutWarningMessage),
+                ],
+              ),
+            ),
+            actions: <Widget>[
+              TextButton(
+                child: Text(AppLocalizations.of(context)!.acceptOptionLabel),
+                onPressed: () {
+                  _logout();
+                },
+              ),
+              TextButton(
+                child: Text(AppLocalizations.of(context)!.declineOptionLabel),
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+              ),
+            ],
+          );
+        }
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text(AppLocalizations.of(context)!.profilePageTitle),
+        actions: [
+          _buildLogoutButton(),
+        ],
       ),
       body: FutureBuilder<ProfileData>(
         future: _profileFuture,
@@ -229,7 +275,6 @@ class _ProfilePageState extends State<ProfilePage> {
             child: Text(value),
           );
         }).toList(),
-      style: Theme.of(context).textTheme.bodyMedium,
     );
   }
 
@@ -237,6 +282,13 @@ class _ProfilePageState extends State<ProfilePage> {
     return ElevatedButton(
       onPressed: _updateProfile,
       child: Text(AppLocalizations.of(context)!.saveChangesLabel),
+    );
+  }
+
+  Widget _buildLogoutButton() {
+    return TextButton(
+        onPressed: _logoutPopupWindow,
+        child: Text('Logout')
     );
   }
 }

@@ -15,7 +15,6 @@ class ApiService {
   })  : _storage = storage ?? const FlutterSecureStorage(),
         _client = client ?? http.Client();
 
-
   Future<String?> getToken() async {
     final token = await _storage.read(key: 'token');
     debugPrint('[DEBUG AUTH] Token odczytany: ${token != null ? 'OK (długość: ${token.length})' : 'Brak'}');
@@ -40,7 +39,6 @@ class ApiService {
     }
     return headers;
   }
-
 
   Future<Map<String, dynamic>> register(
       String email, String password, String confirmPassword) async {
@@ -139,10 +137,12 @@ class ApiService {
       } else if (response.statusCode == 400 || response.statusCode == 401) {
         final responseBody = json.decode(utf8.decode(response.bodyBytes));
         if (response.statusCode == 401) await clearAuthData();
-        throw Exception(responseBody['message'] ?? 'Validation or unauthorized failed.');
+        throw Exception(
+            responseBody['message'] ?? 'Validation or unauthorized failed.');
       } else {
         final responseBody = json.decode(utf8.decode(response.bodyBytes));
-        throw Exception(responseBody['message'] ?? 'Failed to update profile: ${response.statusCode}');
+        throw Exception(responseBody['message'] ??
+            'Failed to update profile: ${response.statusCode}');
       }
     } catch (e) {
       throw Exception('Network error during profile update: $e');

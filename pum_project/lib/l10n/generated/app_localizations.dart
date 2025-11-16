@@ -152,6 +152,12 @@ abstract class AppLocalizations {
   /// **'Your Profile'**
   String get profilePageTitle;
 
+  /// Title of settings page that usually appears on the app bar
+  ///
+  /// In en, this message translates to:
+  /// **'App Settings'**
+  String get settingsPageTitle;
+
   /// Label text that appears on a popup window before warning the user
   ///
   /// In en, this message translates to:
@@ -233,8 +239,14 @@ abstract class AppLocalizations {
   /// Label text for a hyperlink to the profile page
   ///
   /// In en, this message translates to:
-  /// **'Profile'**
+  /// **'Show Profile'**
   String get profileButtonLabel;
+
+  /// Label text for a hyperlink to the app settings page
+  ///
+  /// In en, this message translates to:
+  /// **'App Settings'**
+  String get settingsButtonLabel;
 
   /// Label text for an option that opens the app in offline mode
   ///
@@ -326,6 +338,12 @@ abstract class AppLocalizations {
   /// **'STOP ACTIVITY'**
   String get stopActivityButtonLabel;
 
+  /// Label text for the language setting
+  ///
+  /// In en, this message translates to:
+  /// **'App language'**
+  String get settingsLanguageLabel;
+
   /// Message that appears on the first visit page, prompting the user to login or create an account
   ///
   /// In en, this message translates to:
@@ -337,6 +355,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Some app features are unavailable in offline mode. Are you sure you want to proceed?'**
   String get offlineModeWarningMessage;
+
+  /// Message that appears when the user interacts with the logout button, making sure he wants to log out
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to logout?'**
+  String get logoutWarningMessage;
 
   /// Message that appears on the login page after a successful login
   ///

@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:latlong2/latlong.dart';
 import '../l10n/generated/app_localizations.dart';
 import 'package:flutter_map/flutter_map.dart';
-import 'package:pum_project/services/api_connection.dart';
-import 'package:provider/provider.dart';
 
 class ResultScreen extends StatelessWidget {
   ResultScreen({
@@ -25,13 +23,13 @@ class ResultScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        title: Text(AppLocalizations.of(context)!.resultPageTitle),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            Text(AppLocalizations.of(context)!.resultPageTitle), const SizedBox(height: 30),
             SizedBox(
               height: 400,
               width: double.infinity,
@@ -62,15 +60,19 @@ class ResultScreen extends StatelessWidget {
           urlTemplate: 'https://{s}.tile-cyclosm.openstreetmap.fr/cyclosm/{z}/{x}/{y}.png',
           userAgentPackageName: 'Pum_Project/1.0',
         ),
-        SimpleAttributionWidget(
-          source: Text('OpenStreetMap contributors'),
-        ),
         PolylineLayer(
           polylines: [
             Polyline(
               points: route,
               color: Colors.red,
               strokeWidth: 10,
+            ),
+          ],
+        ),
+        RichAttributionWidget(
+          attributions: [
+            TextSourceAttribution(
+              'OpenStreetMap contributors',
             ),
           ],
         ),

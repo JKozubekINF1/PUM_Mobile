@@ -22,6 +22,9 @@ class AuthProvider extends ChangeNotifier {
 
     debugPrint('[DEBUG AUTH PROVIDER] Token wczytany przy starcie: ${_token != null ? 'TAK' : 'NIE'}');
 
+    if (_token != null) {
+      _showLoginSuccess = true;
+    }
     _isLoading = false;
     notifyListeners();
   }

@@ -79,8 +79,8 @@ class _RegisterPageState extends State<RegisterPage> {
         _passwordController.text,
         _confirmPasswordController.text,
       );
-      _displaySnackbar(AppLocalizations.of(context)!.registerSuccessfulMessage);
       if (mounted) {
+        _displaySnackbar(AppLocalizations.of(context)!.registerSuccessfulMessage);
         Navigator.pushReplacementNamed(context, '/login');
       }
     } catch (e) {

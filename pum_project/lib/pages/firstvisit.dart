@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import '../l10n/generated/app_localizations.dart';
-import 'package:pum_project/services/api_connection.dart';
 import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
+import '../models/profile_data.dart';
+import 'package:pum_project/services/api_connection.dart';
 
 class FirstVisitPage extends StatefulWidget {
   const FirstVisitPage({
@@ -13,7 +14,6 @@ class FirstVisitPage extends StatefulWidget {
 }
 
 class _FirstVisitPageState extends State<FirstVisitPage> {
-
   Future<void> _offlineMode() async {
     return showDialog<void>(
         context: context,
@@ -54,49 +54,65 @@ class _FirstVisitPageState extends State<FirstVisitPage> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _checkAndShowLoginSuccess();
-    });
   }
 
-  void _checkAndShowLoginSuccess() {
-    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+  bool _profileInitializationRequirement(ProfileData profile) {
+    return (profile.firstName=='');
+  }
 
-    if (authProvider.showLoginSuccess) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Zalogowano pomyślnie!')),
-      );
-      authProvider.clearLoginSuccess();
+  Future<void> _checkIfProfileInitialized() async {
+    try {
+      final apiService = Provider.of<ApiService>(context, listen: false);
+      final profile = await apiService.fetchProfile();
+      final initialized = _profileInitializationRequirement(profile);
+
+      if (initialized) {
+        if (mounted) Navigator.pushNamedAndRemoveUntil(context, '/home', (_) => false);
+      } else {
+        if (mounted) Navigator.pushNamedAndRemoveUntil(context, '/profile/edit', (_) => false);
+      }
+    } catch (e) {
+      debugPrint("$e");
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Column(
-        children: [
-          Flexible(
-            flex: 1,
-            child: _buildLogo(),
-          ),
-          Flexible(
-            flex: 1,
-            child: _buildTextPadding(),
-          ),
-          Flexible(
-            flex: 2,
-            child: Container(
-              child: _buildButtonCollumn(),
+    return Consumer<AuthProvider>(
+        builder: (context, auth, child) {
+          if (!auth.isLoading && auth.showLoginSuccess) {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              auth.clearLoginSuccess();
+              _checkIfProfileInitialized();
+            });
+          }
+          return Scaffold(
+            body: Column(
+              children: [
+                Flexible(
+                  flex: 1,
+                  child: _buildLogo(),
+                ),
+                Flexible(
+                  flex: 1,
+                  child: _buildTextPadding(),
+                ),
+                Flexible(
+                  flex: 2,
+                  child: Container(
+                    child: _buildButtonCollumn(),
+                  ),
+                ),
+                Flexible(
+                  flex: 1,
+                  child: Container(
+                    child: _buildOfflineModeText(),
+                  ),
+                ),
+              ],
             ),
-          ),
-          Flexible(
-            flex: 1,
-            child: Container(
-              child: _buildOfflineModeText(),
-            ),
-          ),
-        ],
-      ),
+          );
+        }
     );
   }
 

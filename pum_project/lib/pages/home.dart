@@ -40,6 +40,39 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
+  Future<void> _logoutPopupWindow() async {
+    return showDialog<void>(
+        context: context,
+        barrierDismissible: true,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text(AppLocalizations.of(context)!.warningLabel),
+            content: SingleChildScrollView(
+              child: ListBody(
+                children: <Widget>[
+                  Text(AppLocalizations.of(context)!.logoutWarningMessage),
+                ],
+              ),
+            ),
+            actions: <Widget>[
+              TextButton(
+                child: Text(AppLocalizations.of(context)!.acceptOptionLabel),
+                onPressed: () {
+                  _logout();
+                },
+              ),
+              TextButton(
+                child: Text(AppLocalizations.of(context)!.declineOptionLabel),
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+              ),
+            ],
+          );
+        }
+    );
+  }
+
   void _displaySnackbar(String message) {
     var snackBar = SnackBar(content: Text(message));
     ScaffoldMessenger.of(context).showSnackBar(snackBar);
@@ -60,8 +93,7 @@ class _HomePageState extends State<HomePage> {
       appBar: AppBar(
         title: Text(AppLocalizations.of(context)!.homePageTitle),
         actions: [
-          _buildProfileIcon(),
-          _buildLogoutButton(),
+          _buildProfilePopupMenu(),
         ],
       ),
       body: Center(
@@ -80,25 +112,34 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Widget _buildProfileIcon() {
-    return Flexible(
-      child: ElevatedButton(
-        child: Text(AppLocalizations.of(context)!.profileButtonLabel),
-        onPressed: () {
-          Navigator.pushNamed(context, '/profile');
-        },
+  Widget _buildProfilePopupMenu() {
+    return PopupMenuButton<int>(
+      child: Row(
+        children: [
+          Text('USER NAME + ICON'),
+        ],
       ),
-    );
-  }
-
-  Widget _buildLogoutButton() {
-    return Flexible(
-      child: ElevatedButton(
-        child: Text(AppLocalizations.of(context)!.logoutButtonLabel),
-        onPressed: () {
-          _logout();
-        },
-      ),
+      itemBuilder: (BuildContext context) => <PopupMenuEntry<int>> [
+        PopupMenuItem<int>(
+            value: 1,
+            onTap: () => (
+              Navigator.pushNamed(context,'/profile'),
+            ),
+            child: Text(AppLocalizations.of(context)!.profileButtonLabel),
+        ),
+        PopupMenuItem<int>(
+            value: 2,
+            onTap: () => (
+            Navigator.pushNamed(context,'/settings'),
+            ),
+            child: Text(AppLocalizations.of(context)!.settingsButtonLabel),
+        ),
+        PopupMenuItem<int>(
+            value: 3,
+            onTap: _logoutPopupWindow,
+            child: Text(AppLocalizations.of(context)!.logoutButtonLabel)
+        ),
+      ],
     );
   }
 

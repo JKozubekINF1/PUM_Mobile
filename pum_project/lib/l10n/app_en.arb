@@ -36,6 +36,10 @@
         "@profilePageTitle": {
             "description": "Title of profile page that usually appears on the app bar"
         },
+    "settingsPageTitle": "App Settings",
+        "@settingsPageTitle": {
+            "description": "Title of settings page that usually appears on the app bar"
+        },
     "warningLabel": "Warning",
         "@warningLabel": {
             "description": "Label text that appears on a popup window before warning the user"
@@ -88,9 +92,13 @@
         "@logoutButtonLabel": {
             "description": "Label text for a logout button"
         },
-    "profileButtonLabel": "Profile",
+    "profileButtonLabel": "Show Profile",
         "@profileButtonLabel": {
             "description": "Label text for a hyperlink to the profile page"
+        },
+    "settingsButtonLabel": "App Settings",
+        "@settingsButtonLabel": {
+            "description": "Label text for a hyperlink to the app settings page"
         },
     "offlineModeTextLabel": "or open in offline mode",
         "@offlineModeTextLabel": {
@@ -152,6 +160,10 @@
         "@stopActivityButtonLabel": {
             "description": "Label text for the stop activity button"
         },
+    "settingsLanguageLabel": "App language",
+        "@settingsLanguageLabel": {
+            "description": "Label text for the language setting"
+        },
     "welcomeNewUserMessage": "Log in or create a new account",
         "@welcomeNewUserMessage": {
             "description": "Message that appears on the first visit page, prompting the user to login or create an account"
@@ -159,6 +171,10 @@
     "offlineModeWarningMessage": "Some app features are unavailable in offline mode. Are you sure you want to proceed?",
         "@offlineModeWarningMessage": {
             "description": "Message that appears on the first visit page, warning the user of the limitations of the offline mode"
+        },
+    "logoutWarningMessage": "Are you sure you want to logout?",
+        "@logoutWarningMessage": {
+            "description": "Message that appears when the user interacts with the logout button, making sure he wants to log out"
         },
     "loginSuccessfulMessage": "Login Successful",
         "@loginSuccessfulMessage": {
