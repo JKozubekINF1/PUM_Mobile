@@ -63,14 +63,15 @@ class _EditProfilePageState extends State<EditProfilePage> {
     _heightController.text = profile.height?.toString() ?? '';
     _weightController.text = profile.weight?.toString() ?? '';
     _avatarUrlController.text = profile.avatarUrl ?? '';
-    _gender = profile.gender;
+
+    const validGenders = {'Male', 'Female', 'Other'};
+    _gender = validGenders.contains(profile.gender) ? profile.gender : null;
+
     _dateOfBirth = profile.dateOfBirth;
   }
 
   Future<void> _updateProfile() async {
     if (!_formKey.currentState!.validate()) return;
-
-    setState(() {});
 
     final apiService = Provider.of<ApiService>(context, listen: false);
 
@@ -87,10 +88,14 @@ class _EditProfilePageState extends State<EditProfilePage> {
 
       await apiService.updateProfile(updatedProfile);
 
-      if (mounted) _displaySnackbar(AppLocalizations.of(context)!.profileUpdateSuccessfulMessage);
-
+      if (mounted) {
+        _displaySnackbar(AppLocalizations.of(context)!.profileUpdateSuccessfulMessage);
+      }
     } catch (e) {
-      if (mounted) _displaySnackbar('${AppLocalizations.of(context)!.profileUpdateFailedMessage}. ${e.toString().replaceFirst('Exception: ', '')}');
+      if (mounted) {
+        _displaySnackbar(
+            '${AppLocalizations.of(context)!.profileUpdateFailedMessage}. ${e.toString().replaceFirst('Exception: ', '')}');
+      }
     } finally {
       setState(() {
         _profileFuture = _loadProfile();
@@ -99,8 +104,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
   }
 
   void _displaySnackbar(String message) {
-    var snackBar = SnackBar(content: Text(message));
-    ScaffoldMessenger.of(context).showSnackBar(snackBar);
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
   }
 
   void _logout() async {
@@ -114,34 +118,30 @@ class _EditProfilePageState extends State<EditProfilePage> {
 
   Future<void> _logoutPopupWindow() async {
     return showDialog<void>(
-        context: context,
-        barrierDismissible: true,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            title: Text(AppLocalizations.of(context)!.warningLabel),
-            content: SingleChildScrollView(
-              child: ListBody(
-                children: <Widget>[
-                  Text(AppLocalizations.of(context)!.logoutWarningMessage),
-                ],
-              ),
+      context: context,
+      barrierDismissible: true,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(AppLocalizations.of(context)!.warningLabel),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                Text(AppLocalizations.of(context)!.logoutWarningMessage),
+              ],
             ),
-            actions: <Widget>[
-              TextButton(
-                child: Text(AppLocalizations.of(context)!.acceptOptionLabel),
-                onPressed: () {
-                  _logout();
-                },
-              ),
-              TextButton(
-                child: Text(AppLocalizations.of(context)!.declineOptionLabel),
-                onPressed: () {
-                  Navigator.pop(context);
-                },
-              ),
-            ],
-          );
-        }
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: Text(AppLocalizations.of(context)!.acceptOptionLabel),
+              onPressed: () => _logout(),
+            ),
+            TextButton(
+              child: Text(AppLocalizations.of(context)!.declineOptionLabel),
+              onPressed: () => Navigator.pop(context),
+            ),
+          ],
+        );
+      },
     );
   }
 
@@ -150,9 +150,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(AppLocalizations.of(context)!.profilePageTitle),
-        actions: [
-          _buildLogoutButton(),
-        ],
+        actions: [_buildLogoutButton()],
       ),
       body: FutureBuilder<ProfileData>(
         future: _profileFuture,
@@ -175,9 +173,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                     const SizedBox(height: 20),
                     _buildOptionsColumn(),
                     const SizedBox(height: 30),
-                    Center(
-                      child: _buildSubmitButton(),
-                    ),
+                    Center(child: _buildSubmitButton()),
                   ],
                 ),
               ),
@@ -191,7 +187,6 @@ class _EditProfilePageState extends State<EditProfilePage> {
 
   Widget _buildOptionsColumn() {
     return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
       children: <Widget>[
         _buildTextField(_firstNameController, AppLocalizations.of(context)!.profileFirstNameLabel, false),
         const SizedBox(height: 10),
@@ -232,10 +227,10 @@ class _EditProfilePageState extends State<EditProfilePage> {
   Widget _buildDatePicker(BuildContext context) {
     return ListTile(
       title: Text(
-        style: Theme.of(context).textTheme.bodyMedium,
         _dateOfBirth == null
             ? '${AppLocalizations.of(context)!.profileDayOfBirthLabel} (${AppLocalizations.of(context)!.optionalLabel})'
             : '${AppLocalizations.of(context)!.profileDayOfBirthLabel}: ${_dateOfBirth!.toLocal().toIso8601String().split('T')[0]}',
+        style: Theme.of(context).textTheme.bodyMedium,
       ),
       trailing: const Icon(Icons.calendar_today),
       onTap: () async {
@@ -245,36 +240,38 @@ class _EditProfilePageState extends State<EditProfilePage> {
           firstDate: DateTime(1900),
           lastDate: DateTime.now(),
         );
-        if (picked != null) {
-          _setDate(picked);
-        }
+        if (picked != null) _setDate(picked);
       },
     );
   }
 
   Widget _buildGenderPicker() {
+    final l10n = AppLocalizations.of(context)!;
+
+    final Map<String, String> genderOptions = {
+      'Male': l10n.profileGenderMaleLabel,
+      'Female': l10n.profileGenderFemaleLabel,
+      'Other': l10n.profileGenderOtherLabel,
+    };
+
     return DropdownButtonFormField<String>(
-        decoration: InputDecoration(
-          labelText:
-            '${AppLocalizations.of(context)!.profileGenderLabel} (${AppLocalizations.of(context)!.optionalLabel})',
-          border: OutlineInputBorder(),
-        ),
-        initialValue: _gender,
-        onChanged: (String? newValue) {
-          setState(() {
-            _gender = newValue;
-          });
-        },
-        items: <String>[
-          AppLocalizations.of(context)!.profileGenderMaleLabel,
-          AppLocalizations.of(context)!.profileGenderFemaleLabel,
-          AppLocalizations.of(context)!.profileGenderOtherLabel,
-        ].map<DropdownMenuItem<String>>((String value) {
-          return DropdownMenuItem<String>(
-            value: value,
-            child: Text(value),
-          );
-        }).toList(),
+      value: _gender,
+      decoration: InputDecoration(
+        labelText: '${l10n.profileGenderLabel} (${l10n.optionalLabel})',
+        border: const OutlineInputBorder(),
+      ),
+      hint: const Text('Wybierz płeć'),
+      onChanged: (String? newValue) {
+        setState(() {
+          _gender = newValue;
+        });
+      },
+      items: genderOptions.entries.map((entry) {
+        return DropdownMenuItem<String>(
+          value: entry.key,
+          child: Text(entry.value),
+        );
+      }).toList(),
     );
   }
 
@@ -287,8 +284,8 @@ class _EditProfilePageState extends State<EditProfilePage> {
 
   Widget _buildLogoutButton() {
     return TextButton(
-        onPressed: _logoutPopupWindow,
-        child: Text('Logout')
+      onPressed: _logoutPopupWindow,
+      child: const Text('Logout'),
     );
   }
 }

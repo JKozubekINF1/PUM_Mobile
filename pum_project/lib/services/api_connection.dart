@@ -152,4 +152,44 @@ class ApiService {
   Future<void> logout() async {
     await clearAuthData();
   }
+
+
+  Future<void> saveActivity({
+    required int durationSeconds,
+    required double distanceMeters,
+    required double averageSpeedMs,
+    double? maxSpeedMs,
+    required List<List<double>> routeCoordinates,
+    String title = 'Bez tytułu',
+    String? description,
+    String activityType = 'Running',
+  }) async {
+    final url = Uri.parse('$baseUrl/api/activities');
+
+    final body = jsonEncode({
+      "title": title,
+      "description": description,
+      "activityType": activityType,
+      "durationSeconds": durationSeconds,
+      "distanceMeters": distanceMeters,
+      "averageSpeedMs": averageSpeedMs,
+      "maxSpeedMs": maxSpeedMs,
+      "route": routeCoordinates.length >= 2 ? routeCoordinates : null,
+    });
+
+    final response = await _client.post(
+      url,
+      headers: await _getHeaders(requiresAuth: true),
+      body: body,
+    );
+
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      debugPrint('[API] Aktywność zapisana!');
+      return;
+    } else {
+      final error = json.decode(utf8.decode(response.bodyBytes));
+      throw Exception(error['message'] ?? 'Błąd ${response.statusCode}');
+    }
+
+  }
 }

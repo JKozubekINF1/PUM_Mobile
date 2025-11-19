@@ -85,7 +85,7 @@ class _TrackPageState extends State<TrackPage> {
   void _getPosition() async {
     final LocationSettings locationSettings = LocationSettings(
       accuracy: LocationAccuracy.high,
-      distanceFilter: 100,
+      distanceFilter: 5,
     );
     try {
       await _requestPermissions();
@@ -221,7 +221,6 @@ class _TrackPageState extends State<TrackPage> {
                 ),
               ),
 
-              // PO TESTACH DO USUNIECIA
               _buildCoordinatesText(), const SizedBox(height: 24),
 
               Expanded(
@@ -242,7 +241,6 @@ class _TrackPageState extends State<TrackPage> {
                 ),
               ),
 
-              // PO TESTACH DO USUNIECIA
               _buildSpeedAvgMeter(),
 
               _buildStartStopButton(),
