@@ -36,6 +36,10 @@
         "@profilePageTitle": {
             "description": "Title of profile page that usually appears on the app bar"
         },
+    "editProfilePageTitle": "Edit Profile",
+        "@editProfilePageTitle": {
+            "description": "Title of edit profile page that usually appears on the app bar"
+        },
     "settingsPageTitle": "App Settings",
         "@settingsPageTitle": {
             "description": "Title of settings page that usually appears on the app bar"
@@ -148,9 +152,17 @@
         "@profileAvatarLabel": {
             "description": "Label text for choosing the user profile picture"
         },
+    "profileDetailsLabel": "Details",
+        "@profileDetailsLabel": {
+            "description": "Label text for the details on user profile"
+        },
     "saveChangesLabel": "Save Changes",
         "@saveChangesLabel": {
             "description": "Label text for the save changes button"
+        },
+    "createNewActivityButtonLabel": "START A NEW ACTIVITY",
+        "@createNewActivityButtonLabel": {
+            "description": "Label text for a button that creates a new activity"
         },
     "beginActivityButtonLabel": "START ACTIVITY",
         "@beginActivityButtonLabel": {
@@ -160,17 +172,105 @@
         "@stopActivityButtonLabel": {
             "description": "Label text for the stop activity button"
         },
+    "timeLabel": "Time",
+        "@timeLabel": {
+            "description": "Label text for activity page statistic - time passed"
+        },
+    "distanceLabel": "Distance",
+        "@distanceLabel": {
+            "description": "Label text for activity page statistic - traveled distance"
+        },
+    "speedLabel": "Speed",
+        "@speedLabel": {
+            "description": "Label text for activity page statistic - current user speed"
+        },
+    "avgSpeedLabel": "Speed Avg",
+        "@avgSpeedLabel": {
+            "description": "Label text for activity page statistic - average user speed"
+        },
+    "timeUnitLabel": "seconds",
+        "@timeUnitLabel": {
+            "description": "Label text for the unit of time - seconds"
+        },
+    "distanceUnitLabel": "meters",
+        "@distanceUnitLabel": {
+            "description": "Label text for the unit of distance - meters"
+        },
+    "speedUnitLabel": "m/s",
+        "@speedUnitLabel": {
+            "description": "Label text for the unit speed - meters per second"
+        },
     "settingsLanguageLabel": "App language",
         "@settingsLanguageLabel": {
             "description": "Label text for the language setting"
+        },
+    "settingsThemeLabel": "App theme",
+        "@settingsThemeLabel": {
+            "description": "Label text for the theme setting"
+        },
+    "localActivityListLabel": "Unsaved Activities",
+        "@localActivityListLabel": {
+            "description": "Label text for the list of locally saved activities, waiting to be uploaded"
+        },
+    "runActivityTypeLabel": "Run",
+        "@runActivityTypeLabel": {
+            "description": "Label text for the list of available activities - running"
+        },
+    "bikeActivityTypeLabel": "Bike",
+        "@bikeActivityTypeLabel": {
+            "description": "Label text for the list of available activities - biking"
+        },
+    "walkActivityTypeLabel": "Walk",
+        "@walkActivityTypeLabel": {
+            "description": "Label text for the list of available activities - walking"
+        },
+    "gymActivityTypeLabel": "Gym",
+        "@gymActivityTypeLabel": {
+            "description": "Label text for the list of available activities - gym"
+        },
+    "swimActivityTypeLabel": "Swim",
+        "@swimActivityTypeLabel": {
+            "description": "Label text for the list of available activities - swimming"
+        },
+    "otherActivityTypeLabel": "Other",
+        "@otherActivityTypeLabel": {
+            "description": "Label text for the list of available activities - other"
+        },
+    "activityTypeLabel": "Activity Type",
+        "@activityTypeLabel": {
+            "description": "Label text for the choose activity dropdown menu"
+        },
+    "titleLabel": "Title",
+        "@titleLabel": {
+            "description": "Label text for a title"
+        },
+    "exampleTitleHintLabel": "e.g. Morning run in Puzzlewood Forest",
+        "@ExampleTitleHintLabel": {
+            "description": "Label text for a title hint"
+        },
+    "descriptionLabel": "Description",
+        "@descriptionLabel": {
+            "description": "Label text for a description"
+        },
+    "submitLabel": "Submit",
+        "@submitLabel": {
+            "description": "Label text for a submit button"
         },
     "welcomeNewUserMessage": "Log in or create a new account",
         "@welcomeNewUserMessage": {
             "description": "Message that appears on the first visit page, prompting the user to login or create an account"
         },
+    "newActivityPageMessage": "Ready for action?",
+        "@newActivityPageMessage": {
+            "description": "Message that appears on the home page, prompting the user to start a new activity"
+        },
     "offlineModeWarningMessage": "Some app features are unavailable in offline mode. Are you sure you want to proceed?",
         "@offlineModeWarningMessage": {
             "description": "Message that appears on the first visit page, warning the user of the limitations of the offline mode"
+        },
+    "offlineModePageBlockedMessage": "Log in to unlock all available app features",
+        "@offlineModePageBlockedMessage": {
+            "description": "Message that appears on pages that require logging in to view"
         },
     "logoutWarningMessage": "Are you sure you want to logout?",
         "@logoutWarningMessage": {
@@ -223,6 +323,26 @@
     "profileUpdateFailedMessage": "Profile failed to update",
         "@profileUpdateFailedMessage": {
             "description": "Message that appears after an unsuccessful profile edit"
+        },
+    "appSettingsSaveFailedMessage": "Unable to save settings",
+        "@settingsChangeFailedMessage": {
+            "description": "Message that appears after an unsuccessful attempt to save app settings"
+        },
+    "localFileErrorMessage": "File corrupted, unable to load",
+        "@localFileError": {
+            "description": "Message that appears after an unsuccessful attempt load a local file"
+        },
+    "unsavedChangesWarningMessage": "Unsaved changes will be lost. Are you sure you want to continue?",
+        "@unsavedChangesWarningMessage": {
+            "description": "Message that appears when user tries to leave without saving"
+        },
+    "activityDeletionMessage": "Deleted activity will be lost forever. Are you sure you want to continue?",
+        "@activityDeletionMessage": {
+            "description": "Message that appears when user tries to delete an activity"
+        },
+    "missingRouteMessage": "Route missing",
+        "@missingRouteMessage": {
+            "description": "Message that appears instead of a map on activity result page when no coordinates are given"
         },
     "noConnectionMessage": "Lost connection to the server, check your internet connection",
         "@noConnectionMessage": {

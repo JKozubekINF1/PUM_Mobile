@@ -36,6 +36,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get profilePageTitle => 'Your Profile';
 
   @override
+  String get editProfilePageTitle => 'Edit Profile';
+
+  @override
   String get settingsPageTitle => 'App Settings';
 
   @override
@@ -120,7 +123,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get profileAvatarLabel => 'Profile Picture';
 
   @override
+  String get profileDetailsLabel => 'Details';
+
+  @override
   String get saveChangesLabel => 'Save Changes';
+
+  @override
+  String get createNewActivityButtonLabel => 'START A NEW ACTIVITY';
 
   @override
   String get beginActivityButtonLabel => 'START ACTIVITY';
@@ -129,14 +138,81 @@ class AppLocalizationsEn extends AppLocalizations {
   String get stopActivityButtonLabel => 'STOP ACTIVITY';
 
   @override
+  String get timeLabel => 'Time';
+
+  @override
+  String get distanceLabel => 'Distance';
+
+  @override
+  String get speedLabel => 'Speed';
+
+  @override
+  String get avgSpeedLabel => 'Speed Avg';
+
+  @override
+  String get timeUnitLabel => 'seconds';
+
+  @override
+  String get distanceUnitLabel => 'meters';
+
+  @override
+  String get speedUnitLabel => 'm/s';
+
+  @override
   String get settingsLanguageLabel => 'App language';
+
+  @override
+  String get settingsThemeLabel => 'App theme';
+
+  @override
+  String get localActivityListLabel => 'Unsaved Activities';
+
+  @override
+  String get runActivityTypeLabel => 'Run';
+
+  @override
+  String get bikeActivityTypeLabel => 'Bike';
+
+  @override
+  String get walkActivityTypeLabel => 'Walk';
+
+  @override
+  String get gymActivityTypeLabel => 'Gym';
+
+  @override
+  String get swimActivityTypeLabel => 'Swim';
+
+  @override
+  String get otherActivityTypeLabel => 'Other';
+
+  @override
+  String get activityTypeLabel => 'Activity Type';
+
+  @override
+  String get titleLabel => 'Title';
+
+  @override
+  String get exampleTitleHintLabel => 'e.g. Morning run in Puzzlewood Forest';
+
+  @override
+  String get descriptionLabel => 'Description';
+
+  @override
+  String get submitLabel => 'Submit';
 
   @override
   String get welcomeNewUserMessage => 'Log in or create a new account';
 
   @override
+  String get newActivityPageMessage => 'Ready for action?';
+
+  @override
   String get offlineModeWarningMessage =>
       'Some app features are unavailable in offline mode. Are you sure you want to proceed?';
+
+  @override
+  String get offlineModePageBlockedMessage =>
+      'Log in to unlock all available app features';
 
   @override
   String get logoutWarningMessage => 'Are you sure you want to logout?';
@@ -176,6 +252,23 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get profileUpdateFailedMessage => 'Profile failed to update';
+
+  @override
+  String get appSettingsSaveFailedMessage => 'Unable to save settings';
+
+  @override
+  String get localFileErrorMessage => 'File corrupted, unable to load';
+
+  @override
+  String get unsavedChangesWarningMessage =>
+      'Unsaved changes will be lost. Are you sure you want to continue?';
+
+  @override
+  String get activityDeletionMessage =>
+      'Deleted activity will be lost forever. Are you sure you want to continue?';
+
+  @override
+  String get missingRouteMessage => 'Route missing';
 
   @override
   String get noConnectionMessage =>

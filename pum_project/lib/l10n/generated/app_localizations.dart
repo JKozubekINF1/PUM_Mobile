@@ -152,6 +152,12 @@ abstract class AppLocalizations {
   /// **'Your Profile'**
   String get profilePageTitle;
 
+  /// Title of edit profile page that usually appears on the app bar
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Profile'**
+  String get editProfilePageTitle;
+
   /// Title of settings page that usually appears on the app bar
   ///
   /// In en, this message translates to:
@@ -320,11 +326,23 @@ abstract class AppLocalizations {
   /// **'Profile Picture'**
   String get profileAvatarLabel;
 
+  /// Label text for the details on user profile
+  ///
+  /// In en, this message translates to:
+  /// **'Details'**
+  String get profileDetailsLabel;
+
   /// Label text for the save changes button
   ///
   /// In en, this message translates to:
   /// **'Save Changes'**
   String get saveChangesLabel;
+
+  /// Label text for a button that creates a new activity
+  ///
+  /// In en, this message translates to:
+  /// **'START A NEW ACTIVITY'**
+  String get createNewActivityButtonLabel;
 
   /// Label text for the start activity button
   ///
@@ -338,11 +356,131 @@ abstract class AppLocalizations {
   /// **'STOP ACTIVITY'**
   String get stopActivityButtonLabel;
 
+  /// Label text for activity page statistic - time passed
+  ///
+  /// In en, this message translates to:
+  /// **'Time'**
+  String get timeLabel;
+
+  /// Label text for activity page statistic - traveled distance
+  ///
+  /// In en, this message translates to:
+  /// **'Distance'**
+  String get distanceLabel;
+
+  /// Label text for activity page statistic - current user speed
+  ///
+  /// In en, this message translates to:
+  /// **'Speed'**
+  String get speedLabel;
+
+  /// Label text for activity page statistic - average user speed
+  ///
+  /// In en, this message translates to:
+  /// **'Speed Avg'**
+  String get avgSpeedLabel;
+
+  /// Label text for the unit of time - seconds
+  ///
+  /// In en, this message translates to:
+  /// **'seconds'**
+  String get timeUnitLabel;
+
+  /// Label text for the unit of distance - meters
+  ///
+  /// In en, this message translates to:
+  /// **'meters'**
+  String get distanceUnitLabel;
+
+  /// Label text for the unit speed - meters per second
+  ///
+  /// In en, this message translates to:
+  /// **'m/s'**
+  String get speedUnitLabel;
+
   /// Label text for the language setting
   ///
   /// In en, this message translates to:
   /// **'App language'**
   String get settingsLanguageLabel;
+
+  /// Label text for the theme setting
+  ///
+  /// In en, this message translates to:
+  /// **'App theme'**
+  String get settingsThemeLabel;
+
+  /// Label text for the list of locally saved activities, waiting to be uploaded
+  ///
+  /// In en, this message translates to:
+  /// **'Unsaved Activities'**
+  String get localActivityListLabel;
+
+  /// Label text for the list of available activities - running
+  ///
+  /// In en, this message translates to:
+  /// **'Run'**
+  String get runActivityTypeLabel;
+
+  /// Label text for the list of available activities - biking
+  ///
+  /// In en, this message translates to:
+  /// **'Bike'**
+  String get bikeActivityTypeLabel;
+
+  /// Label text for the list of available activities - walking
+  ///
+  /// In en, this message translates to:
+  /// **'Walk'**
+  String get walkActivityTypeLabel;
+
+  /// Label text for the list of available activities - gym
+  ///
+  /// In en, this message translates to:
+  /// **'Gym'**
+  String get gymActivityTypeLabel;
+
+  /// Label text for the list of available activities - swimming
+  ///
+  /// In en, this message translates to:
+  /// **'Swim'**
+  String get swimActivityTypeLabel;
+
+  /// Label text for the list of available activities - other
+  ///
+  /// In en, this message translates to:
+  /// **'Other'**
+  String get otherActivityTypeLabel;
+
+  /// Label text for the choose activity dropdown menu
+  ///
+  /// In en, this message translates to:
+  /// **'Activity Type'**
+  String get activityTypeLabel;
+
+  /// Label text for a title
+  ///
+  /// In en, this message translates to:
+  /// **'Title'**
+  String get titleLabel;
+
+  /// No description provided for @exampleTitleHintLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. Morning run in Puzzlewood Forest'**
+  String get exampleTitleHintLabel;
+
+  /// Label text for a description
+  ///
+  /// In en, this message translates to:
+  /// **'Description'**
+  String get descriptionLabel;
+
+  /// Label text for a submit button
+  ///
+  /// In en, this message translates to:
+  /// **'Submit'**
+  String get submitLabel;
 
   /// Message that appears on the first visit page, prompting the user to login or create an account
   ///
@@ -350,11 +488,23 @@ abstract class AppLocalizations {
   /// **'Log in or create a new account'**
   String get welcomeNewUserMessage;
 
+  /// Message that appears on the home page, prompting the user to start a new activity
+  ///
+  /// In en, this message translates to:
+  /// **'Ready for action?'**
+  String get newActivityPageMessage;
+
   /// Message that appears on the first visit page, warning the user of the limitations of the offline mode
   ///
   /// In en, this message translates to:
   /// **'Some app features are unavailable in offline mode. Are you sure you want to proceed?'**
   String get offlineModeWarningMessage;
+
+  /// Message that appears on pages that require logging in to view
+  ///
+  /// In en, this message translates to:
+  /// **'Log in to unlock all available app features'**
+  String get offlineModePageBlockedMessage;
 
   /// Message that appears when the user interacts with the logout button, making sure he wants to log out
   ///
@@ -433,6 +583,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Profile failed to update'**
   String get profileUpdateFailedMessage;
+
+  /// No description provided for @appSettingsSaveFailedMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to save settings'**
+  String get appSettingsSaveFailedMessage;
+
+  /// No description provided for @localFileErrorMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'File corrupted, unable to load'**
+  String get localFileErrorMessage;
+
+  /// Message that appears when user tries to leave without saving
+  ///
+  /// In en, this message translates to:
+  /// **'Unsaved changes will be lost. Are you sure you want to continue?'**
+  String get unsavedChangesWarningMessage;
+
+  /// Message that appears when user tries to delete an activity
+  ///
+  /// In en, this message translates to:
+  /// **'Deleted activity will be lost forever. Are you sure you want to continue?'**
+  String get activityDeletionMessage;
+
+  /// Message that appears instead of a map on activity result page when no coordinates are given
+  ///
+  /// In en, this message translates to:
+  /// **'Route missing'**
+  String get missingRouteMessage;
 
   /// Message that appears after losing connection to the server
   ///

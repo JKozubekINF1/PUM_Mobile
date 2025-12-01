@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
 import '../models/profile_data.dart';
 import 'package:pum_project/services/api_connection.dart';
+import 'package:pum_project/services/app_settings.dart';
 
 class FirstVisitPage extends StatefulWidget {
   const FirstVisitPage({
@@ -31,12 +32,15 @@ class _FirstVisitPageState extends State<FirstVisitPage> {
             actions: <Widget>[
               TextButton(
                 child: Text(AppLocalizations.of(context)!.acceptOptionLabel),
-                onPressed: () {
-                  Navigator.of(context).popUntil((route) => route.isFirst);
-                  Navigator.pushReplacementNamed(
-                    context,
-                    '/home',
-                  );
+                onPressed: () async {
+                  await _setOfflineMode();
+                  if (mounted) {
+                    Navigator.of(context).popUntil((route) => route.isFirst);
+                    Navigator.pushReplacementNamed(
+                      context,
+                      '/home',
+                    );
+                  }
                 },
               ),
               TextButton(
@@ -51,9 +55,38 @@ class _FirstVisitPageState extends State<FirstVisitPage> {
     );
   }
 
+  Future<void> _setOfflineMode() async {
+    try {
+      final appSettings = Provider.of<AppSettings>(context, listen: false);
+      await appSettings.setOfflineMode(offline: true);
+    } catch (e) {
+      debugPrint("$e");
+    }
+  }
+
   @override
   void initState() {
     super.initState();
+    _checkOfflineMode();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+  }
+
+  Future<void> _checkOfflineMode() async {
+    try {
+      final appSettings = Provider.of<AppSettings>(context, listen: false);
+      final mode = await appSettings.checkOfflineMode();
+      if (mode ?? false) {
+        if (mounted) {
+          Navigator.pushNamedAndRemoveUntil(context, '/home', (_) => false);
+        }
+      }
+    } catch (e) {
+      debugPrint('$e');
+    }
   }
 
   bool _profileInitializationRequirement(ProfileData profile) {
@@ -119,8 +152,8 @@ class _FirstVisitPageState extends State<FirstVisitPage> {
   Widget _buildLogo() {
     return Align(
       alignment: Alignment.center,
-      child: Text(
-        "LOGO", style: Theme.of(context).textTheme.bodyLarge,
+      child: Image(
+        image: AssetImage("assets/logo.png"),
       ),
     );
   }

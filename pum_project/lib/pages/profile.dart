@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../l10n/generated/app_localizations.dart';
 import '../models/profile_data.dart';
 import '../services/api_connection.dart';
+import 'package:intl/intl.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -14,13 +15,13 @@ class ProfilePage extends StatefulWidget {
 class _ProfilePageState extends State<ProfilePage> {
   late Future<ProfileData> _profileFuture;
 
-  String? _firstName;
-  String? _lastName;
-  double? _height;
-  double? _weight;
-  String? _avatarUrl;
-  String? _gender;
-  DateTime? _dateOfBirth;
+  String _firstName = "";
+  String _lastName = "";
+  String _height = "";
+  String _weight = "";
+  String _avatarUrl = "";
+  String _gender = "";
+  String _dateOfBirth = "";
 
   @override
   void dispose() {
@@ -36,14 +37,38 @@ class _ProfilePageState extends State<ProfilePage> {
     });
   }
 
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+  }
+
   void _initializeProfile(ProfileData profile) {
-    _firstName = profile.firstName ?? '';
-    _lastName = profile.lastName ?? '';
-    _height = profile.height ?? 0;
-    _weight = profile.weight ?? 0;
-    _avatarUrl = profile.avatarUrl ?? '';
-    _gender = profile.gender ?? '';
-    _dateOfBirth = profile.dateOfBirth ?? DateTime(2000,1,1);
+    if (profile.firstName != null) {
+      _firstName = profile.firstName!;
+    }
+    if (profile.lastName != null) {
+      _lastName = profile.lastName!;
+    }
+    if (profile.height != null) {
+      _height = (profile.height!).toString();
+    }
+    if (profile.weight != null) {
+      _weight = (profile.weight!).toString();
+    }
+    if (profile.avatarUrl != null) {
+      _avatarUrl = profile.avatarUrl!;
+    }
+    if (profile.gender != null) {
+      switch (profile.gender) {
+        case "Male": _gender = AppLocalizations.of(context)!.profileGenderMaleLabel; break;
+        case "Female": _gender = AppLocalizations.of(context)!.profileGenderFemaleLabel; break;
+        case "Other": _gender = AppLocalizations.of(context)!.profileGenderOtherLabel; break;
+        default: _gender = profile.gender!; break;
+      }
+    }
+    if (profile.dateOfBirth != null) {
+      _dateOfBirth = DateFormat('dd/MM/yyyy').format(profile.dateOfBirth!);
+    }
   }
 
   Future<ProfileData> _loadProfile() async {
@@ -56,6 +81,9 @@ class _ProfilePageState extends State<ProfilePage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(AppLocalizations.of(context)!.profilePageTitle),
+        actions: [
+          _buildEditButton(),
+        ],
       ),
       body: FutureBuilder<ProfileData>(
         future: _profileFuture,
@@ -67,14 +95,26 @@ class _ProfilePageState extends State<ProfilePage> {
             return Center(child: Text(snapshot.error.toString()));
           }
           if (snapshot.hasData) {
-            return SingleChildScrollView(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                children: [
-                  _buildProfileHeader(),
-                  _buildProfileInfo(),
-                  _buildEditButton(),
-                ],
+            return Center(
+              child: SingleChildScrollView(
+                child: Container(
+                  constraints: BoxConstraints(
+                    minWidth: 450,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).appBarTheme.backgroundColor,
+                    borderRadius: BorderRadius.circular(30),
+                  ),
+                  child: Column(
+                    children: [
+                      SizedBox(height: 35),
+                      _buildProfileHeader(),
+                      SizedBox(height: 20),
+                      _buildProfileInfo(),
+                      SizedBox(height: 35),
+                    ],
+                  ),
+                ),
               ),
             );
           }
@@ -85,29 +125,63 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   Widget _buildProfileHeader() {
-    return Row(
+    return Column(
       children: [
-        Text(_avatarUrl!),
-        Text('Name: ${_firstName!} ${_lastName!}'),
+        _buildProfilePicture(),
+        Text(
+          _firstName,
+          textAlign: TextAlign.center,
+          overflow: TextOverflow.ellipsis,
+          style: TextStyle(
+            fontSize: 32,
+          ),
+        ),
+        Text(
+          _lastName,
+          textAlign: TextAlign.center,
+          overflow: TextOverflow.ellipsis,
+          style: TextStyle(
+            fontSize: 32,
+          ),
+        ),
       ],
     );
   }
 
   Widget _buildProfileInfo() {
-    return Column(
-      children: [
-        Text('Gender: $_gender'),
-        Text('Date of birth: ${_dateOfBirth!.toString()}'),
-        Text('Height: ${_height!.toString()}'),
-        Text('Weight: ${_weight!.toString()}'),
-      ],
+    return Card(
+      color: Theme.of(context).primaryColorLight,
+      shape: BeveledRectangleBorder(
+        borderRadius: BorderRadius.circular(10.0),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          children: [
+            Text(AppLocalizations.of(context)!.profileDetailsLabel,style: TextStyle(fontSize: 42)),
+            SizedBox(height: 14),
+            Text('${AppLocalizations.of(context)!.profileGenderLabel}: $_gender'),
+            Text('${AppLocalizations.of(context)!.profileDayOfBirthLabel}: $_dateOfBirth'),
+            Text('${AppLocalizations.of(context)!.profileHeightLabel}: $_height'),
+            Text('${AppLocalizations.of(context)!.profileWeightLabel}: $_weight'),
+          ],
+        ),
+      ),
     );
   }
 
   Widget _buildEditButton() {
-    return ElevatedButton(
-        onPressed: () => Navigator.pushNamed(context,'/profile/edit'),
-        child: Text('Edit')
+    return IconButton(
+      icon: Icon(Icons.edit),
+      iconSize: 35,
+      onPressed: () => Navigator.pushNamed(context,'/profile/edit'),
+    );
+  }
+
+  Widget _buildProfilePicture() {
+    return Icon(
+      Icons.account_circle_rounded,
+      size: 200,
     );
   }
 }

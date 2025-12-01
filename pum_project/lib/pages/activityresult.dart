@@ -3,21 +3,17 @@ import 'package:latlong2/latlong.dart';
 import '../l10n/generated/app_localizations.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:pum_project/services/api_connection.dart';
+import 'package:pum_project/services/local_storage.dart';
+import 'package:pum_project/services/app_settings.dart';
 import 'package:provider/provider.dart';
 
 class ResultScreen extends StatefulWidget {
   const ResultScreen({
-    required this.duration,
-    required this.route,
-    required this.distance,
-    required this.speedavg,
+    required this.data,
     super.key,
   });
 
-  final int duration;
-  final List<LatLng> route;
-  final int distance;
-  final double speedavg;
+  final Map<String,dynamic> data;
 
   @override
   State<ResultScreen> createState() => _ResultScreenState();
@@ -26,23 +22,100 @@ class ResultScreen extends StatefulWidget {
 class _ResultScreenState extends State<ResultScreen> {
   late final TextEditingController _titleController;
   late final TextEditingController _descriptionController;
-
-  String _selectedActivityType = "Bieg";
+  List<LatLng> routePoints = <LatLng>[];
+  int duration = 0;
+  double distance = 0;
+  double speedavg = 0;
+  String activityType = "run";
+  bool validForUpload = true;
+  bool _hasUnsavedChanges = false;
+  Map<String,String> activityLabels = {};
+  bool offlineMode = true;
 
   final Map<String, IconData> activityIcons = {
-    "Bieg": Icons.directions_run,
-    "Rower": Icons.directions_bike,
-    "Spacer": Icons.directions_walk,
-    "Siłownia": Icons.fitness_center,
-    "Pływanie": Icons.waves,
-    "Inne": Icons.sports,
+    "run": Icons.directions_run,
+    "bike": Icons.directions_bike,
+    "walk": Icons.directions_walk,
+    "gym": Icons.fitness_center,
+    "swim": Icons.waves,
+    "other": Icons.sports,
   };
+
+  void initiateData() {
+    try {
+      if (widget.data['routelist']!=null) {
+        routePoints = widget.data['routelist']
+            .map<LatLng>((p) =>
+            LatLng(
+              p['coordinates'][1].toDouble(),
+              p['coordinates'][0].toDouble(),
+            )).toList();
+      } else {
+        validForUpload = false;
+      }
+
+      if (widget.data['duration']!=null) {
+        duration = widget.data['duration'];
+      } else {
+        validForUpload = false;
+      }
+
+      if (widget.data['distance']!=null) {
+        distance = widget.data['distance'].toDouble();
+      } else {
+        validForUpload = false;
+      }
+
+      if (widget.data['speedavg']!=null) {
+        speedavg = widget.data['speedavg'];
+      } else {
+        validForUpload = false;
+      }
+
+      if (widget.data['title']!=null) {
+        _titleController.value = TextEditingValue(text: widget.data['title']);
+      }
+
+      if (widget.data['description']!=null) {
+        _descriptionController.value = TextEditingValue(text: widget.data['description']);
+      }
+
+      if (widget.data['type']!=null ) {
+        if (activityIcons.containsKey(widget.data['type'])) {
+          activityType = widget.data['type'];
+        }
+      }
+
+    } catch (e) {
+      debugPrint('$e');
+      validForUpload = false;
+    }
+  }
+
+  void initiateDropdownMenu() {
+    activityLabels = {
+      "run": AppLocalizations.of(context)!.runActivityTypeLabel,
+      "bike": AppLocalizations.of(context)!.bikeActivityTypeLabel,
+      "walk": AppLocalizations.of(context)!.walkActivityTypeLabel,
+      "gym": AppLocalizations.of(context)!.gymActivityTypeLabel,
+      "swim": AppLocalizations.of(context)!.swimActivityTypeLabel,
+      "other": AppLocalizations.of(context)!.otherActivityTypeLabel,
+    };
+  }
 
   @override
   void initState() {
     super.initState();
     _titleController = TextEditingController();
     _descriptionController = TextEditingController();
+    initiateData();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    initiateDropdownMenu();
+    _checkOfflineMode();
   }
 
   @override
@@ -53,19 +126,20 @@ class _ResultScreenState extends State<ResultScreen> {
   }
 
   Future<void> _saveActivity() async {
+
     final apiService = Provider.of<ApiService>(context, listen: false);
 
-    final routeJson = widget.route.map((p) => [p.longitude, p.latitude]).toList();
+    final routeJson = routePoints.map((p) => [p.longitude, p.latitude]).toList();
 
     try {
       await apiService.saveActivity(
-        durationSeconds: widget.duration,
-        distanceMeters: widget.distance.toDouble(),
-        averageSpeedMs: widget.speedavg,
+        durationSeconds: duration,
+        distanceMeters: distance,
+        averageSpeedMs: speedavg,
         routeCoordinates: routeJson,
         title: _titleController.text.trim().isEmpty ? "Aktywność bez tytułu" : _titleController.text.trim(),
         description: _descriptionController.text.trim().isEmpty ? null : _descriptionController.text.trim(),
-        activityType: _selectedActivityType,
+        activityType: activityType,
       );
 
       if (!mounted) return;
@@ -75,116 +149,309 @@ class _ResultScreenState extends State<ResultScreen> {
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Błąd: $e"), backgroundColor: Colors.red),
+        SnackBar(content: Text("$e"), backgroundColor: Colors.red),
       );
     }
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(AppLocalizations.of(context)!.resultPageTitle),
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          children: [
-            // Mapa
-            SizedBox(
-              height: 350,
-              child: widget.route.isEmpty
-                  ? const Center(child: Text("Brak trasy"))
-                  : FlutterMap(
-                options: MapOptions(initialCenter: widget.route.first, initialZoom: 15),
-                children: [
-                  TileLayer(
-                    urlTemplate: 'https://{s}.tile-cyclosm.openstreetmap.fr/cyclosm/{z}/{x}/{y}.png',
-                    userAgentPackageName: 'Pum_Project/1.0',
-                  ),
-                  PolylineLayer(
-                    polylines: [Polyline(points: widget.route, color: Colors.red, strokeWidth: 8)],
-                  ),
+  Future<void> _saveLocally() async {
+    try {
+      final localStorage = Provider.of<LocalStorage>(context, listen: false);
+      final Map<String,dynamic> values = {
+        "title": _titleController.text,
+        "description": _descriptionController.text,
+        "type": activityType,
+      };
+      if (widget.data['filename']!=null) {
+        await localStorage.overwriteFile(widget.data['filename'],values);
+      } else {
+        debugPrint('File name is missing from json');
+      }
+    } catch (e) {
+      debugPrint('$e');
+    }
+  }
+
+  Future<void> _deleteActivity() async {
+    try {
+      final localStorage = Provider.of<LocalStorage>(context, listen: false);
+      if (widget.data['filename']!=null) {
+        await localStorage.deleteFile(widget.data['filename']);
+      } else {
+        debugPrint('File name is missing from json');
+      }
+    } catch (e) {
+      debugPrint('$e');
+    }
+  }
+
+  Future<void> _leavePopup() async {
+    return showDialog<void>(
+        context: context,
+        barrierDismissible: true,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text(AppLocalizations.of(context)!.warningLabel),
+            content: SingleChildScrollView(
+              child: ListBody(
+                children: <Widget>[
+                  Text(AppLocalizations.of(context)!.unsavedChangesWarningMessage),
                 ],
               ),
             ),
-            const SizedBox(height: 20),
-
-            Card(
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Text(
-                  "Czas: ${widget.duration}s  •  Dystans: ${widget.distance}m  •  Śr. prędkość: ${widget.speedavg.toStringAsFixed(2)} m/s",
-                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                  textAlign: TextAlign.center,
-                ),
-              ),
-            ),
-            const SizedBox(height: 30),
-
-            DropdownButtonFormField<String>(
-              value: _selectedActivityType,
-              decoration: const InputDecoration(
-                labelText: "Rodzaj aktywności",
-                border: OutlineInputBorder(),
-                prefixIcon: Icon(Icons.sports),
-              ),
-              items: activityIcons.keys.map((type) {
-                return DropdownMenuItem(
-                  value: type,
-                  child: Row(
-                    children: [
-                      Icon(activityIcons[type]),
-                      const SizedBox(width: 10),
-                      Text(type),
-                    ],
-                  ),
-                );
-              }).toList(),
-              onChanged: (value) => setState(() => _selectedActivityType = value!),
-            ),
-            const SizedBox(height: 16),
-
-            // Tytuł
-            TextField(
-              controller: _titleController,
-              decoration: const InputDecoration(
-                labelText: "Tytuł aktywności",
-                hintText: "np. Poranny bieg w Lesie Wolskim",
-                border: OutlineInputBorder(),
-              ),
-            ),
-            const SizedBox(height: 16),
-
-            // Opis
-            TextField(
-              controller: _descriptionController,
-              maxLines: 4,
-              decoration: const InputDecoration(
-                labelText: "Opis (opcjonalnie)",
-                border: OutlineInputBorder(),
-              ),
-            ),
-            const SizedBox(height: 30),
-
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: () async {
-                  await _saveActivity();
-                  if (mounted) Navigator.pop(context);
+            actions: <Widget>[
+              TextButton(
+                child: Text(AppLocalizations.of(context)!.acceptOptionLabel),
+                onPressed: () {
+                  Navigator.pop(context,true);
+                  Navigator.pop(context,true);
                 },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF375534),
-                  padding: const EdgeInsets.symmetric(vertical: 20),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                ),
-                child: const Text("ZAPISZ AKTYWNOŚĆ", style: TextStyle(fontSize: 20, color: Colors.white)),
+              ),
+              TextButton(
+                child: Text(AppLocalizations.of(context)!.declineOptionLabel),
+                onPressed: () {
+                  Navigator.pop(context,false);
+                },
+              ),
+            ],
+          );
+        }
+    );
+  }
+
+  Future<void> _deletePopup() async {
+    return showDialog<void>(
+        context: context,
+        barrierDismissible: true,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text(AppLocalizations.of(context)!.warningLabel),
+            content: SingleChildScrollView(
+              child: ListBody(
+                children: <Widget>[
+                  Text(AppLocalizations.of(context)!.activityDeletionMessage),
+                ],
               ),
             ),
-          ],
+            actions: <Widget>[
+              TextButton(
+                child: Text(AppLocalizations.of(context)!.acceptOptionLabel),
+                onPressed: () {
+                  _deleteActivity();
+                  Navigator.pushNamedAndRemoveUntil(context,"/home", (_) => false);
+                },
+              ),
+              TextButton(
+                child: Text(AppLocalizations.of(context)!.declineOptionLabel),
+                onPressed: () {
+                  Navigator.pop(context,false);
+                },
+              ),
+            ],
+          );
+        }
+    );
+  }
+
+  Future<void> _checkOfflineMode() async {
+    try {
+      final appSettings = Provider.of<AppSettings>(context, listen: false);
+      final mode = await appSettings.checkOfflineMode();
+      if (mounted) {
+        setState(() {
+          offlineMode = mode ?? true;
+        });
+      }
+    } catch (e) {
+      if (mounted) _displaySnackbar(AppLocalizations.of(context)!.genericErrorMessage);
+      debugPrint('$e');
+    }
+  }
+
+  void _displaySnackbar(String message) {
+    var snackBar = SnackBar(content: Text(message));
+    ScaffoldMessenger.of(context).showSnackBar(snackBar);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) async {
+        if (didPop) return;
+        if (!_hasUnsavedChanges) {
+          Navigator.pop(context);
+          return;
+        }
+        await _leavePopup();
+      },
+      child: Scaffold(
+        appBar: AppBar(
+        title: Text(AppLocalizations.of(context)!.resultPageTitle),
+        actions: [
+          _buildSaveLocallyButton(),
+        ],
+      ),
+        body: SingleChildScrollView(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            children: [
+              _buildMap(),
+              const SizedBox(height: 20),
+              _buildStats(),
+              const SizedBox(height: 30),
+              _buildTypeField(),
+              const SizedBox(height: 16),
+              _buildTitleField(),
+              const SizedBox(height: 16),
+              _buildDescriptionField(),
+              const SizedBox(height: 30),
+              _buildControlRow(),
+            ],
+          ),
         ),
       ),
+    );
+  }
+
+  Widget _buildMap() {
+    return SizedBox(
+      height: 350,
+      child: routePoints.isEmpty || routePoints.length == 1
+          ? Center(child: Text(AppLocalizations.of(context)!.missingRouteMessage))
+          : FlutterMap(
+        options: MapOptions(initialCenter: routePoints.first, initialZoom: 15),
+        children: [
+          TileLayer(
+            urlTemplate: 'https://{s}.tile-cyclosm.openstreetmap.fr/cyclosm/{z}/{x}/{y}.png',
+            userAgentPackageName: 'Pum_Project/1.0',
+          ),
+          PolylineLayer(
+            polylines: [Polyline(points: routePoints, color: Colors.red, strokeWidth: 8)],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStats() {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Text(
+          "${AppLocalizations.of(context)!.timeLabel}: $duration ${AppLocalizations.of(context)!.speedUnitLabel}  •  ${AppLocalizations.of(context)!.distanceLabel}: $distance ${AppLocalizations.of(context)!.distanceUnitLabel}  •  ${AppLocalizations.of(context)!.avgSpeedLabel}: ${speedavg.toStringAsFixed(2)} ${AppLocalizations.of(context)!.speedUnitLabel}",
+          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          textAlign: TextAlign.center,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTypeField() {
+    return DropdownButtonFormField<String>(
+      initialValue: activityType,
+      decoration: InputDecoration(
+        labelText: AppLocalizations.of(context)!.activityTypeLabel,
+        border: OutlineInputBorder(),
+        prefixIcon: Icon(Icons.sports),
+      ),
+      items: activityIcons.keys.map((key) {
+        return DropdownMenuItem(
+          value: key,
+          child: Row(
+            children: [
+              Icon(activityIcons[key]),
+              const SizedBox(width: 10),
+              Text(activityLabels[key] ?? key),
+            ],
+          ),
+        );
+      }).toList(),
+      onChanged: (value) {
+        _hasUnsavedChanges = true;
+        setState(() => activityType = value!);
+      },
+    );
+  }
+
+  Widget _buildTitleField() {
+    return TextFormField(
+      controller: _titleController,
+      onChanged: (_) => _hasUnsavedChanges = true,
+      decoration: InputDecoration(
+        labelText: AppLocalizations.of(context)!.titleLabel,
+        hintText: AppLocalizations.of(context)!.exampleTitleHintLabel,
+        border: OutlineInputBorder(),
+      ),
+    );
+  }
+
+  Widget _buildDescriptionField() {
+    return TextField(
+      controller: _descriptionController,
+      onChanged: (_) => _hasUnsavedChanges = true,
+      maxLines: 4,
+      decoration: InputDecoration(
+        labelText: "${AppLocalizations.of(context)!.descriptionLabel} (${AppLocalizations.of(context)!.optionalLabel})",
+        border: OutlineInputBorder(),
+      ),
+    );
+  }
+
+  Widget _buildSaveLocallyButton() {
+    return IconButton(
+      onPressed: () async {
+        await _saveLocally();
+        if (mounted) Navigator.pop(context);
+      },
+      iconSize: 32,
+      icon: Icon(Icons.save),
+    );
+  }
+
+  Widget _buildDeleteButton() {
+    return IconButton(
+      onPressed: () async {
+        _deletePopup();
+      },
+      iconSize: 32,
+      icon: Icon(Icons.delete_rounded),
+    );
+  }
+
+  Widget _buildSubmitButton() {
+    return ElevatedButton(
+      onPressed: () async {
+        if (offlineMode) {
+          _displaySnackbar(AppLocalizations.of(context)!.offlineModePageBlockedMessage);
+        } else {
+          await _saveActivity();
+          if (mounted) Navigator.pop(context);
+        }
+      },
+      style: ElevatedButton.styleFrom(
+        padding: const EdgeInsets.symmetric(vertical: 20),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      ),
+      child: Text(AppLocalizations.of(context)!.submitLabel),
+    );
+  }
+
+  Widget _buildControlRow() {
+    return Row(
+      children: [
+        Expanded(
+          child: _buildDeleteButton(),
+        ),
+        Expanded(
+          flex: 2,
+          child: SizedBox(),
+        ),
+        Expanded(
+          flex: 2,
+          child: _buildSubmitButton(),
+        ),
+      ],
     );
   }
 }

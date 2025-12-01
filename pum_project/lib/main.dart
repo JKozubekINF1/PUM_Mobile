@@ -11,19 +11,28 @@ import 'package:pum_project/pages/editprofile.dart';
 import 'package:pum_project/pages/settings.dart';
 import 'l10n/generated/app_localizations.dart';
 import 'package:pum_project/services/api_connection.dart';
+import 'package:pum_project/services/app_settings.dart';
+import 'package:pum_project/services/local_storage.dart';
 import 'package:pum_project/theme/app_theme.dart';
 import 'package:provider/provider.dart';
 import 'providers/auth_provider.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
+  LocalStorage.init();
   runApp(
       MultiProvider(
           providers: [
             ChangeNotifierProvider<AuthProvider>(create: (_) => AuthProvider()),
             Provider<ApiService>(create: (context) => ApiService()),
+            Provider<AppSettings>(create: (context) => AppSettings()),
+            Provider<LocalStorage>(create: (context) => LocalStorage()),
           ],
-      child: const MyApp(),
+        child: Builder(
+          builder: (context) {
+            return const MyApp();
+          },
+        ),
       ),
   );
 }
@@ -36,9 +45,9 @@ class MyApp extends StatefulWidget {
     state?.setLocale(newLocale);
   }
 
-  static String? getLocale(BuildContext context) {
+  static void setTheme(BuildContext context, String newThemeName) {
     _MyAppState? state = context.findAncestorStateOfType<_MyAppState>();
-    return state?.getLocale();
+    state?.setTheme(newThemeName);
   }
 
   @override
@@ -47,6 +56,7 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   Locale? _locale;
+  ThemeData? _theme = AppTheme.lightTheme;
 
   void setLocale(Locale locale) {
     setState(() {
@@ -54,11 +64,34 @@ class _MyAppState extends State<MyApp> {
     });
   }
 
-  String getLocale() {
-    if (_locale==null) {
-      return 'en';
+  void setTheme(String themeName) {
+    setState(() {
+      switch(themeName) {
+        case "light": _theme = AppTheme.lightTheme; break;
+        case "test": _theme = AppTheme.testTheme; break;
+      }
+    });
+  }
+
+  Future<void> loadSettings() async{
+    try {
+      final appSettings = Provider.of<AppSettings>(context, listen: false);
+      final settings = await appSettings.getSettings();
+      if (mounted) {
+        setState(() {
+          _locale = Locale(settings?["language"] ?? "en");
+        });
+        setTheme(settings?["theme"] ?? "light");
+      }
+    } catch (e) {
+      debugPrint('Failed to fetch settings');
     }
-    return _locale.toString();
+  }
+
+  @override
+  void initState() {
+    loadSettings();
+    super.initState();
   }
 
   @override
@@ -80,14 +113,11 @@ class _MyAppState extends State<MyApp> {
         '/results' : (BuildContext context) {
           final args = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
           return ResultScreen(
-            duration: args['Duration'],
-            route: args['RouteList'],
-            distance: args['Distance'],
-            speedavg: args['SpeedAvg'],
+            data: args['Data'],
           );
         },
       },
-      theme: AppTheme.lightTheme,
+      theme: _theme,
       locale: _locale,
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,

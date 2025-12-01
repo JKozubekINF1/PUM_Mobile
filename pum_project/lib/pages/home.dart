@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
 import '../l10n/generated/app_localizations.dart';
+import 'package:flutter/cupertino.dart';
+import '../services/local_storage.dart';
+import '../services/app_settings.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({
@@ -14,6 +17,10 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   late PageController _pageViewController;
+  bool loading = true;
+  List<String>? localActivitiesList = [];
+  bool showLocalActivities = false;
+  bool offlineMode = true;
 
   @override
   void dispose() {
@@ -23,8 +30,15 @@ class _HomePageState extends State<HomePage> {
 
   @override
   void initState() {
+    _loadPageData();
     super.initState();
     _pageViewController = PageController();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _checkOfflineMode();
   }
 
   void _changeToPage(int number) {
@@ -37,6 +51,33 @@ class _HomePageState extends State<HomePage> {
     if (mounted) {
       _displaySnackbar(AppLocalizations.of(context)!.logoutSuccessfulMessage);
       Navigator.pushNamedAndRemoveUntil(context, "/", (route) => false);
+    }
+  }
+
+  Future<void> _turnOffOfflineMode() async {
+    try {
+      final appSettings = Provider.of<AppSettings>(context, listen: false);
+      await appSettings.setOfflineMode(offline: false);
+      if (mounted) {
+        Navigator.pushNamedAndRemoveUntil(context, "/", (route) => false);
+      }
+    } catch (e) {
+      debugPrint("$e");
+    }
+  }
+
+  Future<void> _checkOfflineMode() async {
+    try {
+      final appSettings = Provider.of<AppSettings>(context, listen: false);
+      final mode = await appSettings.checkOfflineMode();
+      if (mounted) {
+        setState(() {
+          offlineMode = mode ?? true;
+        });
+      }
+    } catch (e) {
+      if (mounted) _displaySnackbar(AppLocalizations.of(context)!.genericErrorMessage);
+      debugPrint('$e');
     }
   }
 
@@ -57,8 +98,9 @@ class _HomePageState extends State<HomePage> {
             actions: <Widget>[
               TextButton(
                 child: Text(AppLocalizations.of(context)!.acceptOptionLabel),
-                onPressed: () {
-                  _logout();
+                onPressed: () async {
+                  await _turnOffOfflineMode();
+                  if (mounted) _logout();
                 },
               ),
               TextButton(
@@ -76,6 +118,52 @@ class _HomePageState extends State<HomePage> {
   void _displaySnackbar(String message) {
     var snackBar = SnackBar(content: Text(message));
     ScaffoldMessenger.of(context).showSnackBar(snackBar);
+  }
+
+  Future<void> _loadLocalActivityList() async {
+    try {
+      final localStorage = Provider.of<LocalStorage>(context, listen: false);
+      List<String>? fileList = await localStorage.getStorageList();
+      if (fileList!.isNotEmpty) {
+        if (mounted) {
+          setState(() {
+            localActivitiesList = fileList;
+            showLocalActivities = true;
+          });
+        }
+      } else {
+        if (mounted) {
+          setState(() {
+            showLocalActivities = false;
+          });
+        }
+      }
+    } catch (e) {
+      if (mounted) _displaySnackbar(AppLocalizations.of(context)!.genericErrorMessage);
+      debugPrint('$e');
+    }
+  }
+
+  Future<void> _readLocalActivity(String filename) async {
+    try {
+      final localStorage = Provider.of<LocalStorage>(context, listen: false);
+      Map? fileContent = await localStorage.readFromStorage(filename);
+      if (fileContent!=null) {
+        if (mounted) {
+          Navigator.pushNamed(context, '/results', arguments: {
+            'Local': true,
+            'Data': fileContent,
+          });
+        }
+      }
+    } catch (e) {
+      if (mounted) _displaySnackbar(AppLocalizations.of(context)!.localFileErrorMessage);
+      debugPrint('$e');
+    }
+  }
+
+  Future<void> _loadPageData() async {
+    await _loadLocalActivityList();
   }
 
   @override
@@ -113,34 +201,60 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _buildProfilePopupMenu() {
-    return PopupMenuButton<int>(
-      child: Row(
-        children: [
-          Text('USER NAME + ICON'),
-        ],
-      ),
-      itemBuilder: (BuildContext context) => <PopupMenuEntry<int>> [
-        PopupMenuItem<int>(
+    if (offlineMode) {
+      return PopupMenuButton<int>(
+        child: Row(
+          children: [
+            Icon(CupertinoIcons.profile_circled, size: 35),
+            Icon(CupertinoIcons.ellipsis_vertical, size: 35),
+          ],
+        ),
+        itemBuilder: (BuildContext context) => <PopupMenuEntry<int>> [
+          PopupMenuItem<int>(
             value: 1,
             onTap: () => (
-              Navigator.pushNamed(context,'/profile'),
+            Navigator.pushNamed(context,'/settings'),
+            ),
+            child: Text(AppLocalizations.of(context)!.settingsButtonLabel),
+          ),
+          PopupMenuItem<int>(
+              value: 2,
+              onTap: _turnOffOfflineMode,
+              child: Text(AppLocalizations.of(context)!.loginButtonLabel)
+          ),
+        ],
+      );
+    } else {
+      return PopupMenuButton<int>(
+        child: Row(
+          children: [
+            Icon(CupertinoIcons.profile_circled, size: 35),
+            Icon(CupertinoIcons.ellipsis_vertical, size: 35),
+          ],
+        ),
+        itemBuilder: (BuildContext context) => <PopupMenuEntry<int>> [
+          PopupMenuItem<int>(
+            value: 1,
+            onTap: () => (
+            Navigator.pushNamed(context,'/profile'),
             ),
             child: Text(AppLocalizations.of(context)!.profileButtonLabel),
-        ),
-        PopupMenuItem<int>(
+          ),
+          PopupMenuItem<int>(
             value: 2,
             onTap: () => (
             Navigator.pushNamed(context,'/settings'),
             ),
             child: Text(AppLocalizations.of(context)!.settingsButtonLabel),
-        ),
-        PopupMenuItem<int>(
-            value: 3,
-            onTap: _logoutPopupWindow,
-            child: Text(AppLocalizations.of(context)!.logoutButtonLabel)
-        ),
-      ],
-    );
+          ),
+          PopupMenuItem<int>(
+              value: 3,
+              onTap: _logoutPopupWindow,
+              child: Text(AppLocalizations.of(context)!.logoutButtonLabel)
+          ),
+        ],
+      );
+    }
   }
 
   Widget _buildMenu() {
@@ -184,7 +298,7 @@ class _HomePageState extends State<HomePage> {
               onPressed: () {
                 _changeToPage(0);
               },
-              child: Text('ICON 1'),
+              child: Icon(CupertinoIcons.timer,size: 45),
             ),
           ),
         ),
@@ -196,7 +310,7 @@ class _HomePageState extends State<HomePage> {
               onPressed: () {
                 _changeToPage(1);
               },
-              child: Text('ICON 2'),
+              child: Icon(CupertinoIcons.book,size: 45),
             ),
           ),
         ),
@@ -208,7 +322,7 @@ class _HomePageState extends State<HomePage> {
               onPressed: () {
                 _changeToPage(2);
               },
-              child: Text('ICON 3'),
+              child: Icon(CupertinoIcons.chart_bar,size: 45),
             ),
           ),
         ),
@@ -221,8 +335,15 @@ class _HomePageState extends State<HomePage> {
       child: SizedBox(
         child: Column(
           children: [
-            Text('New Activity Page'),
-            _buildStartActivityButton(),
+            Expanded(child: _buildStartActivityColumn()),
+            if (showLocalActivities)
+              Expanded(
+                flex: 1,
+                child: ColoredBox(
+                  color: Theme.of(context).appBarTheme.backgroundColor as Color,
+                  child: _buildLocalActivityContainer(),
+                ),
+              ),
           ],
         ),
       ),
@@ -230,11 +351,14 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _buildActivityHistoryPage() {
+    if (offlineMode) {
+      return _buildDummyOfflinePage();
+    }
     return Expanded(
       child: SizedBox(
         child: Column(
           children: [
-            Text('Activity History Page'),
+            Text('Uploaded Activity History Page'),
           ],
         ),
       ),
@@ -242,6 +366,9 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _buildLeaderboardPage() {
+    if (offlineMode) {
+      return _buildDummyOfflinePage();
+    }
     return Expanded(
       child: SizedBox(
         child: Column(
@@ -253,12 +380,86 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Widget _buildStartActivityButton() {
-    return ElevatedButton(
-      onPressed: () {
-        Navigator.pushNamed(context,'/track');
-      },
-      child: Text('START ACTIVITY'),
+  Widget _buildDummyOfflinePage() {
+    return Expanded(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(AppLocalizations.of(context)!.offlineModePageBlockedMessage,style: TextStyle(fontSize:34),textAlign: TextAlign.center),
+          SizedBox(height:45),
+          Icon(Icons.lock_sharp,size:56),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStartActivityColumn() {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.spaceAround,
+      children: [
+        Text(AppLocalizations.of(context)!.newActivityPageMessage),
+        Icon(Icons.directions_run,size: 130),
+        ElevatedButton(
+          style: ElevatedButton.styleFrom(
+            minimumSize: const Size(100, 80),
+          ),
+          onPressed: () {
+            Navigator.pushNamed(context,'/track').then((_) {
+              _loadLocalActivityList();
+            });
+          },
+          child: Text(AppLocalizations.of(context)!.createNewActivityButtonLabel),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildLocalActivityContainer() {
+    if (showLocalActivities) {
+      return Column(
+        children: [
+          Container(
+            width: double.infinity,
+            color: Theme
+                .of(context)
+                .appBarTheme
+                .backgroundColor as Color,
+            child: Center(child: Text(AppLocalizations.of(context)!.localActivityListLabel,style: TextStyle(color: Theme.of(context).appBarTheme.foregroundColor))),
+          ),
+          Expanded(
+            flex: 1,
+            child: _buildLocalActivityListView(),
+          ),
+        ],
+      );
+    } else {
+      return const SizedBox.shrink();
+    }
+  }
+
+  Widget _buildLocalActivityListView() {
+    final List<String> list = localActivitiesList!;
+    return ListView.builder(
+        padding: EdgeInsets.all(15.0),
+        itemCount: list.length,
+        itemBuilder: (BuildContext context, int index) {
+          return ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              minimumSize: const Size(100, 60),
+              padding: EdgeInsets.all(30.0),
+            ),
+            onPressed: () {
+              _readLocalActivity(list[index]);
+              },
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(CupertinoIcons.doc,size: 25),
+                Flexible(child: Text(list[index],style:TextStyle(fontSize: 16))),
+              ],
+            ),
+          );
+        }
     );
   }
 }

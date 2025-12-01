@@ -4,6 +4,8 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:geolocator/geolocator.dart';
 import 'dart:async';
+import '../services/local_storage.dart';
+import 'package:provider/provider.dart';
 
 class TrackPage extends StatefulWidget {
   const TrackPage({
@@ -18,8 +20,8 @@ class _TrackPageState extends State<TrackPage> {
   final List<LatLng> _routeList = [];
   final Distance distance = Distance();
   final List<double> _speedList = [];
-  LatLng _currentPosition = LatLng(0, 0);
-  LatLng _lastPosition = LatLng(0,0);
+  LatLng? _currentPosition;
+  LatLng? _lastPosition;
   bool _permissions = false;
   bool _activityState = false;
   Duration _duration = Duration();
@@ -44,10 +46,12 @@ class _TrackPageState extends State<TrackPage> {
   }
 
   void _resetMap() {
-    if (mounted) {
-      setState(() {
-        _mapController.move(_currentPosition,16);
-      });
+    if (_currentPosition!=null) {
+      if (mounted) {
+        setState(() {
+          _mapController.move(_currentPosition!,16);
+        });
+      }
     }
   }
 
@@ -62,9 +66,11 @@ class _TrackPageState extends State<TrackPage> {
   Future<void> _requestPermissions() async {
     bool serviceEnabled;
     LocationPermission permission;
+    bool allow = true;
 
     serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
+      allow = false;
       if (mounted) _displaySnackbar(AppLocalizations.of(context)!.noLocationServicesMessage);
     }
 
@@ -72,14 +78,16 @@ class _TrackPageState extends State<TrackPage> {
     if (permission == LocationPermission.denied) {
       permission = await Geolocator.requestPermission();
       if (permission == LocationPermission.denied) {
+        allow = false;
         if (mounted) _displaySnackbar(AppLocalizations.of(context)!.noLocationPermissionsMessage);
       }
     }
 
     if (permission == LocationPermission.deniedForever) {
+      allow = false;
       if (mounted) _displaySnackbar(AppLocalizations.of(context)!.noLocationPermissionsForeverMessage);
     }
-    _setPermissions(true);
+    if (allow) _setPermissions(true);
   }
 
   void _getPosition() async {
@@ -88,7 +96,6 @@ class _TrackPageState extends State<TrackPage> {
       distanceFilter: 5,
     );
     try {
-      await _requestPermissions();
       if (_permissions) {
         Position position = await Geolocator.getCurrentPosition(locationSettings: locationSettings);
         setState(() {
@@ -98,7 +105,7 @@ class _TrackPageState extends State<TrackPage> {
       }
     } catch (e) {
       setState(() {
-        _currentPosition = LatLng(0, 0);
+        _currentPosition = null;
       });
     }
   }
@@ -109,7 +116,9 @@ class _TrackPageState extends State<TrackPage> {
   }
 
   void _addToRouteList() async {
-    _routeList.add(_currentPosition);
+    if (_currentPosition!=null) {
+      _routeList.add(_currentPosition!);
+    }
   }
 
   void _activity() async {
@@ -136,11 +145,14 @@ class _TrackPageState extends State<TrackPage> {
   }
 
   void _calculateDistance() async {
-    _gainedDistance = distance(
-      _lastPosition,
-      _currentPosition
-    ).toInt();
-    _maxDistance += _gainedDistance;
+    if (_currentPosition!=null || _lastPosition!=null) {
+      _gainedDistance = distance(
+          _lastPosition!,
+          _currentPosition!
+      ).toInt();
+      _maxDistance += _gainedDistance;
+      _lastPosition = _currentPosition!;
+    }
     _lastPosition = _currentPosition;
   }
 
@@ -150,9 +162,13 @@ class _TrackPageState extends State<TrackPage> {
   }
 
   void _getSpeedAverage() async {
+    if (_speedList.isEmpty) {
+      _speedAvg = 0.0;
+      return;
+    }
     int x = 0;
     double sum = 0.0;
-    for(x;x<=_speedList.length;x++) {
+    for(x;x<_speedList.length;x++) {
       sum += _speedList[x];
     }
     _speedAvg = sum / _speedList.length;
@@ -175,19 +191,19 @@ class _TrackPageState extends State<TrackPage> {
     _setActivityState(!_activityState);
     if (_activityState) {
       _duration = Duration(seconds: 0);
-      _routeList.add(_currentPosition);
-      _lastPosition = _currentPosition;
+      if (_currentPosition!=null) {
+        _routeList.add(_currentPosition!);
+        _lastPosition = _currentPosition!;
+      }
       _startTimer();
     } else {
       _stopTimer();
       _getSpeedAverage();
-      await Navigator.pushNamed(context, '/results', arguments: {
-        'Duration': _duration.inSeconds,
-        'RouteList': _routeList,
-        "Distance": _maxDistance,
-        "SpeedAvg": _speedAvg
-      });
+      Map? activityContent = await _generateLocalFile();
       _resetStats();
+      await Navigator.pushNamed(context, '/results', arguments: {
+        'Data': activityContent,
+      });
     }
   }
 
@@ -196,9 +212,33 @@ class _TrackPageState extends State<TrackPage> {
     ScaffoldMessenger.of(context).showSnackBar(snackBar);
   }
 
+  Future<Map?> _generateLocalFile() async {
+    try {
+      final localStorage = Provider.of<LocalStorage>(context, listen: false);
+      Map<String,dynamic> fileContent = {
+        'duration': _duration.inSeconds,
+        'routelist': _routeList,
+        'distance': _maxDistance,
+        'speedavg': _speedAvg
+      };
+      await localStorage.saveToStorage(fileContent);
+      return fileContent;
+    } catch (e) {
+      if (mounted) _displaySnackbar(AppLocalizations.of(context)!.genericErrorMessage);
+      debugPrint('$e');
+    }
+    return null;
+  }
+
   @override
   void initState() {
     super.initState();
+    _requestPermissions();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
     _getPosition();
   }
 
@@ -220,9 +260,6 @@ class _TrackPageState extends State<TrackPage> {
                   child: _buildMap(),
                 ),
               ),
-
-              _buildCoordinatesText(), const SizedBox(height: 24),
-
               Expanded(
                 child: SizedBox(
                   child: Row(
@@ -240,10 +277,9 @@ class _TrackPageState extends State<TrackPage> {
                   ),
                 ),
               ),
-
-              _buildSpeedAvgMeter(),
-
-              _buildStartStopButton(),
+              Expanded(
+                child: _buildStartStopButton(),
+              ),
             ],
         ),
       ),
@@ -254,13 +290,13 @@ class _TrackPageState extends State<TrackPage> {
     return FlutterMap(
       mapController: _mapController,
       options:
-        MapOptions(
-          initialCenter: _currentPosition,
-          initialZoom: 16,
-          interactionOptions: InteractionOptions(
-              flags: InteractiveFlag.none,
-          ),
+      MapOptions(
+        initialCenter: _currentPosition ?? LatLng(0,0),
+        initialZoom: 16,
+        interactionOptions: InteractionOptions(
+          flags: InteractiveFlag.none,
         ),
+      ),
       children: [
         TileLayer(
           urlTemplate: 'https://{s}.tile-cyclosm.openstreetmap.fr/cyclosm/{z}/{x}/{y}.png',
@@ -269,7 +305,7 @@ class _TrackPageState extends State<TrackPage> {
         MarkerLayer(
           markers: [
             Marker(
-              point: _currentPosition,
+              point: _currentPosition ?? LatLng(0,0),
               width: 50,
               height: 80,
               child: Icon(
@@ -291,13 +327,6 @@ class _TrackPageState extends State<TrackPage> {
     );
   }
 
-  Widget _buildCoordinatesText() {
-    return Text(
-      "${_currentPosition.latitude}, ${_currentPosition.longitude}",
-      textAlign: TextAlign.center,
-    );
-  }
-
   Widget _buildStartStopButton() {
     return Flexible(
       child: SizedBox(
@@ -307,8 +336,6 @@ class _TrackPageState extends State<TrackPage> {
             _activityButton();
           },
           style: ElevatedButton.styleFrom(
-            backgroundColor: _activityState? const Color(0xFFE91E63) : const Color(0xFF375534),
-            foregroundColor: Colors.white,
             padding: const EdgeInsets.symmetric(vertical: 14),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12),
@@ -321,30 +348,29 @@ class _TrackPageState extends State<TrackPage> {
   }
 
   Widget _buildStopwatch() {
-    return Text(
-      "TIME:\n${_duration.inSeconds}\nseconds",
-      textAlign: TextAlign.center,
+    return Card(
+      child: Text(
+        "${AppLocalizations.of(context)!.timeLabel}:\n${_duration.inSeconds}\n${AppLocalizations.of(context)!.timeUnitLabel}",
+        textAlign: TextAlign.center,
+      ),
     );
   }
 
   Widget _buildDistanceMeter() {
-    return Text(
-      "DISTANCE:\n$_maxDistance\nmeters",
-      textAlign: TextAlign.center,
+    return Card(
+      child: Text(
+        "${AppLocalizations.of(context)!.distanceLabel}\n$_maxDistance\n${AppLocalizations.of(context)!.distanceUnitLabel}",
+        textAlign: TextAlign.center,
+      ),
     );
   }
 
   Widget _buildSpeedMeter() {
-    return Text(
-      "SPEED:\n$_speed\nm/s",
-      textAlign: TextAlign.center,
-    );
-  }
-
-  Widget _buildSpeedAvgMeter() {
-    return Text(
-      "SPEED AVG:\n$_speedAvg\nm/s",
-      textAlign: TextAlign.center,
+    return Card(
+      child: Text(
+        "${AppLocalizations.of(context)!.speedLabel}:\n$_speed\n${AppLocalizations.of(context)!.speedUnitLabel}",
+        textAlign: TextAlign.center,
+      ),
     );
   }
 }

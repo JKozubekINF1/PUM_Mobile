@@ -149,7 +149,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(AppLocalizations.of(context)!.profilePageTitle),
+        title: Text(AppLocalizations.of(context)!.editProfilePageTitle),
         actions: [_buildLogoutButton()],
       ),
       body: FutureBuilder<ProfileData>(
@@ -169,7 +169,6 @@ class _EditProfilePageState extends State<EditProfilePage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Email: ${snapshot.data!.email ?? 'N/A'}'),
                     const SizedBox(height: 20),
                     _buildOptionsColumn(),
                     const SizedBox(height: 30),
@@ -189,17 +188,17 @@ class _EditProfilePageState extends State<EditProfilePage> {
     return Column(
       children: <Widget>[
         _buildTextField(_firstNameController, AppLocalizations.of(context)!.profileFirstNameLabel, false),
-        const SizedBox(height: 10),
+        const SizedBox(height: 20),
         _buildTextField(_lastNameController, AppLocalizations.of(context)!.profileLastNameLabel, false),
-        const SizedBox(height: 10),
+        const SizedBox(height: 20),
         _buildGenderPicker(),
-        const SizedBox(height: 10),
+        const SizedBox(height: 20),
         _buildDatePicker(context),
-        const SizedBox(height: 10),
+        const SizedBox(height: 20),
         _buildTextField(_heightController, AppLocalizations.of(context)!.profileHeightLabel, true),
-        const SizedBox(height: 10),
+        const SizedBox(height: 20),
         _buildTextField(_weightController, AppLocalizations.of(context)!.profileWeightLabel, true),
-        const SizedBox(height: 10),
+        const SizedBox(height: 20),
         _buildTextField(_avatarUrlController, AppLocalizations.of(context)!.profileAvatarLabel, false),
         const SizedBox(height: 10),
       ],
@@ -255,7 +254,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
     };
 
     return DropdownButtonFormField<String>(
-      value: _gender,
+      initialValue: _gender,
       decoration: InputDecoration(
         labelText: '${l10n.profileGenderLabel} (${l10n.optionalLabel})',
         border: const OutlineInputBorder(),
