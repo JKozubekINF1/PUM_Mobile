@@ -1,4 +1,5 @@
 class ProfileData {
+  String? userName;
   String? firstName;
   String? lastName;
   String? email;
@@ -9,6 +10,7 @@ class ProfileData {
   String? avatarUrl;
 
   ProfileData({
+    this.userName,
     this.firstName,
     this.lastName,
     this.email,
@@ -21,6 +23,7 @@ class ProfileData {
 
   factory ProfileData.fromJson(Map<String, dynamic> json) {
     return ProfileData(
+      userName: json['userName'],
       firstName: json['firstName'],
       lastName: json['lastName'],
       email: json['email'],
@@ -36,6 +39,7 @@ class ProfileData {
 
   Map<String, dynamic> toJson() {
     return {
+      'userName': userName,
       'firstName': firstName,
       'lastName': lastName,
       'dateOfBirth': dateOfBirth?.toIso8601String(),

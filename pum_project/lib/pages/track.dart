@@ -215,9 +215,14 @@ class _TrackPageState extends State<TrackPage> {
   Future<Map?> _generateLocalFile() async {
     try {
       final localStorage = Provider.of<LocalStorage>(context, listen: false);
+
+      List<Map<String, dynamic>> fixedRoute = _routeList.map((p) => {
+        "coordinates": [p.latitude, p.longitude],
+      }).toList();
+
       Map<String,dynamic> fileContent = {
         'duration': _duration.inSeconds,
-        'routelist': _routeList,
+        'routelist': fixedRoute,
         'distance': _maxDistance,
         'speedavg': _speedAvg
       };

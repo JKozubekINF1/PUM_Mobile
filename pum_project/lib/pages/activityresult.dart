@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:latlong2/latlong.dart';
 import '../l10n/generated/app_localizations.dart';
 import 'package:flutter_map/flutter_map.dart';
-import 'package:pum_project/services/api_connection.dart';
+import 'package:pum_project/services/upload_queue.dart';
 import 'package:pum_project/services/local_storage.dart';
 import 'package:pum_project/services/app_settings.dart';
 import 'package:provider/provider.dart';
+import 'package:pum_project/models/activity.dart';
+import 'package:image_picker/image_picker.dart';
 
 class ResultScreen extends StatefulWidget {
   const ResultScreen({
@@ -20,6 +22,7 @@ class ResultScreen extends StatefulWidget {
 }
 
 class _ResultScreenState extends State<ResultScreen> {
+  final ImagePicker picker = ImagePicker();
   late final TextEditingController _titleController;
   late final TextEditingController _descriptionController;
   List<LatLng> routePoints = <LatLng>[];
@@ -31,6 +34,8 @@ class _ResultScreenState extends State<ResultScreen> {
   bool _hasUnsavedChanges = false;
   Map<String,String> activityLabels = {};
   bool offlineMode = true;
+  String filename = "";
+  XFile? image;
 
   final Map<String, IconData> activityIcons = {
     "run": Icons.directions_run,
@@ -42,13 +47,14 @@ class _ResultScreenState extends State<ResultScreen> {
   };
 
   void initiateData() {
+    final storage = Provider.of<LocalStorage>(context, listen: false);
     try {
       if (widget.data['routelist']!=null) {
         routePoints = widget.data['routelist']
             .map<LatLng>((p) =>
             LatLng(
-              p['coordinates'][1].toDouble(),
               p['coordinates'][0].toDouble(),
+              p['coordinates'][1].toDouble(),
             )).toList();
       } else {
         validForUpload = false;
@@ -84,6 +90,12 @@ class _ResultScreenState extends State<ResultScreen> {
         if (activityIcons.containsKey(widget.data['type'])) {
           activityType = widget.data['type'];
         }
+      }
+
+      if (widget.data['filename']!=null) {
+        filename = widget.data['filename'];
+      } else {
+        filename = storage.generateFileName();
       }
 
     } catch (e) {
@@ -126,31 +138,33 @@ class _ResultScreenState extends State<ResultScreen> {
   }
 
   Future<void> _saveActivity() async {
-
-    final apiService = Provider.of<ApiService>(context, listen: false);
-
-    final routeJson = routePoints.map((p) => [p.longitude, p.latitude]).toList();
+    final queue = Provider.of<UploadQueue>(context, listen: false);
+    final storage = Provider.of<LocalStorage>(context, listen: false);
 
     try {
-      await apiService.saveActivity(
-        durationSeconds: duration,
-        distanceMeters: distance,
-        averageSpeedMs: speedavg,
-        routeCoordinates: routeJson,
-        title: _titleController.text.trim().isEmpty ? "Aktywność bez tytułu" : _titleController.text.trim(),
+      Activity activity = Activity(
+        duration: duration,
+        distance: distance,
+        avgSpeed: speedavg,
+        routelist: routePoints,
+        title: _titleController.text.trim().isEmpty ? "No Title" : _titleController.text.trim(),
         description: _descriptionController.text.trim().isEmpty ? null : _descriptionController.text.trim(),
         activityType: activityType,
+        filename: filename,
       );
 
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Aktywność zapisana!"), backgroundColor: Colors.green),
-      );
+      final result = await queue.addActivity(activity);
+      await storage.deleteFile(filename);
+
+      if (result) {
+        if (mounted) _displaySnackbar(AppLocalizations.of(context)!.activitySentMessage);
+      } else {
+        if (mounted) _displaySnackbar(AppLocalizations.of(context)!.noConnectionMessage);
+      }
+
     } catch (e) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("$e"), backgroundColor: Colors.red),
-      );
+      if (mounted) _displaySnackbar(AppLocalizations.of(context)!.genericErrorMessage);
+      debugPrint("$e");
     }
   }
 
@@ -183,6 +197,11 @@ class _ResultScreenState extends State<ResultScreen> {
     } catch (e) {
       debugPrint('$e');
     }
+  }
+
+  void _displaySnackbar(String message) {
+    var snackBar = SnackBar(content: Text(message));
+    ScaffoldMessenger.of(context).showSnackBar(snackBar);
   }
 
   Future<void> _leavePopup() async {
@@ -268,11 +287,6 @@ class _ResultScreenState extends State<ResultScreen> {
     }
   }
 
-  void _displaySnackbar(String message) {
-    var snackBar = SnackBar(content: Text(message));
-    ScaffoldMessenger.of(context).showSnackBar(snackBar);
-  }
-
   @override
   Widget build(BuildContext context) {
     return PopScope(
@@ -305,6 +319,8 @@ class _ResultScreenState extends State<ResultScreen> {
               _buildTitleField(),
               const SizedBox(height: 16),
               _buildDescriptionField(),
+              const SizedBox(height: 16),
+              _buildPicturePicker(),
               const SizedBox(height: 30),
               _buildControlRow(),
             ],
@@ -395,6 +411,15 @@ class _ResultScreenState extends State<ResultScreen> {
         labelText: "${AppLocalizations.of(context)!.descriptionLabel} (${AppLocalizations.of(context)!.optionalLabel})",
         border: OutlineInputBorder(),
       ),
+    );
+  }
+
+  Widget _buildPicturePicker() {
+    return TextButton(
+      onPressed: () async {
+        image = await picker.pickImage(source: ImageSource.gallery);
+      },
+      child: Text("TEST"),
     );
   }
 

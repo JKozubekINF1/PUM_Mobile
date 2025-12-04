@@ -3,8 +3,11 @@ import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
 import '../l10n/generated/app_localizations.dart';
 import 'package:flutter/cupertino.dart';
-import '../services/local_storage.dart';
-import '../services/app_settings.dart';
+import 'package:pum_project/services/api_connection.dart';
+import 'package:pum_project/services/local_storage.dart';
+import 'package:pum_project/services/app_settings.dart';
+import 'package:pum_project/services/upload_queue.dart';
+import 'package:pum_project/services/route_observer.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({
@@ -15,15 +18,18 @@ class HomePage extends StatefulWidget {
   State<HomePage> createState() => _HomePageState();
 }
 
-class _HomePageState extends State<HomePage> {
+class _HomePageState extends State<HomePage> with RouteAware{
   late PageController _pageViewController;
   bool loading = true;
   List<String>? localActivitiesList = [];
+  Map<String,dynamic>? onlineActivities;
   bool showLocalActivities = false;
   bool offlineMode = true;
+  int queueSize = 0;
 
   @override
   void dispose() {
+    routeObserver.unsubscribe(this);
     super.dispose();
     _pageViewController.dispose();
   }
@@ -38,7 +44,21 @@ class _HomePageState extends State<HomePage> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    routeObserver.subscribe(
+        this,
+        ModalRoute.of(context)! as PageRoute<dynamic>,
+    );
     _checkOfflineMode();
+    _checkUploadQueue();
+    _loadLocalActivityList();
+    if (!offlineMode) {
+      _loadOnlineActivityList();
+    }
+  }
+
+  @override
+  void didPopNext() {
+    _checkUploadQueue();
   }
 
   void _changeToPage(int number) {
@@ -81,6 +101,52 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
+  Future<void> _checkUploadQueue() async {
+    try {
+      final uploadQueue = Provider.of<UploadQueue>(context, listen: false);
+      final size = await uploadQueue.getQueueSize();
+      if (mounted) {
+        setState(() {
+          queueSize = size ?? 0;
+        });
+      }
+    } catch (e) {
+      if (mounted) _displaySnackbar(AppLocalizations.of(context)!.genericErrorMessage);
+      debugPrint('$e');
+    }
+  }
+
+  Future<void> _cancelQueue() async {
+    try {
+      final uploadQueue = Provider.of<UploadQueue>(context, listen: false);
+      await uploadQueue.cancelQueue();
+      if (mounted) {
+        _displaySnackbar(AppLocalizations.of(context)!.activityQueueCancelledMessage);
+        await _checkUploadQueue();
+        await _loadLocalActivityList();
+      }
+    } catch (e) {
+      if (mounted) _displaySnackbar(AppLocalizations.of(context)!.genericErrorMessage);
+      debugPrint('$e');
+    }
+  }
+
+  Future<void> _retryUpload() async {
+    try {
+      final uploadQueue = Provider.of<UploadQueue>(context, listen: false);
+      final check = await uploadQueue.processQueue();
+      if (check) {
+        if (mounted) _displaySnackbar(AppLocalizations.of(context)!.activitySentMessage);
+      } else {
+        if (mounted) _displaySnackbar(AppLocalizations.of(context)!.noConnectionMessage);
+      }
+      await _checkUploadQueue();
+    } catch (e) {
+      if (mounted) _displaySnackbar(AppLocalizations.of(context)!.genericErrorMessage);
+      debugPrint('$e');
+    }
+  }
+
   Future<void> _logoutPopupWindow() async {
     return showDialog<void>(
         context: context,
@@ -115,6 +181,40 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
+  Future<void> _clearQueueWindow() async {
+    return showDialog<void>(
+        context: context,
+        barrierDismissible: true,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text(AppLocalizations.of(context)!.warningLabel),
+            content: SingleChildScrollView(
+              child: ListBody(
+                children: <Widget>[
+                  Text(AppLocalizations.of(context)!.activityQueueCancelDialogMessage),
+                ],
+              ),
+            ),
+            actions: <Widget>[
+              TextButton(
+                child: Text(AppLocalizations.of(context)!.acceptOptionLabel),
+                onPressed: () async {
+                  Navigator.pop(context);
+                  await _cancelQueue();
+                },
+              ),
+              TextButton(
+                child: Text(AppLocalizations.of(context)!.declineOptionLabel),
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+              ),
+            ],
+          );
+        }
+    );
+  }
+
   void _displaySnackbar(String message) {
     var snackBar = SnackBar(content: Text(message));
     ScaffoldMessenger.of(context).showSnackBar(snackBar);
@@ -135,6 +235,23 @@ class _HomePageState extends State<HomePage> {
         if (mounted) {
           setState(() {
             showLocalActivities = false;
+          });
+        }
+      }
+    } catch (e) {
+      if (mounted) _displaySnackbar(AppLocalizations.of(context)!.genericErrorMessage);
+      debugPrint('$e');
+    }
+  }
+
+  Future<void> _loadOnlineActivityList() async {
+    try {
+      final api = Provider.of<ApiService>(context, listen: false);
+      Map<String,dynamic>? activityMap = await api.getUserActivities();
+      if (activityMap.isNotEmpty) {
+        if (mounted) {
+          setState(() {
+            onlineActivities = activityMap;
           });
         }
       }
@@ -359,6 +476,7 @@ class _HomePageState extends State<HomePage> {
         child: Column(
           children: [
             Text('Uploaded Activity History Page'),
+            _buildQueueDisplay(),
           ],
         ),
       ),
@@ -461,5 +579,35 @@ class _HomePageState extends State<HomePage> {
           );
         }
     );
+  }
+
+  Widget _buildQueueDisplay() {
+    if (queueSize>0) {
+      return Card(
+        child: Column(
+          children: [
+            Text("($queueSize) ${AppLocalizations.of(context)!.uploadQueueLabel}",overflow: TextOverflow.ellipsis),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                IconButton(
+                  onPressed: _retryUpload,
+                  icon: Icon(Icons.change_circle_rounded),
+                  iconSize: 40,
+                ),
+                SizedBox(width:30),
+                IconButton(
+                  onPressed: _clearQueueWindow,
+                  icon: Icon(Icons.cancel),
+                  iconSize: 40,
+                ),
+              ],
+            ),
+          ],
+        ),
+      );
+    } else {
+      return const SizedBox.shrink();
+    }
   }
 }

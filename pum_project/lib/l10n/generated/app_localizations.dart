@@ -260,6 +260,12 @@ abstract class AppLocalizations {
   /// **'or open in offline mode'**
   String get offlineModeTextLabel;
 
+  /// Label text for the nickname text field
+  ///
+  /// In en, this message translates to:
+  /// **'Nickname'**
+  String get profileNickNameLabel;
+
   /// Label text for the first name text field
   ///
   /// In en, this message translates to:
@@ -482,6 +488,12 @@ abstract class AppLocalizations {
   /// **'Submit'**
   String get submitLabel;
 
+  /// Label text for the upload queue that appears when offline
+  ///
+  /// In en, this message translates to:
+  /// **'activities are still pending in queue'**
+  String get uploadQueueLabel;
+
   /// Message that appears on the first visit page, prompting the user to login or create an account
   ///
   /// In en, this message translates to:
@@ -607,6 +619,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Deleted activity will be lost forever. Are you sure you want to continue?'**
   String get activityDeletionMessage;
+
+  /// Message that appears when the user successfully upload an activity
+  ///
+  /// In en, this message translates to:
+  /// **'Activity has been saved successfully'**
+  String get activitySentMessage;
+
+  /// Message that appears when the user tries to cancel the activity queue
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to clear your queue? Your local activities will be restored'**
+  String get activityQueueCancelDialogMessage;
+
+  /// Message that appears when the user cancels the upload queue
+  ///
+  /// In en, this message translates to:
+  /// **'Upload queue has been cancelled and local files have been restored'**
+  String get activityQueueCancelledMessage;
 
   /// Message that appears instead of a map on activity result page when no coordinates are given
   ///

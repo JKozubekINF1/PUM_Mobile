@@ -16,6 +16,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
   final _formKey = GlobalKey<FormState>();
   late Future<ProfileData> _profileFuture;
 
+  final TextEditingController _userNameController = TextEditingController();
   final TextEditingController _firstNameController = TextEditingController();
   final TextEditingController _lastNameController = TextEditingController();
   final TextEditingController _heightController = TextEditingController();
@@ -36,6 +37,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
 
   @override
   void dispose() {
+    _userNameController.dispose();
     _firstNameController.dispose();
     _lastNameController.dispose();
     _heightController.dispose();
@@ -58,6 +60,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
   }
 
   void _initializeControllers(ProfileData profile) {
+    _userNameController.text = profile.userName ?? '';
     _firstNameController.text = profile.firstName ?? '';
     _lastNameController.text = profile.lastName ?? '';
     _heightController.text = profile.height?.toString() ?? '';
@@ -77,6 +80,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
 
     try {
       final updatedProfile = ProfileData(
+        userName: _userNameController.text.trim(),
         firstName: _firstNameController.text.trim(),
         lastName: _lastNameController.text.trim(),
         height: double.tryParse(_heightController.text.trim()),
@@ -187,6 +191,8 @@ class _EditProfilePageState extends State<EditProfilePage> {
   Widget _buildOptionsColumn() {
     return Column(
       children: <Widget>[
+        _buildTextField(_userNameController, AppLocalizations.of(context)!.profileNickNameLabel, false),
+        const SizedBox(height: 20),
         _buildTextField(_firstNameController, AppLocalizations.of(context)!.profileFirstNameLabel, false),
         const SizedBox(height: 20),
         _buildTextField(_lastNameController, AppLocalizations.of(context)!.profileLastNameLabel, false),

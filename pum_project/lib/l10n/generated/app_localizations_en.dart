@@ -90,6 +90,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get offlineModeTextLabel => 'or open in offline mode';
 
   @override
+  String get profileNickNameLabel => 'Nickname';
+
+  @override
   String get profileFirstNameLabel => 'First Name';
 
   @override
@@ -201,6 +204,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get submitLabel => 'Submit';
 
   @override
+  String get uploadQueueLabel => 'activities are still pending in queue';
+
+  @override
   String get welcomeNewUserMessage => 'Log in or create a new account';
 
   @override
@@ -266,6 +272,17 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get activityDeletionMessage =>
       'Deleted activity will be lost forever. Are you sure you want to continue?';
+
+  @override
+  String get activitySentMessage => 'Activity has been saved successfully';
+
+  @override
+  String get activityQueueCancelDialogMessage =>
+      'Are you sure you want to clear your queue? Your local activities will be restored';
+
+  @override
+  String get activityQueueCancelledMessage =>
+      'Upload queue has been cancelled and local files have been restored';
 
   @override
   String get missingRouteMessage => 'Route missing';

@@ -3,6 +3,7 @@ import 'package:http/http.dart' as http;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:pum_project/models/profile_data.dart';
+import 'dart:typed_data';
 
 class ApiService {
   final String baseUrl = 'https://localhost:7123'; //http://10.0.2.2:5123
@@ -158,30 +159,38 @@ class ApiService {
     required int durationSeconds,
     required double distanceMeters,
     required double averageSpeedMs,
-    double? maxSpeedMs,
     required List<List<double>> routeCoordinates,
+    Uint8List? imageBytes,
     String title = 'Bez tytułu',
     String? description,
     String activityType = 'Running',
   }) async {
     final url = Uri.parse('$baseUrl/api/activities');
+    final request = http.MultipartRequest('POST', url);
 
-    final body = jsonEncode({
-      "title": title,
-      "description": description,
-      "activityType": activityType,
-      "durationSeconds": durationSeconds,
-      "distanceMeters": distanceMeters,
-      "averageSpeedMs": averageSpeedMs,
-      "maxSpeedMs": maxSpeedMs,
-      "route": routeCoordinates.length >= 2 ? routeCoordinates : null,
-    });
+    request.fields['title'] = title;
+    if (description != null) request.fields['description'] = description;
+    request.fields['activityType'] = activityType;
+    request.fields['durationSeconds'] = durationSeconds.toString();
+    request.fields['distanceMeters'] = distanceMeters.toString();
+    request.fields['averageSpeedMs'] = averageSpeedMs.toString();
+    if (routeCoordinates.length >= 2) {
+      request.fields['route'] = jsonEncode(routeCoordinates);
+    }
+    if (imageBytes != null) {
+      request.files.add(
+        http.MultipartFile.fromBytes(
+          'image',
+          imageBytes,
+        ),
+      );
+    }
 
-    final response = await _client.post(
-      url,
-      headers: await _getHeaders(requiresAuth: true),
-      body: body,
-    );
+    final headers = await _getHeaders(requiresAuth: true);
+    request.headers.addAll(headers);
+
+    final streamedResponse = await request.send();
+    final response = await http.Response.fromStream(streamedResponse);
 
     if (response.statusCode == 200 || response.statusCode == 201) {
       debugPrint('[API] Aktywność zapisana!');
@@ -190,6 +199,27 @@ class ApiService {
       final error = json.decode(utf8.decode(response.bodyBytes));
       throw Exception(error['message'] ?? 'Błąd ${response.statusCode}');
     }
+  }
 
+  Future<Map<String,dynamic>> getUserActivities() async {
+    final url = Uri.parse('$baseUrl/api/Activities/history');
+    try {
+      final response = await _client.get(
+        url,
+        headers: await _getHeaders(requiresAuth: true),
+      );
+
+      final responseBody = json.decode(utf8.decode(response.bodyBytes));
+
+      if (response.statusCode == 200) {
+        return responseBody;
+      } else if (response.statusCode == 401) {
+        throw Exception('Unauthorized. Token expired or invalid.');
+      } else {
+        throw Exception(responseBody['message'] ?? 'Failed to fetch activities: ${response.statusCode}');
+      }
+    } catch (e) {
+      throw Exception('Network error during activities fetch: $e');
+    }
   }
 }

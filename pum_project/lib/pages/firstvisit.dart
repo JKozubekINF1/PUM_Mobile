@@ -15,6 +15,8 @@ class FirstVisitPage extends StatefulWidget {
 }
 
 class _FirstVisitPageState extends State<FirstVisitPage> {
+  bool _loadingSettings = true;
+  bool _loadingAccount = true;
   Future<void> _offlineMode() async {
     return showDialog<void>(
         context: context,
@@ -68,6 +70,7 @@ class _FirstVisitPageState extends State<FirstVisitPage> {
   void initState() {
     super.initState();
     _checkOfflineMode();
+    _checkIfProfileInitialized();
   }
 
   @override
@@ -86,6 +89,11 @@ class _FirstVisitPageState extends State<FirstVisitPage> {
       }
     } catch (e) {
       debugPrint('$e');
+    }
+    if (mounted) {
+      setState(() {
+        _loadingSettings = false;
+      });
     }
   }
 
@@ -107,10 +115,24 @@ class _FirstVisitPageState extends State<FirstVisitPage> {
     } catch (e) {
       debugPrint("$e");
     }
+    if (mounted) {
+      setState(() {
+        _loadingAccount = false;
+      });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
+    if (_loadingAccount || _loadingSettings) {
+      return Scaffold(
+        backgroundColor: const Color(0xff01bafd),
+        body: Center(
+          child: Image.asset("assets/logo.png"),
+        ),
+      );
+    }
+
     return Consumer<AuthProvider>(
         builder: (context, auth, child) {
           if (!auth.isLoading && auth.showLoginSuccess) {
@@ -120,6 +142,15 @@ class _FirstVisitPageState extends State<FirstVisitPage> {
             });
           }
           return Scaffold(
+            appBar: AppBar(
+                backgroundColor: Colors.transparent,
+                elevation: 0,
+                automaticallyImplyLeading: false,
+                actions: [
+                  _buildSettingsIcon(),
+                ],
+            ),
+            backgroundColor: const Color(0xff01bafd),
             body: Column(
               children: [
                 Flexible(
@@ -131,7 +162,7 @@ class _FirstVisitPageState extends State<FirstVisitPage> {
                   child: _buildTextPadding(),
                 ),
                 Flexible(
-                  flex: 2,
+                  flex: 1,
                   child: Container(
                     child: _buildButtonCollumn(),
                   ),
@@ -209,7 +240,7 @@ class _FirstVisitPageState extends State<FirstVisitPage> {
     return Align(
       alignment: Alignment.center,
       child: Text(
-        AppLocalizations.of(context)!.firstVisitPageTitle, style: Theme.of(context).textTheme.bodyLarge,
+        AppLocalizations.of(context)!.firstVisitPageTitle, style: TextStyle(color: Color(0xFFFFFFFF), fontSize:72),
       ),
     );
   }
@@ -218,14 +249,17 @@ class _FirstVisitPageState extends State<FirstVisitPage> {
     return Align(
       alignment: Alignment.center,
       child: Text(
-        AppLocalizations.of(context)!.welcomeNewUserMessage, style: TextStyle(color: Color(0xFF375534)),
+        AppLocalizations.of(context)!.welcomeNewUserMessage, style: TextStyle(color: Color(0xFFFFFFFF)),
       ),
     );
   }
 
   Widget _buildLoginButton() {
     return ElevatedButton(
-      child: Text(AppLocalizations.of(context)!.loginButtonLabel),
+      style: ElevatedButton.styleFrom(
+        backgroundColor: Colors.blueGrey,
+      ),
+      child: Text(AppLocalizations.of(context)!.loginButtonLabel, style: TextStyle(color: Color(0xFFFFFFFF))),
       onPressed: () {
         Navigator.pushNamed(
           context,
@@ -237,7 +271,10 @@ class _FirstVisitPageState extends State<FirstVisitPage> {
 
   Widget _buildRegisterButton() {
     return ElevatedButton(
-      child: Text(AppLocalizations.of(context)!.registerButtonLabel),
+      style: ElevatedButton.styleFrom(
+        backgroundColor: Colors.blueGrey,
+      ),
+      child: Text(AppLocalizations.of(context)!.registerButtonLabel, style: TextStyle(color: Color(0xFFFFFFFF))),
       onPressed: () {
         Navigator.pushNamed(
           context,
@@ -255,9 +292,20 @@ class _FirstVisitPageState extends State<FirstVisitPage> {
           _offlineMode();
         },
         child: Text(
-            AppLocalizations.of(context)!.offlineModeTextLabel, style: Theme.of(context).textTheme.bodyMedium,
+            AppLocalizations.of(context)!.offlineModeTextLabel, style: TextStyle(color: Color(0xFFFFFFFF), fontSize:24),
         ),
       ),
+    );
+  }
+
+  Widget _buildSettingsIcon() {
+    return IconButton(
+      icon: Icon(Icons.settings),
+      iconSize: 45,
+      color: Colors.white,
+      onPressed: () {
+        Navigator.pushNamed(context,"/settings");
+      },
     );
   }
 }

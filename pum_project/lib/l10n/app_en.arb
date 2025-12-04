@@ -108,6 +108,10 @@
         "@offlineModeTextLabel": {
             "description": "Label text for an option that opens the app in offline mode"
         },
+    "profileNickNameLabel": "Nickname",
+        "@profileNickNameLabel": {
+            "description": "Label text for the nickname text field"
+        },
     "profileFirstNameLabel": "First Name",
         "@profileFirstNameLabel": {
             "description": "Label text for the first name text field"
@@ -256,6 +260,10 @@
         "@submitLabel": {
             "description": "Label text for a submit button"
         },
+    "uploadQueueLabel": "activities are still pending in queue",
+        "@uploadQueueLabel": {
+            "description": "Label text for the upload queue that appears when offline"
+        },
     "welcomeNewUserMessage": "Log in or create a new account",
         "@welcomeNewUserMessage": {
             "description": "Message that appears on the first visit page, prompting the user to login or create an account"
@@ -339,6 +347,18 @@
     "activityDeletionMessage": "Deleted activity will be lost forever. Are you sure you want to continue?",
         "@activityDeletionMessage": {
             "description": "Message that appears when user tries to delete an activity"
+        },
+    "activitySentMessage": "Activity has been saved successfully",
+        "@activitySentMessage": {
+            "description": "Message that appears when the user successfully upload an activity"
+        },
+    "activityQueueCancelDialogMessage": "Are you sure you want to clear your queue? Your local activities will be restored",
+        "@activityQueueCancelDialogMessage": {
+            "description": "Message that appears when the user tries to cancel the activity queue"
+        },
+    "activityQueueCancelledMessage": "Upload queue has been cancelled and local files have been restored",
+        "@activityQueueCancelledMessage": {
+            "description": "Message that appears when the user cancels the upload queue"
         },
     "missingRouteMessage": "Route missing",
         "@missingRouteMessage": {

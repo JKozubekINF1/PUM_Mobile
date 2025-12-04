@@ -13,13 +13,21 @@ import 'l10n/generated/app_localizations.dart';
 import 'package:pum_project/services/api_connection.dart';
 import 'package:pum_project/services/app_settings.dart';
 import 'package:pum_project/services/local_storage.dart';
+import 'package:pum_project/services/upload_queue.dart';
+import 'package:pum_project/services/route_observer.dart';
 import 'package:pum_project/theme/app_theme.dart';
 import 'package:provider/provider.dart';
 import 'providers/auth_provider.dart';
+import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
-void main() {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   LocalStorage.init();
+  // NEEDED FOR WINDOWS TESTING
+  sqfliteFfiInit();
+  databaseFactory = databaseFactoryFfi;
+  // COMMENT WHEN TESTING ON ANDROID
+  await UploadQueue.instance.init();
   runApp(
       MultiProvider(
           providers: [
@@ -27,6 +35,7 @@ void main() {
             Provider<ApiService>(create: (context) => ApiService()),
             Provider<AppSettings>(create: (context) => AppSettings()),
             Provider<LocalStorage>(create: (context) => LocalStorage()),
+            Provider<UploadQueue>(create: (context) => UploadQueue.instance),
           ],
         child: Builder(
           builder: (context) {
@@ -100,6 +109,7 @@ class _MyAppState extends State<MyApp> {
       onGenerateTitle: (context) {
         return "App";
       },
+      navigatorObservers: [routeObserver],
       routes: {
         '/' : (BuildContext context)=>const FirstVisitPage(),
         '/home' : (BuildContext context)=>const HomePage(),

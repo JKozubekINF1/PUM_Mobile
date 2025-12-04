@@ -19,7 +19,13 @@ class LocalStorage {
 
   Future<String> saveToStorage(Map values) async {
     try {
-      final String filename = generateFileName();
+      String filename = "";
+      if (values.containsKey("filename")) {
+        filename = values["filename"];
+      }
+      if (filename=="") {
+        filename = generateFileName();
+      }
       final File newFile = File(p.join(localStorage!.path,filename));
       values.putIfAbsent("filename", () => filename);
       await newFile.writeAsString(jsonEncode(values));
