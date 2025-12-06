@@ -85,7 +85,6 @@ class _EditProfilePageState extends State<EditProfilePage> {
         lastName: _lastNameController.text.trim(),
         height: double.tryParse(_heightController.text.trim()),
         weight: double.tryParse(_weightController.text.trim()),
-        avatarUrl: _avatarUrlController.text.trim(),
         gender: _gender,
         dateOfBirth: _dateOfBirth,
       );
@@ -104,6 +103,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
       setState(() {
         _profileFuture = _loadProfile();
       });
+      if (mounted) Navigator.pushNamedAndRemoveUntil(context,"/home", (_) => false);
     }
   }
 

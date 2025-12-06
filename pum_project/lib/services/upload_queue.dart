@@ -98,6 +98,7 @@ class UploadQueue {
   }
 
   Future<bool> _upload(Activity activity) async {
+    debugPrint('${activity.routelist.map((p) => [p.latitude, p.longitude]).toList()}');
     try {
       await _api.saveActivity(
         durationSeconds: activity.duration,

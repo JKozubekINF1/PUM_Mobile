@@ -22,7 +22,7 @@ class _HomePageState extends State<HomePage> with RouteAware{
   late PageController _pageViewController;
   bool loading = true;
   List<String>? localActivitiesList = [];
-  Map<String,dynamic>? onlineActivities;
+  List<Map<String,dynamic>>? onlineActivities;
   bool showLocalActivities = false;
   bool offlineMode = true;
   int queueSize = 0;
@@ -247,7 +247,7 @@ class _HomePageState extends State<HomePage> with RouteAware{
   Future<void> _loadOnlineActivityList() async {
     try {
       final api = Provider.of<ApiService>(context, listen: false);
-      Map<String,dynamic>? activityMap = await api.getUserActivities();
+      List<Map<String,dynamic>>? activityMap = await api.getUserActivities();
       if (activityMap.isNotEmpty) {
         if (mounted) {
           setState(() {
@@ -257,7 +257,7 @@ class _HomePageState extends State<HomePage> with RouteAware{
       }
     } catch (e) {
       if (mounted) _displaySnackbar(AppLocalizations.of(context)!.genericErrorMessage);
-      debugPrint('$e');
+      debugPrint('Failed to load online activities: $e');
     }
   }
 

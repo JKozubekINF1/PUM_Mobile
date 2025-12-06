@@ -42,7 +42,11 @@ class ApiService {
   }
 
   Future<Map<String, dynamic>> register(
-      String email, String password, String confirmPassword) async {
+      String email,
+      String username,
+      String password,
+      String confirmPassword
+      ) async {
     final url = Uri.parse('$baseUrl/api/Auth/register');
     try {
       final response = await _client.post(
@@ -50,6 +54,7 @@ class ApiService {
         headers: await _getHeaders(),
         body: json.encode({
           'Email': email,
+          'UserName': username,
           'Password': password,
           'ConfirmPassword': confirmPassword,
         }),
@@ -87,6 +92,7 @@ class ApiService {
           await _storage.write(key: 'token', value: token);
           await _storage.write(key: 'email', value: email);
 
+          debugPrint(responseBody['token']);
           debugPrint('[DEBUG AUTH] Token ZAPISANY po loginie (długość: ${token.length})');
         }
         return responseBody;
@@ -160,37 +166,27 @@ class ApiService {
     required double distanceMeters,
     required double averageSpeedMs,
     required List<List<double>> routeCoordinates,
-    Uint8List? imageBytes,
     String title = 'Bez tytułu',
     String? description,
     String activityType = 'Running',
   }) async {
     final url = Uri.parse('$baseUrl/api/activities');
-    final request = http.MultipartRequest('POST', url);
 
-    request.fields['title'] = title;
-    if (description != null) request.fields['description'] = description;
-    request.fields['activityType'] = activityType;
-    request.fields['durationSeconds'] = durationSeconds.toString();
-    request.fields['distanceMeters'] = distanceMeters.toString();
-    request.fields['averageSpeedMs'] = averageSpeedMs.toString();
-    if (routeCoordinates.length >= 2) {
-      request.fields['route'] = jsonEncode(routeCoordinates);
-    }
-    if (imageBytes != null) {
-      request.files.add(
-        http.MultipartFile.fromBytes(
-          'image',
-          imageBytes,
-        ),
-      );
-    }
+    final body = jsonEncode({
+      "title": title,
+      "description": description,
+      "activityType": activityType,
+      "durationSeconds": durationSeconds,
+      "distanceMeters": distanceMeters,
+      "averageSpeedMs": averageSpeedMs,
+      "route": routeCoordinates.length >= 2 ? routeCoordinates : null,
+    });
 
-    final headers = await _getHeaders(requiresAuth: true);
-    request.headers.addAll(headers);
-
-    final streamedResponse = await request.send();
-    final response = await http.Response.fromStream(streamedResponse);
+    final response = await _client.post(
+      url,
+      headers: await _getHeaders(requiresAuth: true),
+      body: body,
+    );
 
     if (response.statusCode == 200 || response.statusCode == 201) {
       debugPrint('[API] Aktywność zapisana!');
@@ -201,7 +197,7 @@ class ApiService {
     }
   }
 
-  Future<Map<String,dynamic>> getUserActivities() async {
+  Future<List<Map<String, dynamic>>> getUserActivities() async {
     final url = Uri.parse('$baseUrl/api/Activities/history');
     try {
       final response = await _client.get(
@@ -212,7 +208,7 @@ class ApiService {
       final responseBody = json.decode(utf8.decode(response.bodyBytes));
 
       if (response.statusCode == 200) {
-        return responseBody;
+        return (responseBody as List).cast<Map<String, dynamic>>();
       } else if (response.statusCode == 401) {
         throw Exception('Unauthorized. Token expired or invalid.');
       } else {

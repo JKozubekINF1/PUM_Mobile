@@ -13,6 +13,7 @@ class RegisterPage extends StatefulWidget {
 
 class _RegisterPageState extends State<RegisterPage> {
   final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _confirmPasswordController = TextEditingController();
   bool _processing = false;
@@ -23,6 +24,7 @@ class _RegisterPageState extends State<RegisterPage> {
   @override
   void dispose() {
     _emailController.dispose();
+    _usernameController.dispose();
     _passwordController.dispose();
     _confirmPasswordController.dispose();
     super.dispose();
@@ -47,7 +49,7 @@ class _RegisterPageState extends State<RegisterPage> {
   void _checkCredentials() {
     _setProcessing(true);
     _setValidCredentials(true);
-    if (_emailController.text.trim().isEmpty || _passwordController.text.trim().isEmpty) {
+    if (_emailController.text.trim().isEmpty || _passwordController.text.trim().isEmpty || _usernameController.text.trim().isEmpty) {
     _displaySnackbar(AppLocalizations.of(context)!.emptyFieldMessage);
     _setValidCredentials(false);
     }
@@ -76,6 +78,7 @@ class _RegisterPageState extends State<RegisterPage> {
       final apiService = Provider.of<ApiService>(context, listen: false);
       await apiService.register(
         _emailController.text.trim(),
+        _usernameController.text.trim(),
         _passwordController.text,
         _confirmPasswordController.text,
       );
@@ -173,6 +176,21 @@ class _RegisterPageState extends State<RegisterPage> {
             child: _buildConfirmPasswordField(),
           ),
         ),
+        Flexible(
+          flex: 1,
+          child: const SizedBox(
+            width: double.infinity,
+            height: 10,
+          ),
+        ),
+        Flexible(
+          flex: 1,
+          child: SizedBox(
+            width: double.infinity,
+            height: 50,
+            child: _buildUsernameField(),
+          ),
+        ),
       ],
     );
   }
@@ -222,6 +240,16 @@ class _RegisterPageState extends State<RegisterPage> {
       controller: _emailController,
       decoration: InputDecoration(
         labelText: AppLocalizations.of(context)!.emailLabel,
+        border: OutlineInputBorder(),
+      ), style: Theme.of(context).textTheme.bodyMedium,
+    );
+  }
+
+  Widget _buildUsernameField() {
+    return TextField(
+      controller: _usernameController,
+      decoration: InputDecoration(
+        labelText: AppLocalizations.of(context)!.usernameLabel,
         border: OutlineInputBorder(),
       ), style: Theme.of(context).textTheme.bodyMedium,
     );
