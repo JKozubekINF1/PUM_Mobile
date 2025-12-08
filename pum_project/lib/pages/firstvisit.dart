@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../l10n/generated/app_localizations.dart';
 import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
-import '../models/profile_data.dart';
+import 'package:pum_project/models/profile_data.dart';
 import 'package:pum_project/services/api_connection.dart';
 import 'package:pum_project/services/app_settings.dart';
 
@@ -23,7 +23,7 @@ class _FirstVisitPageState extends State<FirstVisitPage> {
         barrierDismissible: true,
         builder: (BuildContext context) {
           return AlertDialog(
-            title: Text(AppLocalizations.of(context)!.warningLabel),
+            title: Text(AppLocalizations.of(context)!.warningLabel,style:TextStyle(color:Colors.black)),
             content: SingleChildScrollView(
               child: ListBody(
                 children: <Widget>[
@@ -97,20 +97,22 @@ class _FirstVisitPageState extends State<FirstVisitPage> {
     }
   }
 
-  bool _profileInitializationRequirement(ProfileData profile) {
-    return (profile.firstName=='');
+  Future<bool> _profileInitializationRequirement(ProfileData profile) async {
+    return (profile.firstName=='' || profile.firstName==null);
   }
 
   Future<void> _checkIfProfileInitialized() async {
     try {
       final apiService = Provider.of<ApiService>(context, listen: false);
       final profile = await apiService.fetchProfile();
-      final initialized = _profileInitializationRequirement(profile);
+      if (profile.userName!=null) {
+        final notInitialized = await _profileInitializationRequirement(profile);
 
-      if (initialized) {
-        if (mounted) Navigator.pushNamedAndRemoveUntil(context, '/home', (_) => false);
-      } else {
-        if (mounted) Navigator.pushNamedAndRemoveUntil(context, '/profile/edit', (_) => false);
+        if (notInitialized) {
+          if (mounted) Navigator.pushNamedAndRemoveUntil(context, '/profile/edit', (_) => false, arguments: {'forcedEntry':true});
+        } else {
+          if (mounted) Navigator.pushNamedAndRemoveUntil(context, '/home', (_) => false);
+        }
       }
     } catch (e) {
       debugPrint("$e");
@@ -135,12 +137,6 @@ class _FirstVisitPageState extends State<FirstVisitPage> {
 
     return Consumer<AuthProvider>(
         builder: (context, auth, child) {
-          if (!auth.isLoading && auth.showLoginSuccess) {
-            WidgetsBinding.instance.addPostFrameCallback((_) {
-              auth.clearLoginSuccess();
-              _checkIfProfileInitialized();
-            });
-          }
           return Scaffold(
             appBar: AppBar(
                 backgroundColor: Colors.transparent,

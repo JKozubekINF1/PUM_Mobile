@@ -20,6 +20,10 @@
         "@registerPageTitle": {
             "description": "Title of register page that usually appears on the app bar"
         },
+    "resetPasswordPageTitle": "Reset Password",
+        "@resetPasswordPageTitle": {
+            "description": "Title of reset password page that usually appears on the app bar"
+        },
     "homePageTitle": "Homepage",
         "@homePageTitle": {
             "description": "Title of home page that usually appears on the app bar"
@@ -32,6 +36,10 @@
         "@resultPageTitle": {
             "description": "Title of map page that usually appears on the app bar"
         },
+    "viewActivityPageTitle": "Activity",
+        "@viewActivityPageTitle": {
+            "description": "Title of view activity page that usually appears on the app bar"
+        },
     "profilePageTitle": "Your Profile",
         "@profilePageTitle": {
             "description": "Title of profile page that usually appears on the app bar"
@@ -43,6 +51,14 @@
     "settingsPageTitle": "App Settings",
         "@settingsPageTitle": {
             "description": "Title of settings page that usually appears on the app bar"
+        },
+    "activityHistoryPageTitle": "Your Activity History",
+        "@activityHistoryPageTitle": {
+            "description": "Title of activity history page that usually appears on the app bar"
+        },
+    "leaderboardPageTitle": "Leaderboard",
+        "@leaderboardPageTitle": {
+            "description": "Title of leaderboard page that usually appears on the app bar"
         },
     "warningLabel": "Warning",
         "@warningLabel": {
@@ -127,6 +143,30 @@
     "profileDayOfBirthLabel": "Date of birth",
         "@profileDayOfBirthLabel": {
             "description": "Label text for the user date of birth"
+        },
+    "dateLabel": "Date",
+        "@dateLabel": {
+            "description": "Label text for a date"
+        },
+    "sortByLabel": "Sort by",
+        "@sortByLabel": {
+            "description": "Label text for choosing a sorting option"
+        },
+    "rankedByLabel": "Ranked by",
+        "@rankedByLabel": {
+            "description": "Label text for choosing a sorting option in the leaderboard"
+        },
+    "sortByTotalDistanceLabel": "Total Distance",
+        "@sortByTotalDistanceLabel": {
+            "description": "Label text for the sort option - total distance"
+        },
+    "sortByActivityCountLabel": "Activity Count",
+        "@sortByActivityCountLabel": {
+            "description": "Label text for the sort option - activity count"
+        },
+    "sortByTotalDurationLabel": "Total Duration",
+        "@sortByTotalDurationLabel": {
+            "description": "Label text for the sort option - total duration"
         },
     "optionalLabel": "Optional",
         "@optionalLabel": {
@@ -260,6 +300,14 @@
         "@submitLabel": {
             "description": "Label text for a submit button"
         },
+    "chooseAvatarButtonLabel": "Choose Avatar",
+        "@chooseAvatarButtonLabel": {
+            "description": "Label text for an image picker button that lets you choose your avatar"
+        },
+    "uploadPictureButtonLabel": "Upload a picture",
+        "@uploadPictureButtonLabel": {
+            "description": "Label text for an image picker that lets you upload a picture"
+        },
     "uploadQueueLabel": "activities are still pending in queue",
         "@uploadQueueLabel": {
             "description": "Label text for the upload queue that appears when offline"
@@ -363,6 +411,10 @@
     "missingRouteMessage": "Route missing",
         "@missingRouteMessage": {
             "description": "Message that appears instead of a map on activity result page when no coordinates are given"
+        },
+    "nicknameTakenMessage": "Nickname already taken",
+        "@nicknameTakenMessage": {
+            "description": "Message that appears after trying to register or change your name to an already taken nickname"
         },
     "noConnectionMessage": "Lost connection to the server, check your internet connection",
         "@noConnectionMessage": {

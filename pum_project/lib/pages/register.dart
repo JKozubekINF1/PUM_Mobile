@@ -96,7 +96,11 @@ class _RegisterPageState extends State<RegisterPage> {
 
   String _formatError(String raw) {
     final msg = raw.replaceFirst('Exception: ', '').toLowerCase();
-    if (msg.contains('network') || msg.contains('timeout')) {
+    if (msg.contains('email is already registered')) {
+      return AppLocalizations.of(context)!.emailTakenMessage;
+    } else if (msg.contains('username is already taken')) {
+      return AppLocalizations.of(context)!.nicknameTakenMessage;
+    } else if (msg.contains('network') || msg.contains('timeout')) {
       return AppLocalizations.of(context)!.noConnectionMessage;
     } else if (msg.contains('not a subtype')) {
       return AppLocalizations.of(context)!.incorrectEmailMessage;
@@ -262,7 +266,7 @@ class _RegisterPageState extends State<RegisterPage> {
       decoration: InputDecoration(
         labelText: AppLocalizations.of(context)!.passwordLabel,
         suffixIcon: IconButton(
-          icon: Icon(_obscurePassword1 ? Icons.visibility : Icons.visibility_off),
+          icon: Icon(_obscurePassword1 ? Icons.visibility : Icons.visibility_off, color: Theme.of(context).iconTheme.color),
           onPressed: () {
             setState(() {
               _obscurePassword1 = !_obscurePassword1;
@@ -281,7 +285,7 @@ class _RegisterPageState extends State<RegisterPage> {
       decoration: InputDecoration(
         labelText: AppLocalizations.of(context)!.confirmPasswordLabel,
         suffixIcon: IconButton(
-          icon: Icon(_obscurePassword2 ? Icons.visibility : Icons.visibility_off),
+          icon: Icon(_obscurePassword2 ? Icons.visibility : Icons.visibility_off, color: Theme.of(context).iconTheme.color),
           onPressed: () {
             setState(() {
               _obscurePassword2 = !_obscurePassword2;

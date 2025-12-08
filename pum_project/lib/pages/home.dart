@@ -8,6 +8,7 @@ import 'package:pum_project/services/local_storage.dart';
 import 'package:pum_project/services/app_settings.dart';
 import 'package:pum_project/services/upload_queue.dart';
 import 'package:pum_project/services/route_observer.dart';
+import 'package:intl/intl.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({
@@ -23,9 +24,16 @@ class _HomePageState extends State<HomePage> with RouteAware{
   bool loading = true;
   List<String>? localActivitiesList = [];
   List<Map<String,dynamic>>? onlineActivities;
+  List<Map<String,dynamic>>? leaderboard;
   bool showLocalActivities = false;
   bool offlineMode = true;
   int queueSize = 0;
+  bool onlineActivitiesInitiated = false;
+  bool leaderboardInitiated = false;
+  String? _sortOption = "startedAt";
+  bool _sortOrder = false;
+  String? _rankOption = "totalDistanceKm";
+  bool _processing = false;
 
   @override
   void dispose() {
@@ -37,6 +45,7 @@ class _HomePageState extends State<HomePage> with RouteAware{
   @override
   void initState() {
     _loadPageData();
+    _checkOfflineMode();
     super.initState();
     _pageViewController = PageController();
   }
@@ -48,12 +57,8 @@ class _HomePageState extends State<HomePage> with RouteAware{
         this,
         ModalRoute.of(context)! as PageRoute<dynamic>,
     );
-    _checkOfflineMode();
     _checkUploadQueue();
     _loadLocalActivityList();
-    if (!offlineMode) {
-      _loadOnlineActivityList();
-    }
   }
 
   @override
@@ -153,7 +158,7 @@ class _HomePageState extends State<HomePage> with RouteAware{
         barrierDismissible: true,
         builder: (BuildContext context) {
           return AlertDialog(
-            title: Text(AppLocalizations.of(context)!.warningLabel),
+            title: Text(AppLocalizations.of(context)!.warningLabel,style:TextStyle(color:Colors.black)),
             content: SingleChildScrollView(
               child: ListBody(
                 children: <Widget>[
@@ -187,7 +192,7 @@ class _HomePageState extends State<HomePage> with RouteAware{
         barrierDismissible: true,
         builder: (BuildContext context) {
           return AlertDialog(
-            title: Text(AppLocalizations.of(context)!.warningLabel),
+            title: Text(AppLocalizations.of(context)!.warningLabel,style:TextStyle(color:Colors.black)),
             content: SingleChildScrollView(
               child: ListBody(
                 children: <Widget>[
@@ -213,6 +218,22 @@ class _HomePageState extends State<HomePage> with RouteAware{
           );
         }
     );
+  }
+
+  Future<void> _loadOnlineActivity(String id) async {
+    _processing = true;
+    try {
+      final api = Provider.of<ApiService>(context, listen: false);
+      Map<String,dynamic>? map = await api.getActivity(id);
+      await Navigator.pushNamed(context, '/activity/get', arguments: {
+        'Data': map,
+      });
+      _processing = false;
+    } catch (e) {
+      if (mounted) _displaySnackbar(AppLocalizations.of(context)!.genericErrorMessage);
+      debugPrint('$e');
+      _processing = false;
+    }
   }
 
   void _displaySnackbar(String message) {
@@ -247,17 +268,93 @@ class _HomePageState extends State<HomePage> with RouteAware{
   Future<void> _loadOnlineActivityList() async {
     try {
       final api = Provider.of<ApiService>(context, listen: false);
-      List<Map<String,dynamic>>? activityMap = await api.getUserActivities();
-      if (activityMap.isNotEmpty) {
+      List<Map<String,dynamic>>? activityList = await api.getUserActivities();
+      if (activityList.isNotEmpty) {
         if (mounted) {
           setState(() {
-            onlineActivities = activityMap;
+            onlineActivities = activityList;
+          });
+        }
+        _sortActivityList();
+      }
+    } catch (e) {
+      if (mounted) _displaySnackbar(AppLocalizations.of(context)!.genericErrorMessage);
+      debugPrint('Failed to load online activities: $e');
+    }
+  }
+
+  void _sortActivityList() {
+    if (onlineActivities == null) return;
+
+    List<Map<String, dynamic>> newList = List.from(onlineActivities!);
+
+    newList.sort((a, b) {
+      final valueA = a[_sortOption];
+      final valueB = b[_sortOption];
+      final alphaA = a['title'];
+      final alphaB = b['title'];
+
+      if (valueA == null && valueB == null) return 0;
+      if (valueA == null) return -1;
+      if (valueB == null) return 1;
+
+      if (valueA == valueB) {
+        return alphaA.toString().trim().toLowerCase().compareTo(alphaB.toString().trim().toLowerCase());
+      }
+
+      if (valueA is String && valueB is String) {
+        return valueA.trim().toLowerCase().compareTo(valueB.trim().toLowerCase());
+      } else if (valueA is num && valueB is num) {
+        return valueA.compareTo(valueB);
+      } else if (valueA is DateTime && valueB is DateTime) {
+        return valueA.compareTo(valueB);
+      }else {
+        return valueA.toString().compareTo(valueB.toString());
+      }
+    });
+
+    if (!_sortOrder) {
+      newList = newList.reversed.toList();
+    }
+    setState(() {
+      onlineActivities = newList;
+    });
+  }
+
+  void _sortLeaderboard() {
+    if (leaderboard == null) return;
+
+    List<Map<String, dynamic>> newList = List.from(leaderboard!);
+
+    newList.sort((a, b) {
+      final valueA = a[_sortOption];
+      final valueB = b[_sortOption];
+
+      if (valueA == null && valueB == null) return 0;
+      if (valueA == null) return -1;
+      if (valueB == null) return 1;
+
+      return valueA.compareTo(valueB);
+    });
+    setState(() {
+      leaderboard = newList;
+    });
+  }
+
+  Future<void> _loadLeaderboard() async {
+    try {
+      final api = Provider.of<ApiService>(context, listen: false);
+      List<Map<String,dynamic>>? newLeaderboard = await api.getLeaderboard();
+      if (newLeaderboard.isNotEmpty) {
+        if (mounted) {
+          setState(() {
+            leaderboard = newLeaderboard;
           });
         }
       }
     } catch (e) {
       if (mounted) _displaySnackbar(AppLocalizations.of(context)!.genericErrorMessage);
-      debugPrint('Failed to load online activities: $e');
+      debugPrint('Failed to load leaderboard: $e');
     }
   }
 
@@ -320,6 +417,7 @@ class _HomePageState extends State<HomePage> with RouteAware{
   Widget _buildProfilePopupMenu() {
     if (offlineMode) {
       return PopupMenuButton<int>(
+        color: Theme.of(context).cardTheme.color,
         child: Row(
           children: [
             Icon(CupertinoIcons.profile_circled, size: 35),
@@ -332,17 +430,18 @@ class _HomePageState extends State<HomePage> with RouteAware{
             onTap: () => (
             Navigator.pushNamed(context,'/settings'),
             ),
-            child: Text(AppLocalizations.of(context)!.settingsButtonLabel),
+            child: Text(AppLocalizations.of(context)!.settingsButtonLabel,style:TextStyle(color:Theme.of(context).inputDecorationTheme.hintStyle!.color)),
           ),
           PopupMenuItem<int>(
               value: 2,
               onTap: _turnOffOfflineMode,
-              child: Text(AppLocalizations.of(context)!.loginButtonLabel)
+              child: Text(AppLocalizations.of(context)!.loginButtonLabel,style:TextStyle(color:Theme.of(context).inputDecorationTheme.hintStyle!.color))
           ),
         ],
       );
     } else {
       return PopupMenuButton<int>(
+        color: Theme.of(context).cardTheme.color,
         child: Row(
           children: [
             Icon(CupertinoIcons.profile_circled, size: 35),
@@ -355,19 +454,19 @@ class _HomePageState extends State<HomePage> with RouteAware{
             onTap: () => (
             Navigator.pushNamed(context,'/profile'),
             ),
-            child: Text(AppLocalizations.of(context)!.profileButtonLabel),
+            child: Text(AppLocalizations.of(context)!.profileButtonLabel,style:TextStyle(color:Theme.of(context).inputDecorationTheme.hintStyle!.color)),
           ),
           PopupMenuItem<int>(
             value: 2,
             onTap: () => (
             Navigator.pushNamed(context,'/settings'),
             ),
-            child: Text(AppLocalizations.of(context)!.settingsButtonLabel),
+            child: Text(AppLocalizations.of(context)!.settingsButtonLabel,style:TextStyle(color:Theme.of(context).inputDecorationTheme.hintStyle!.color)),
           ),
           PopupMenuItem<int>(
               value: 3,
               onTap: _logoutPopupWindow,
-              child: Text(AppLocalizations.of(context)!.logoutButtonLabel)
+              child: Text(AppLocalizations.of(context)!.logoutButtonLabel,style:TextStyle(color:Theme.of(context).inputDecorationTheme.hintStyle!.color))
           ),
         ],
       );
@@ -381,6 +480,24 @@ class _HomePageState extends State<HomePage> with RouteAware{
           child: PageView(
             controller: _pageViewController,
             scrollDirection: Axis.horizontal,
+            onPageChanged: (index) {
+              if (index == 1) {
+                if (!offlineMode) {
+                  if (!onlineActivitiesInitiated) {
+                    _loadOnlineActivityList();
+                    onlineActivitiesInitiated = true;
+                  }
+                }
+              }
+              if (index == 2) {
+                if (!offlineMode) {
+                  if (!leaderboardInitiated) {
+                    _loadLeaderboard();
+                    leaderboardInitiated = true;
+                  }
+                }
+              }
+            },
             children: <Widget>[
               Column(
                 children: [
@@ -475,7 +592,9 @@ class _HomePageState extends State<HomePage> with RouteAware{
       child: SizedBox(
         child: Column(
           children: [
-            Text('Uploaded Activity History Page'),
+            Text(AppLocalizations.of(context)!.activityHistoryPageTitle, overflow: TextOverflow.ellipsis),
+            _buildOnlineActivityControlRow(),
+            Expanded(child: _buildOnlineActivitiesListView()),
             _buildQueueDisplay(),
           ],
         ),
@@ -491,7 +610,9 @@ class _HomePageState extends State<HomePage> with RouteAware{
       child: SizedBox(
         child: Column(
           children: [
-            Text('Leaderboard Page'),
+            Text(AppLocalizations.of(context)!.leaderboardPageTitle, overflow: TextOverflow.ellipsis),
+            _buildLeaderboardControlRow(),
+            Expanded(child: _buildLeaderboardListView()),
           ],
         ),
       ),
@@ -609,5 +730,231 @@ class _HomePageState extends State<HomePage> with RouteAware{
     } else {
       return const SizedBox.shrink();
     }
+  }
+
+  Widget _buildOnlineActivitiesListView() {
+    if (onlineActivities == null) {
+      return const Center(child: CircularProgressIndicator());
+    }
+    final List<Map<String,dynamic>> list = onlineActivities!;
+    return ListView.builder(
+        padding: EdgeInsets.all(15.0),
+        itemCount: list.length,
+        itemBuilder: (BuildContext context, int index) {
+          return ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              minimumSize: const Size(100, 60),
+              padding: EdgeInsets.all(30.0),
+              backgroundColor: index.isEven ? Theme.of(context).cardTheme.color as Color : Theme.of(context).elevatedButtonTheme.style!.backgroundColor!.resolve({}),
+            ),
+            onPressed: () {
+              if (!_processing) {
+                _loadOnlineActivity(list[index]["id"]);
+              }
+            },
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text("${list[index]["title"]}",overflow: TextOverflow.ellipsis),
+                ),
+                Expanded(
+                  child: _getActivitySortingOptionText(list, index),
+                ),
+              ],
+            ),
+          );
+        }
+    );
+  }
+
+  Widget _getActivitySortingOptionText(List list,int index) {
+    if (_sortOption=="startedAt") {
+      DateTime date = DateTime.parse(list[index]["startedAt"]);
+      String formattedDate = DateFormat("dd.MM.yyyy hh:mm").format(date);
+      return Text(formattedDate,overflow: TextOverflow.ellipsis);
+    } else if (_sortOption!="title") {
+      return Text("${list[index][_sortOption]}",overflow: TextOverflow.ellipsis);
+    } else {
+      return const SizedBox.shrink();
+    }
+  }
+
+  Widget _buildLeaderboardListView() {
+    if (leaderboard == null) {
+      return const Center(child: CircularProgressIndicator());
+    }
+    final List<Map<String,dynamic>> list = leaderboard!;
+    return ListView.builder(
+        padding: EdgeInsets.all(15.0),
+        itemCount: list.length,
+        itemBuilder: (BuildContext context, int index) {
+          return ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              minimumSize: const Size(100, 60),
+              padding: EdgeInsets.all(30.0),
+              backgroundColor: index.isEven ? Theme.of(context).cardTheme.color as Color : Theme.of(context).elevatedButtonTheme.style!.backgroundColor!.resolve({}),
+            ),
+            onPressed: () {
+
+            },
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Expanded(
+                  child: Text((index+1).toString(),overflow: TextOverflow.ellipsis),
+                ),
+                Expanded(
+                  flex: 4,
+                  child: Text("${list[index]["userName"]}",overflow: TextOverflow.ellipsis),
+                ),
+                Expanded(
+                  flex: 2,
+                  child: Text("${list[index][_rankOption]}",overflow: TextOverflow.ellipsis),
+                ),
+              ],
+            ),
+          );
+        }
+    );
+  }
+
+  Widget _buildRefreshOnlineActivityListButton() {
+    return IconButton(
+      icon: Icon(Icons.refresh_rounded),
+      iconSize: 45,
+      onPressed: () {
+        if (mounted) {
+          _loadOnlineActivityList();
+        }
+      },
+    );
+  }
+
+  Widget _buildInvertActivityListSortingButton() {
+    return IconButton(
+      icon: _sortOrder ? Icon(CupertinoIcons.sort_down) : Icon(CupertinoIcons.sort_up),
+      onPressed: () {
+        if (mounted) {
+          _sortOrder = !_sortOrder;
+          _sortActivityList();
+        }
+      },
+    );
+  }
+
+  Widget _buildActivityChooseSortField() {
+    final Map<String, String> sortOptions = {
+      "title": AppLocalizations.of(context)!.titleLabel,
+      "activityType": AppLocalizations.of(context)!.activityTypeLabel,
+      "startedAt": AppLocalizations.of(context)!.dateLabel,
+      "durationSeconds": AppLocalizations.of(context)!.timeLabel,
+      "distanceMeters": AppLocalizations.of(context)!.distanceLabel,
+      "averageSpeedMs": AppLocalizations.of(context)!.avgSpeedLabel,
+    };
+    return DropdownButtonFormField<String>(
+      initialValue: _sortOption,
+      dropdownColor: Theme.of(context).cardTheme.color,
+      decoration: InputDecoration(
+        labelText: AppLocalizations.of(context)!.sortByLabel,
+        border: const OutlineInputBorder(),
+      ),
+      onChanged: (String? newValue) {
+        setState(() {
+          _sortOption = newValue;
+          _sortActivityList();
+        });
+      },
+      items: sortOptions.entries.map((entry) {
+        return DropdownMenuItem<String>(
+          value: entry.key,
+          child: Text(entry.value,style:TextStyle(color:Theme.of(context).inputDecorationTheme.hintStyle!.color)),
+        );
+      }).toList(),
+    );
+  }
+
+  Widget _buildLeaderboardChooseSortField() {
+    final Map<String, String> sortOptions = {
+      "totalDistanceKm": AppLocalizations.of(context)!.sortByTotalDistanceLabel,
+      "activityCount": AppLocalizations.of(context)!.sortByActivityCountLabel,
+      "totalDuration": AppLocalizations.of(context)!.sortByTotalDurationLabel,
+    };
+    return DropdownButtonFormField<String>(
+      initialValue: _rankOption,
+      dropdownColor: Theme.of(context).cardTheme.color,
+      decoration: InputDecoration(
+        labelText: AppLocalizations.of(context)!.rankedByLabel,
+        border: const OutlineInputBorder(),
+      ),
+      onChanged: (String? newValue) {
+        setState(() {
+          _rankOption = newValue;
+          _sortLeaderboard();
+        });
+      },
+      items: sortOptions.entries.map((entry) {
+        return DropdownMenuItem<String>(
+          value: entry.key,
+          child: Text(entry.value,style:TextStyle(color:Theme.of(context).inputDecorationTheme.hintStyle!.color)),
+        );
+      }).toList(),
+    );
+  }
+
+  Widget _buildOnlineActivityControlRow() {
+    return Padding(
+      padding: const EdgeInsets.all(16),
+      child: Row(
+        children: [
+          Expanded(
+            flex: 4,
+            child: _buildActivityChooseSortField(),
+          ),
+          Flexible(
+            child: _buildInvertActivityListSortingButton(),
+          ),
+          Expanded(
+            flex: 1,
+            child: SizedBox(),
+          ),
+          Flexible(
+            child: _buildRefreshOnlineActivityListButton(),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLeaderboardControlRow() {
+    return Padding(
+      padding: const EdgeInsets.all(16),
+      child: Row(
+        children: [
+          Expanded(
+            flex: 4,
+            child: _buildLeaderboardChooseSortField(),
+          ),
+          Expanded(
+            flex: 1,
+            child: SizedBox(),
+          ),
+          Flexible(
+            child: _buildRefreshLeaderboardButton(),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildRefreshLeaderboardButton() {
+    return IconButton(
+      icon: Icon(Icons.refresh_rounded),
+      iconSize: 45,
+      onPressed: () {
+        if (mounted) {
+          _loadLeaderboard();
+        }
+      },
+    );
   }
 }

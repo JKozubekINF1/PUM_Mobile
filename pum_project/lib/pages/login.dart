@@ -245,7 +245,7 @@ class _LoginPageState extends State<LoginPage> {
       decoration: InputDecoration(
         labelText: AppLocalizations.of(context)!.passwordLabel,
         suffixIcon: IconButton(
-          icon: Icon(_obscurePassword ? Icons.visibility : Icons.visibility_off),
+          icon: Icon(_obscurePassword ? Icons.visibility : Icons.visibility_off, color: Theme.of(context).iconTheme.color),
           onPressed: () {
             setState(() {
               _obscurePassword = !_obscurePassword;

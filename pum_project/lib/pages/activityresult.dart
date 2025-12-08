@@ -36,6 +36,8 @@ class _ResultScreenState extends State<ResultScreen> {
   bool offlineMode = true;
   String filename = "";
   XFile? image;
+  String? imageName;
+  bool _processing = false;
 
   final Map<String, IconData> activityIcons = {
     "run": Icons.directions_run,
@@ -138,6 +140,7 @@ class _ResultScreenState extends State<ResultScreen> {
   }
 
   Future<void> _saveActivity() async {
+    _processing = true;
     final queue = Provider.of<UploadQueue>(context, listen: false);
     final storage = Provider.of<LocalStorage>(context, listen: false);
 
@@ -155,6 +158,7 @@ class _ResultScreenState extends State<ResultScreen> {
 
       final result = await queue.addActivity(activity);
       await storage.deleteFile(filename);
+      _processing = false;
 
       if (result) {
         if (mounted) _displaySnackbar(AppLocalizations.of(context)!.activitySentMessage);
@@ -165,11 +169,13 @@ class _ResultScreenState extends State<ResultScreen> {
     } catch (e) {
       if (mounted) _displaySnackbar(AppLocalizations.of(context)!.genericErrorMessage);
       debugPrint("$e");
+      _processing = false;
     }
   }
 
   Future<void> _saveLocally() async {
     try {
+      _processing = true;
       final localStorage = Provider.of<LocalStorage>(context, listen: false);
       final Map<String,dynamic> values = {
         "title": _titleController.text,
@@ -181,13 +187,16 @@ class _ResultScreenState extends State<ResultScreen> {
       } else {
         debugPrint('File name is missing from json');
       }
+      _processing = false;
     } catch (e) {
       debugPrint('$e');
+      _processing = false;
     }
   }
 
   Future<void> _deleteActivity() async {
     try {
+      _processing = true;
       final localStorage = Provider.of<LocalStorage>(context, listen: false);
       if (widget.data['filename']!=null) {
         await localStorage.deleteFile(widget.data['filename']);
@@ -196,6 +205,7 @@ class _ResultScreenState extends State<ResultScreen> {
       }
     } catch (e) {
       debugPrint('$e');
+      _processing = false;
     }
   }
 
@@ -210,7 +220,7 @@ class _ResultScreenState extends State<ResultScreen> {
         barrierDismissible: true,
         builder: (BuildContext context) {
           return AlertDialog(
-            title: Text(AppLocalizations.of(context)!.warningLabel),
+            title: Text(AppLocalizations.of(context)!.warningLabel,style:TextStyle(color:Colors.black)),
             content: SingleChildScrollView(
               child: ListBody(
                 children: <Widget>[
@@ -244,7 +254,7 @@ class _ResultScreenState extends State<ResultScreen> {
         barrierDismissible: true,
         builder: (BuildContext context) {
           return AlertDialog(
-            title: Text(AppLocalizations.of(context)!.warningLabel),
+            title: Text(AppLocalizations.of(context)!.warningLabel,style:TextStyle(color:Colors.black)),
             content: SingleChildScrollView(
               child: ListBody(
                 children: <Widget>[
@@ -319,9 +329,9 @@ class _ResultScreenState extends State<ResultScreen> {
               _buildTitleField(),
               const SizedBox(height: 16),
               _buildDescriptionField(),
-              const SizedBox(height: 16),
-              _buildPicturePicker(),
               const SizedBox(height: 30),
+              _buildUploadPictureRow(),
+              const SizedBox(height: 45),
               _buildControlRow(),
             ],
           ),
@@ -351,14 +361,38 @@ class _ResultScreenState extends State<ResultScreen> {
   }
 
   Widget _buildStats() {
+    return Row(
+      children: [
+        Expanded(child:_buildTimeDisplay()),
+        Expanded(child:_buildDistanceDisplay()),
+        Expanded(child:_buildAvgSpeedDisplay()),
+      ],
+    );
+  }
+
+  Widget _buildTimeDisplay() {
     return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Text(
-          "${AppLocalizations.of(context)!.timeLabel}: $duration ${AppLocalizations.of(context)!.speedUnitLabel}  •  ${AppLocalizations.of(context)!.distanceLabel}: $distance ${AppLocalizations.of(context)!.distanceUnitLabel}  •  ${AppLocalizations.of(context)!.avgSpeedLabel}: ${speedavg.toStringAsFixed(2)} ${AppLocalizations.of(context)!.speedUnitLabel}",
-          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-          textAlign: TextAlign.center,
-        ),
+      child: Text(
+        "${AppLocalizations.of(context)!.timeLabel}:\n$duration\n${AppLocalizations.of(context)!.timeUnitLabel}",
+        textAlign: TextAlign.center,
+      ),
+    );
+  }
+
+  Widget _buildDistanceDisplay() {
+    return Card(
+      child: Text(
+        "${AppLocalizations.of(context)!.distanceLabel}\n${distance.toStringAsFixed(2)}\n${AppLocalizations.of(context)!.distanceUnitLabel}",
+        textAlign: TextAlign.center,
+      ),
+    );
+  }
+
+  Widget _buildAvgSpeedDisplay() {
+    return Card(
+      child: Text(
+        "${AppLocalizations.of(context)!.avgSpeedLabel}:\n${speedavg.toStringAsFixed(2)}\n${AppLocalizations.of(context)!.speedUnitLabel}",
+        textAlign: TextAlign.center,
       ),
     );
   }
@@ -366,10 +400,11 @@ class _ResultScreenState extends State<ResultScreen> {
   Widget _buildTypeField() {
     return DropdownButtonFormField<String>(
       initialValue: activityType,
+      dropdownColor: Theme.of(context).cardTheme.color,
       decoration: InputDecoration(
         labelText: AppLocalizations.of(context)!.activityTypeLabel,
         border: OutlineInputBorder(),
-        prefixIcon: Icon(Icons.sports),
+        prefixIcon: Icon(Icons.sports,color: Theme.of(context).iconTheme.color),
       ),
       items: activityIcons.keys.map((key) {
         return DropdownMenuItem(
@@ -378,7 +413,7 @@ class _ResultScreenState extends State<ResultScreen> {
             children: [
               Icon(activityIcons[key]),
               const SizedBox(width: 10),
-              Text(activityLabels[key] ?? key),
+              Text(activityLabels[key] ?? key,style:TextStyle(color:Theme.of(context).inputDecorationTheme.hintStyle!.color)),
             ],
           ),
         );
@@ -415,19 +450,38 @@ class _ResultScreenState extends State<ResultScreen> {
   }
 
   Widget _buildPicturePicker() {
-    return TextButton(
+    return ElevatedButton(
       onPressed: () async {
-        image = await picker.pickImage(source: ImageSource.gallery);
+        XFile? newImage = await picker.pickImage(source: ImageSource.gallery);
+        if (newImage!=null) {
+          image = newImage;
+          _hasUnsavedChanges = true;
+          setState(() {
+            imageName = image?.name;
+          });
+        }
       },
-      child: Text("TEST"),
+      child: Text(AppLocalizations.of(context)!.uploadPictureButtonLabel),
+    );
+  }
+
+  Widget _buildUploadPictureRow() {
+    return Row(
+      children: [
+        Expanded(flex:2,child: _buildPicturePicker()),
+        SizedBox(width:20),
+        Expanded(child:Text(imageName==null ? "" : imageName!, overflow: TextOverflow.ellipsis)),
+      ],
     );
   }
 
   Widget _buildSaveLocallyButton() {
     return IconButton(
       onPressed: () async {
-        await _saveLocally();
-        if (mounted) Navigator.pop(context);
+        if (!_processing) {
+          await _saveLocally();
+          if (mounted) Navigator.pop(context);
+        }
       },
       iconSize: 32,
       icon: Icon(Icons.save),
@@ -437,7 +491,7 @@ class _ResultScreenState extends State<ResultScreen> {
   Widget _buildDeleteButton() {
     return IconButton(
       onPressed: () async {
-        _deletePopup();
+        if (!_processing) _deletePopup();
       },
       iconSize: 32,
       icon: Icon(Icons.delete_rounded),
@@ -450,8 +504,10 @@ class _ResultScreenState extends State<ResultScreen> {
         if (offlineMode) {
           _displaySnackbar(AppLocalizations.of(context)!.offlineModePageBlockedMessage);
         } else {
-          await _saveActivity();
-          if (mounted) Navigator.pop(context);
+          if (!_processing) {
+            await _saveActivity();
+            if (mounted) Navigator.pop(context);
+          }
         }
       },
       style: ElevatedButton.styleFrom(

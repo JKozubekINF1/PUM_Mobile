@@ -24,6 +24,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get registerPageTitle => 'Register';
 
   @override
+  String get resetPasswordPageTitle => 'Reset Password';
+
+  @override
   String get homePageTitle => 'Homepage';
 
   @override
@@ -33,6 +36,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get resultPageTitle => 'Results';
 
   @override
+  String get viewActivityPageTitle => 'Activity';
+
+  @override
   String get profilePageTitle => 'Your Profile';
 
   @override
@@ -40,6 +46,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settingsPageTitle => 'App Settings';
+
+  @override
+  String get activityHistoryPageTitle => 'Your Activity History';
+
+  @override
+  String get leaderboardPageTitle => 'Leaderboard';
 
   @override
   String get warningLabel => 'Warning';
@@ -103,6 +115,24 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get profileDayOfBirthLabel => 'Date of birth';
+
+  @override
+  String get dateLabel => 'Date';
+
+  @override
+  String get sortByLabel => 'Sort by';
+
+  @override
+  String get rankedByLabel => 'Ranked by';
+
+  @override
+  String get sortByTotalDistanceLabel => 'Total Distance';
+
+  @override
+  String get sortByActivityCountLabel => 'Activity Count';
+
+  @override
+  String get sortByTotalDurationLabel => 'Total Duration';
 
   @override
   String get optionalLabel => 'Optional';
@@ -204,6 +234,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get submitLabel => 'Submit';
 
   @override
+  String get chooseAvatarButtonLabel => 'Choose Avatar';
+
+  @override
+  String get uploadPictureButtonLabel => 'Upload a picture';
+
+  @override
   String get uploadQueueLabel => 'activities are still pending in queue';
 
   @override
@@ -286,6 +322,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get missingRouteMessage => 'Route missing';
+
+  @override
+  String get nicknameTakenMessage => 'Nickname already taken';
 
   @override
   String get noConnectionMessage =>

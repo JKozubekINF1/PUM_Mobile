@@ -24,6 +24,9 @@ class AppLocalizationsPl extends AppLocalizations {
   String get registerPageTitle => 'Rejestracja';
 
   @override
+  String get resetPasswordPageTitle => 'Resetuj Hasło';
+
+  @override
   String get homePageTitle => 'Strona główna';
 
   @override
@@ -33,6 +36,9 @@ class AppLocalizationsPl extends AppLocalizations {
   String get resultPageTitle => 'Wyniki';
 
   @override
+  String get viewActivityPageTitle => 'Aktywność';
+
+  @override
   String get profilePageTitle => 'Twój Profil';
 
   @override
@@ -40,6 +46,12 @@ class AppLocalizationsPl extends AppLocalizations {
 
   @override
   String get settingsPageTitle => 'Ustawienia';
+
+  @override
+  String get activityHistoryPageTitle => 'Twoja Historia Aktywności';
+
+  @override
+  String get leaderboardPageTitle => 'Ranking';
 
   @override
   String get warningLabel => 'Uwaga';
@@ -103,6 +115,24 @@ class AppLocalizationsPl extends AppLocalizations {
 
   @override
   String get profileDayOfBirthLabel => 'Data urodzin';
+
+  @override
+  String get dateLabel => 'Data';
+
+  @override
+  String get sortByLabel => 'Sortuj poprzez';
+
+  @override
+  String get rankedByLabel => 'Ranking Według';
+
+  @override
+  String get sortByTotalDistanceLabel => 'Całkowity Dystans';
+
+  @override
+  String get sortByActivityCountLabel => 'Ilość Aktywności';
+
+  @override
+  String get sortByTotalDurationLabel => 'Całkowity Czas';
 
   @override
   String get optionalLabel => 'Opcjonalne';
@@ -204,6 +234,12 @@ class AppLocalizationsPl extends AppLocalizations {
   String get submitLabel => 'Wyślij';
 
   @override
+  String get chooseAvatarButtonLabel => 'Wybierz Awatar';
+
+  @override
+  String get uploadPictureButtonLabel => 'Prześlij zdjęcie';
+
+  @override
   String get uploadQueueLabel => 'aktywności nadal oczekują w kolejce';
 
   @override
@@ -287,6 +323,9 @@ class AppLocalizationsPl extends AppLocalizations {
 
   @override
   String get missingRouteMessage => 'Brak trasy';
+
+  @override
+  String get nicknameTakenMessage => 'Nazwa użytkownika jest zajęta';
 
   @override
   String get noConnectionMessage =>

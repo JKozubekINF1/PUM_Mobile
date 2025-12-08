@@ -77,6 +77,7 @@ class _SettingsPageState extends State<SettingsPage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
+            SizedBox(height:20),
             _buildLanguageSetting(),
             _buildThemeSetting(),
           ],
@@ -145,6 +146,7 @@ class _SettingsPageState extends State<SettingsPage> {
 
     return DropdownButtonFormField<String>(
       initialValue: _language,
+      dropdownColor: Theme.of(context).cardTheme.color,
       onChanged: (String? newValue) {
         setState(() {
           _language = newValue;
@@ -155,30 +157,43 @@ class _SettingsPageState extends State<SettingsPage> {
       items: languageList.map<DropdownMenuItem<String>>((lang) {
         return DropdownMenuItem<String>(
           value: lang['value'],
-          child: Text(lang['name']!),
+          child: Text(lang['name']!,style:TextStyle(color:Theme.of(context).inputDecorationTheme.hintStyle!.color)),
         );
       }).toList(),
     );
   }
 
   Widget _buildThemeFormField() {
-    final lightTheme = {
-      'value': 'light',
-      'name': 'Light Theme',
+    final defaultTheme = {
+      'value': 'default',
+      'name': 'Default',
     };
 
-    final testTheme = {
-      'value': 'test',
-      'name': 'Test Theme',
+    final darkTheme = {
+      'value': 'dark',
+      'name': 'Midnight',
+    };
+
+    final christmasTheme = {
+      'value': 'christmas',
+      'name': 'Jolly',
+    };
+
+    final halloweenTheme = {
+      'value': 'halloween',
+      'name': 'Spooky',
     };
 
     final themeList = [
-      lightTheme,
-      testTheme,
+      defaultTheme,
+      darkTheme,
+      christmasTheme,
+      halloweenTheme,
     ];
 
     return DropdownButtonFormField<String>(
       initialValue: _theme,
+      dropdownColor: Theme.of(context).cardTheme.color,
       onChanged: (String? newValue) {
         setState(() {
           _theme = newValue;
@@ -189,7 +204,7 @@ class _SettingsPageState extends State<SettingsPage> {
       items: themeList.map<DropdownMenuItem<String>>((theme) {
         return DropdownMenuItem<String>(
           value: theme['value'],
-          child: Text(theme['name']!),
+          child: Text(theme['name']!,style:TextStyle(color:Theme.of(context).inputDecorationTheme.hintStyle!.color))
         );
       }).toList(),
     );

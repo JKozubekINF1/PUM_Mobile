@@ -128,6 +128,12 @@ abstract class AppLocalizations {
   /// **'Register'**
   String get registerPageTitle;
 
+  /// Title of reset password page that usually appears on the app bar
+  ///
+  /// In en, this message translates to:
+  /// **'Reset Password'**
+  String get resetPasswordPageTitle;
+
   /// Title of home page that usually appears on the app bar
   ///
   /// In en, this message translates to:
@@ -146,6 +152,12 @@ abstract class AppLocalizations {
   /// **'Results'**
   String get resultPageTitle;
 
+  /// Title of view activity page that usually appears on the app bar
+  ///
+  /// In en, this message translates to:
+  /// **'Activity'**
+  String get viewActivityPageTitle;
+
   /// Title of profile page that usually appears on the app bar
   ///
   /// In en, this message translates to:
@@ -163,6 +175,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'App Settings'**
   String get settingsPageTitle;
+
+  /// Title of activity history page that usually appears on the app bar
+  ///
+  /// In en, this message translates to:
+  /// **'Your Activity History'**
+  String get activityHistoryPageTitle;
+
+  /// Title of leaderboard page that usually appears on the app bar
+  ///
+  /// In en, this message translates to:
+  /// **'Leaderboard'**
+  String get leaderboardPageTitle;
 
   /// Label text that appears on a popup window before warning the user
   ///
@@ -289,6 +313,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Date of birth'**
   String get profileDayOfBirthLabel;
+
+  /// Label text for a date
+  ///
+  /// In en, this message translates to:
+  /// **'Date'**
+  String get dateLabel;
+
+  /// Label text for choosing a sorting option
+  ///
+  /// In en, this message translates to:
+  /// **'Sort by'**
+  String get sortByLabel;
+
+  /// Label text for choosing a sorting option in the leaderboard
+  ///
+  /// In en, this message translates to:
+  /// **'Ranked by'**
+  String get rankedByLabel;
+
+  /// Label text for the sort option - total distance
+  ///
+  /// In en, this message translates to:
+  /// **'Total Distance'**
+  String get sortByTotalDistanceLabel;
+
+  /// Label text for the sort option - activity count
+  ///
+  /// In en, this message translates to:
+  /// **'Activity Count'**
+  String get sortByActivityCountLabel;
+
+  /// Label text for the sort option - total duration
+  ///
+  /// In en, this message translates to:
+  /// **'Total Duration'**
+  String get sortByTotalDurationLabel;
 
   /// Label text that appears as a part of optional options
   ///
@@ -488,6 +548,18 @@ abstract class AppLocalizations {
   /// **'Submit'**
   String get submitLabel;
 
+  /// Label text for an image picker button that lets you choose your avatar
+  ///
+  /// In en, this message translates to:
+  /// **'Choose Avatar'**
+  String get chooseAvatarButtonLabel;
+
+  /// Label text for an image picker that lets you upload a picture
+  ///
+  /// In en, this message translates to:
+  /// **'Upload a picture'**
+  String get uploadPictureButtonLabel;
+
   /// Label text for the upload queue that appears when offline
   ///
   /// In en, this message translates to:
@@ -643,6 +715,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Route missing'**
   String get missingRouteMessage;
+
+  /// Message that appears after trying to register or change your name to an already taken nickname
+  ///
+  /// In en, this message translates to:
+  /// **'Nickname already taken'**
+  String get nicknameTakenMessage;
 
   /// Message that appears after losing connection to the server
   ///

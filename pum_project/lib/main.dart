@@ -9,6 +9,7 @@ import 'package:pum_project/pages/activityresult.dart';
 import 'package:pum_project/pages/profile.dart';
 import 'package:pum_project/pages/editprofile.dart';
 import 'package:pum_project/pages/settings.dart';
+import 'package:pum_project/pages/viewonlineactivity.dart';
 import 'l10n/generated/app_localizations.dart';
 import 'package:pum_project/services/api_connection.dart';
 import 'package:pum_project/services/app_settings.dart';
@@ -65,7 +66,7 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   Locale? _locale;
-  ThemeData? _theme = AppTheme.lightTheme;
+  ThemeData? _theme = AppTheme.defaultTheme;
 
   void setLocale(Locale locale) {
     setState(() {
@@ -76,8 +77,10 @@ class _MyAppState extends State<MyApp> {
   void setTheme(String themeName) {
     setState(() {
       switch(themeName) {
-        case "light": _theme = AppTheme.lightTheme; break;
-        case "test": _theme = AppTheme.testTheme; break;
+        case "default": _theme = AppTheme.defaultTheme; break;
+        case "dark": _theme = AppTheme.darkTheme; break;
+        case "christmas": _theme = AppTheme.christmasTheme; break;
+        case "halloween": _theme = AppTheme.halloweenTheme; break;
       }
     });
   }
@@ -90,7 +93,7 @@ class _MyAppState extends State<MyApp> {
         setState(() {
           _locale = Locale(settings?["language"] ?? "en");
         });
-        setTheme(settings?["theme"] ?? "light");
+        setTheme(settings?["theme"] ?? "default");
       }
     } catch (e) {
       debugPrint('Failed to fetch settings');
@@ -123,6 +126,12 @@ class _MyAppState extends State<MyApp> {
         '/results' : (BuildContext context) {
           final args = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
           return ResultScreen(
+            data: args['Data'],
+          );
+        },
+        '/activity/get' : (BuildContext context) {
+          final args = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
+          return ViewOnlineActivityScreen(
             data: args['Data'],
           );
         },

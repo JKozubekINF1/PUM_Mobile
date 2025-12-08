@@ -10,7 +10,7 @@ class AppSettings {
 
   final Map defaultSettings = {
     "language" : "en",
-    "theme" : "light",
+    "theme" : "default",
   };
 
   Future<Map?> getSettings() async {

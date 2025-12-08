@@ -3,7 +3,7 @@ import 'package:http/http.dart' as http;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:pum_project/models/profile_data.dart';
-import 'dart:typed_data';
+import 'package:image_picker/image_picker.dart';
 
 class ApiService {
   final String baseUrl = 'https://localhost:7123'; //http://10.0.2.2:5123
@@ -18,14 +18,14 @@ class ApiService {
 
   Future<String?> getToken() async {
     final token = await _storage.read(key: 'token');
-    debugPrint('[DEBUG AUTH] Token odczytany: ${token != null ? 'OK (długość: ${token.length})' : 'Brak'}');
+    debugPrint('[API] Attempting to read token: ${token != null ? 'OK (length: ${token.length})' : 'Empty'}');
     return token;
   }
 
   Future<void> clearAuthData() async {
     await _storage.delete(key: 'token');
     await _storage.delete(key: 'email');
-    debugPrint('[DEBUG AUTH] Dane autoryzacyjne USUNIĘTE.');
+    debugPrint('[API] Auth data cleared');
   }
 
   Future<Map<String, String>> _getHeaders({bool requiresAuth = false}) async {
@@ -92,8 +92,7 @@ class ApiService {
           await _storage.write(key: 'token', value: token);
           await _storage.write(key: 'email', value: email);
 
-          debugPrint(responseBody['token']);
-          debugPrint('[DEBUG AUTH] Token ZAPISANY po loginie (długość: ${token.length})');
+          debugPrint('[API] Token saved after login (length: ${token.length})');
         }
         return responseBody;
       } else if (response.statusCode == 401) {
@@ -166,7 +165,7 @@ class ApiService {
     required double distanceMeters,
     required double averageSpeedMs,
     required List<List<double>> routeCoordinates,
-    String title = 'Bez tytułu',
+    String title = 'No Title',
     String? description,
     String activityType = 'Running',
   }) async {
@@ -189,11 +188,11 @@ class ApiService {
     );
 
     if (response.statusCode == 200 || response.statusCode == 201) {
-      debugPrint('[API] Aktywność zapisana!');
+      debugPrint('[API] Activity saved');
       return;
     } else {
       final error = json.decode(utf8.decode(response.bodyBytes));
-      throw Exception(error['message'] ?? 'Błąd ${response.statusCode}');
+      throw Exception(error['message'] ?? 'Error ${response.statusCode}');
     }
   }
 
@@ -216,6 +215,77 @@ class ApiService {
       }
     } catch (e) {
       throw Exception('Network error during activities fetch: $e');
+    }
+  }
+
+  Future<Map<String, dynamic>> getActivity(String id) async {
+    final url = Uri.parse('$baseUrl/api/Activities/$id');
+    try {
+      final response = await _client.get(
+        url,
+        headers: await _getHeaders(requiresAuth: true),
+      );
+
+      final responseBody = json.decode(utf8.decode(response.bodyBytes));
+
+      if (response.statusCode == 200) {
+        return responseBody;
+      } else if (response.statusCode == 401) {
+        throw Exception('Unauthorized. Token expired or invalid.');
+      } else {
+        throw Exception(responseBody['message'] ?? 'Failed to fetch activity: ${response.statusCode}');
+      }
+    } catch (e) {
+      throw Exception('Network error during activity fetch: $e');
+    }
+  }
+
+  Future<List<Map<String, dynamic>>> getLeaderboard() async {
+    final url = Uri.parse('$baseUrl/api/Activities/leaderboard');
+    try {
+      final response = await _client.get(
+        url,
+        headers: await _getHeaders(requiresAuth: true),
+      );
+
+      final responseBody = json.decode(utf8.decode(response.bodyBytes));
+
+      if (response.statusCode == 200) {
+        return (responseBody as List).cast<Map<String, dynamic>>();
+      } else if (response.statusCode == 401) {
+        throw Exception('Unauthorized. Token expired or invalid.');
+      } else {
+        throw Exception(responseBody['message'] ?? 'Failed to fetch leaderboard: ${response.statusCode}');
+      }
+    } catch (e) {
+      throw Exception('Network error during leaderboard fetch: $e');
+    }
+  }
+
+  Future<void> uploadAvatar({
+    required XFile imageFile,
+  }) async {
+    final url = Uri.parse('$baseUrl/api/Profile/upload-avatar');
+    try {
+      final request = http.MultipartRequest("POST", url);
+      final headers = await _getHeaders(requiresAuth: true);
+      request.headers.addAll(headers);
+      request.files.add(
+        await http.MultipartFile.fromPath(
+          'file',
+          imageFile.path,
+        ),
+      );
+      final response = await _client.send(request);
+      if (response.statusCode == 200) {
+        debugPrint('[API] User avatar uploaded successfully');
+      } else if (response.statusCode == 401) {
+        throw Exception('Unauthorized. Token expired or invalid.');
+      } else {
+        throw Exception('Failed to upload avatar: ${response.statusCode}');
+      }
+    } catch (e) {
+      throw Exception('Network error during avatar upload: $e');
     }
   }
 }

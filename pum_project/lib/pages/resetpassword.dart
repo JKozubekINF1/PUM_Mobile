@@ -18,11 +18,23 @@ class _ResetPageState extends State<ResetPage> {
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            Text('To be added'),
+            Flexible(
+              flex: 1,
+              child: _buildPageTitle(),
+            ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildPageTitle() {
+    return Align(
+      alignment: Alignment.center,
+      child: Text(
+        AppLocalizations.of(context)!.resetPasswordPageTitle,
+        style: Theme.of(context).textTheme.bodyLarge,
       ),
     );
   }

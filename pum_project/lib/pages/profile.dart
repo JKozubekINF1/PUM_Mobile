@@ -15,6 +15,7 @@ class ProfilePage extends StatefulWidget {
 class _ProfilePageState extends State<ProfilePage> {
   late Future<ProfileData> _profileFuture;
 
+  String _userName = "";
   String _firstName = "";
   String _lastName = "";
   String _height = "";
@@ -43,6 +44,9 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   void _initializeProfile(ProfileData profile) {
+    if (profile.userName != null) {
+      _userName = profile.userName!;
+    }
     if (profile.firstName != null) {
       _firstName = profile.firstName!;
     }
@@ -127,6 +131,15 @@ class _ProfilePageState extends State<ProfilePage> {
   Widget _buildProfileHeader() {
     return Column(
       children: [
+        Text(
+          _userName,
+          textAlign: TextAlign.center,
+          overflow: TextOverflow.ellipsis,
+          style: TextStyle(
+            fontSize: 38,
+            color: Theme.of(context).appBarTheme.foregroundColor as Color,
+          ),
+        ),
         _buildProfilePicture(),
         Text(
           _firstName,
@@ -134,6 +147,7 @@ class _ProfilePageState extends State<ProfilePage> {
           overflow: TextOverflow.ellipsis,
           style: TextStyle(
             fontSize: 32,
+            color: Theme.of(context).appBarTheme.foregroundColor as Color,
           ),
         ),
         Text(
@@ -142,6 +156,7 @@ class _ProfilePageState extends State<ProfilePage> {
           overflow: TextOverflow.ellipsis,
           style: TextStyle(
             fontSize: 32,
+            color: Theme.of(context).appBarTheme.foregroundColor as Color,
           ),
         ),
       ],
@@ -150,7 +165,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
   Widget _buildProfileInfo() {
     return Card(
-      color: Theme.of(context).primaryColorLight,
+      color: Theme.of(context).cardTheme.color,
       shape: BeveledRectangleBorder(
         borderRadius: BorderRadius.circular(10.0),
       ),
