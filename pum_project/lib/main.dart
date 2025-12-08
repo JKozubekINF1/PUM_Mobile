@@ -28,7 +28,7 @@ void main() async {
   sqfliteFfiInit();
   databaseFactory = databaseFactoryFfi;
   // COMMENT WHEN TESTING ON ANDROID
-  await UploadQueue.instance.init();
+  // await UploadQueue.instance.init();
   runApp(
       MultiProvider(
           providers: [

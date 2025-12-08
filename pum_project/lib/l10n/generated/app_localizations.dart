@@ -751,6 +751,90 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'An error has occurred, try again later'**
   String get genericErrorMessage;
+
+  /// Label for the token input field
+  ///
+  /// In en, this message translates to:
+  /// **'Code from email'**
+  String get tokenLabel;
+
+  /// Label for the new password input field
+  ///
+  /// In en, this message translates to:
+  /// **'New password'**
+  String get newPasswordLabel;
+
+  /// Button text to submit new password
+  ///
+  /// In en, this message translates to:
+  /// **'Change password'**
+  String get resetPasswordButton;
+
+  /// Button text to request password reset code
+  ///
+  /// In en, this message translates to:
+  /// **'Send code'**
+  String get sendCodeButton;
+
+  /// Error message for invalid email format
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a valid email'**
+  String get invalidEmailError;
+
+  /// Error message when passwords differ
+  ///
+  /// In en, this message translates to:
+  /// **'Passwords do not match'**
+  String get passwordsDoNotMatch;
+
+  /// Button text to go back to email entry
+  ///
+  /// In en, this message translates to:
+  /// **'Wrong email? Go back.'**
+  String get wrongEmailGoBackLabel;
+
+  /// Error message when password is too short
+  ///
+  /// In en, this message translates to:
+  /// **'Password must be at least 6 characters'**
+  String get passwordTooShortError;
+
+  /// Instruction after sending the code
+  ///
+  /// In en, this message translates to:
+  /// **'We sent a code to your email. Enter it below.'**
+  String get codeSentInstructionMessage;
+
+  /// Error message for empty code field
+  ///
+  /// In en, this message translates to:
+  /// **'Enter code'**
+  String get enterCodeError;
+
+  /// Success message after password reset
+  ///
+  /// In en, this message translates to:
+  /// **'Password changed! Log in.'**
+  String get passwordResetSuccessMessage;
+
+  /// Success message after sending code
+  ///
+  /// In en, this message translates to:
+  /// **'Code sent! Check email.'**
+  String get codeSentSuccessMessage;
+
+  /// Instruction on the initial reset screen
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your email address. We will send you a code needed to reset your password.'**
+  String get enterEmailInstructionMessage;
+
+  /// Label for generic error prefix
+  ///
+  /// In en, this message translates to:
+  /// **'Error'**
+  String get errorLabel;
 }
 
 class _AppLocalizationsDelegate

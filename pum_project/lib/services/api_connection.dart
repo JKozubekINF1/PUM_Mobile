@@ -6,7 +6,7 @@ import 'package:pum_project/models/profile_data.dart';
 import 'package:image_picker/image_picker.dart';
 
 class ApiService {
-  final String baseUrl = 'https://localhost:7123'; //http://10.0.2.2:5123
+  final String baseUrl = 'https://activitis.hostingasp.pl.hostingasp.pl';
   final FlutterSecureStorage _storage;
   final http.Client _client;
 
@@ -18,7 +18,6 @@ class ApiService {
 
   Future<String?> getToken() async {
     final token = await _storage.read(key: 'token');
-    debugPrint('[API] Attempting to read token: ${token != null ? 'OK (length: ${token.length})' : 'Empty'}');
     return token;
   }
 
@@ -42,11 +41,7 @@ class ApiService {
   }
 
   Future<Map<String, dynamic>> register(
-      String email,
-      String username,
-      String password,
-      String confirmPassword
-      ) async {
+      String email, String username, String password, String confirmPassword) async {
     final url = Uri.parse('$baseUrl/api/Auth/register');
     try {
       final response = await _client.post(
@@ -65,7 +60,8 @@ class ApiService {
       if (response.statusCode == 200) {
         return responseBody;
       } else {
-        throw Exception(responseBody['message'] ?? 'Error during registration: ${response.statusCode}');
+        throw Exception(responseBody['message'] ??
+            'Error during registration: ${response.statusCode}');
       }
     } catch (e) {
       throw Exception('Network error during registration: $e');
@@ -91,19 +87,73 @@ class ApiService {
         if (token != null) {
           await _storage.write(key: 'token', value: token);
           await _storage.write(key: 'email', value: email);
-
-          debugPrint('[API] Token saved after login (length: ${token.length})');
         }
         return responseBody;
       } else if (response.statusCode == 401) {
         throw Exception('Invalid credentials.');
       } else {
-        throw Exception(responseBody['message'] ?? 'Login failed with status: ${response.statusCode}');
+        throw Exception(responseBody['message'] ??
+            'Login failed with status: ${response.statusCode}');
       }
     } catch (e) {
       throw Exception('Network error during login: $e');
     }
   }
+
+
+  Future<void> forgotPassword(String email) async {
+    final url = Uri.parse('$baseUrl/api/Auth/forgot-password');
+    try {
+      final response = await _client.post(
+        url,
+        headers: await _getHeaders(requiresAuth: false),
+        body: json.encode({'email': email}),
+      );
+      if (response.statusCode == 200) {
+        return;
+      } else {
+        final body = json.decode(utf8.decode(response.bodyBytes));
+        throw Exception(body['message'] ?? 'Błąd wysyłania kodu.');
+      }
+    } catch (e) {
+      throw Exception('Błąd sieci: $e');
+    }
+  }
+
+  Future<void> resetPassword(String email, String token, String newPassword,
+      String confirmNewPassword) async {
+    final url = Uri.parse('$baseUrl/api/Auth/reset-password');
+    try {
+      final response = await _client.post(
+        url,
+        headers: await _getHeaders(requiresAuth: false),
+        body: json.encode({
+          'email': email,
+          'token': token,
+          'newPassword': newPassword,
+          'confirmNewPassword': confirmNewPassword,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        return;
+      } else {
+        final body = json.decode(utf8.decode(response.bodyBytes));
+        String errorMsg = body['message'] ?? 'Błąd resetowania hasła';
+
+        if (body is List) {
+          errorMsg = body.map((e) => e['description']).join('\n');
+        } else if (body['errors'] != null) {
+          errorMsg = body['errors'].toString();
+        }
+
+        throw Exception(errorMsg);
+      }
+    } catch (e) {
+      throw Exception('Błąd sieci: $e');
+    }
+  }
+
 
   Future<ProfileData> fetchProfile() async {
     final url = Uri.parse('$baseUrl/api/Profile');
@@ -121,7 +171,8 @@ class ApiService {
         await clearAuthData();
         throw Exception('Unauthorized. Token expired or invalid.');
       } else {
-        throw Exception(responseBody['message'] ?? 'Failed to fetch profile: ${response.statusCode}');
+        throw Exception(responseBody['message'] ??
+            'Failed to fetch profile: ${response.statusCode}');
       }
     } catch (e) {
       throw Exception('Network error during profile fetch: $e');
@@ -138,11 +189,10 @@ class ApiService {
       );
 
       if (response.statusCode == 200) {
-        debugPrint('[DEBUG API] Profile updated successfully.');
         return;
       } else if (response.statusCode == 400 || response.statusCode == 401) {
-        final responseBody = json.decode(utf8.decode(response.bodyBytes));
         if (response.statusCode == 401) await clearAuthData();
+        final responseBody = json.decode(utf8.decode(response.bodyBytes));
         throw Exception(
             responseBody['message'] ?? 'Validation or unauthorized failed.');
       } else {
@@ -211,7 +261,8 @@ class ApiService {
       } else if (response.statusCode == 401) {
         throw Exception('Unauthorized. Token expired or invalid.');
       } else {
-        throw Exception(responseBody['message'] ?? 'Failed to fetch activities: ${response.statusCode}');
+        throw Exception(responseBody['message'] ??
+            'Failed to fetch activities: ${response.statusCode}');
       }
     } catch (e) {
       throw Exception('Network error during activities fetch: $e');
@@ -233,7 +284,8 @@ class ApiService {
       } else if (response.statusCode == 401) {
         throw Exception('Unauthorized. Token expired or invalid.');
       } else {
-        throw Exception(responseBody['message'] ?? 'Failed to fetch activity: ${response.statusCode}');
+        throw Exception(responseBody['message'] ??
+            'Failed to fetch activity: ${response.statusCode}');
       }
     } catch (e) {
       throw Exception('Network error during activity fetch: $e');
@@ -255,7 +307,8 @@ class ApiService {
       } else if (response.statusCode == 401) {
         throw Exception('Unauthorized. Token expired or invalid.');
       } else {
-        throw Exception(responseBody['message'] ?? 'Failed to fetch leaderboard: ${response.statusCode}');
+        throw Exception(responseBody['message'] ??
+            'Failed to fetch leaderboard: ${response.statusCode}');
       }
     } catch (e) {
       throw Exception('Network error during leaderboard fetch: $e');

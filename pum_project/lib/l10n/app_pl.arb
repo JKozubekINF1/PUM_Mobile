@@ -108,5 +108,20 @@
     "noLocationServicesMessage": "Usługi lokalizacyjne są wyłączone, uruchom lokalizacje",
     "noLocationPermissionsMessage": "Uprawnienia usług lokalizacyjnych zostały odrzucone",
     "noLocationPermissionsForeverMessage": "Uprawnienia usług lokalizacyjnych są permamentnie odrzucone, sprawdź ustawienia systemowe",
-    "genericErrorMessage": "Wystąpił błąd, spróbuj później"
+    "genericErrorMessage": "Wystąpił błąd, spróbuj później",
+    "tokenLabel": "Kod z maila",
+    "newPasswordLabel": "Nowe hasło",
+    "resetPasswordButton": "Zmień hasło",
+    "resetPasswordPageTitle": "Reset Hasła",
+    "sendCodeButton": "Wyślij kod",
+    "invalidEmailError": "Podaj poprawny email",
+    "passwordsDoNotMatch": "Hasła nie są identyczne",
+    "wrongEmailGoBackLabel": "Zły email? Wróć.",
+    "passwordTooShortError": "Hasło musi mieć min. 6 znaków",
+    "codeSentInstructionMessage": "Wysłaliśmy kod na Twój email. Wpisz go poniżej.",
+    "enterCodeError": "Podaj kod",
+    "passwordResetSuccessMessage": "Hasło zostało zmienione! Zaloguj się.",
+    "codeSentSuccessMessage": "Kod został wysłany! Sprawdź email.",
+    "enterEmailInstructionMessage": "Podaj swój adres email. Wyślemy Ci kod potrzebny do zresetowania hasła.",
+    "errorLabel": "Błąd"
 }

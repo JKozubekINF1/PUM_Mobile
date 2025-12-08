@@ -435,5 +435,61 @@
     "genericErrorMessage": "An error has occurred, try again later",
         "@genericErrorMessage": {
             "description": "A generic error message used in most cases"
+        },
+    "tokenLabel": "Code from email",
+        "@tokenLabel": {
+            "description": "Label for the token input field"
+        },
+    "newPasswordLabel": "New password",
+        "@newPasswordLabel": {
+            "description": "Label for the new password input field"
+        },
+    "resetPasswordButton": "Change password",
+        "@resetPasswordButton": {
+            "description": "Button text to submit new password"
+        },
+    "sendCodeButton": "Send code",
+        "@sendCodeButton": {
+            "description": "Button text to request password reset code"
+        },
+    "invalidEmailError": "Enter a valid email",
+        "@invalidEmailError": {
+            "description": "Error message for invalid email format"
+        },
+    "passwordsDoNotMatch": "Passwords do not match",
+        "@passwordsDoNotMatch": {
+            "description": "Error message when passwords differ"
+        },
+    "wrongEmailGoBackLabel": "Wrong email? Go back.",
+        "@wrongEmailGoBackLabel": {
+            "description": "Button text to go back to email entry"
+        },
+    "passwordTooShortError": "Password must be at least 6 characters",
+        "@passwordTooShortError": {
+            "description": "Error message when password is too short"
+        },
+    "codeSentInstructionMessage": "We sent a code to your email. Enter it below.",
+        "@codeSentInstructionMessage": {
+            "description": "Instruction after sending the code"
+        },
+    "enterCodeError": "Enter code",
+        "@enterCodeError": {
+            "description": "Error message for empty code field"
+        },
+    "passwordResetSuccessMessage": "Password changed! Log in.",
+        "@passwordResetSuccessMessage": {
+            "description": "Success message after password reset"
+        },
+    "codeSentSuccessMessage": "Code sent! Check email.",
+        "@codeSentSuccessMessage": {
+            "description": "Success message after sending code"
+        },
+    "enterEmailInstructionMessage": "Enter your email address. We will send you a code needed to reset your password.",
+        "@enterEmailInstructionMessage": {
+            "description": "Instruction on the initial reset screen"
+        },
+    "errorLabel": "Error",
+        "@errorLabel": {
+            "description": "Label for generic error prefix"
         }
 }

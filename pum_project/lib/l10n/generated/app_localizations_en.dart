@@ -344,4 +344,48 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get genericErrorMessage => 'An error has occurred, try again later';
+
+  @override
+  String get tokenLabel => 'Code from email';
+
+  @override
+  String get newPasswordLabel => 'New password';
+
+  @override
+  String get resetPasswordButton => 'Change password';
+
+  @override
+  String get sendCodeButton => 'Send code';
+
+  @override
+  String get invalidEmailError => 'Enter a valid email';
+
+  @override
+  String get passwordsDoNotMatch => 'Passwords do not match';
+
+  @override
+  String get wrongEmailGoBackLabel => 'Wrong email? Go back.';
+
+  @override
+  String get passwordTooShortError => 'Password must be at least 6 characters';
+
+  @override
+  String get codeSentInstructionMessage =>
+      'We sent a code to your email. Enter it below.';
+
+  @override
+  String get enterCodeError => 'Enter code';
+
+  @override
+  String get passwordResetSuccessMessage => 'Password changed! Log in.';
+
+  @override
+  String get codeSentSuccessMessage => 'Code sent! Check email.';
+
+  @override
+  String get enterEmailInstructionMessage =>
+      'Enter your email address. We will send you a code needed to reset your password.';
+
+  @override
+  String get errorLabel => 'Error';
 }

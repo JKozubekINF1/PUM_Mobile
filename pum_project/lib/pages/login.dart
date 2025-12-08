@@ -6,9 +6,8 @@ import '../providers/auth_provider.dart';
 import '../models/profile_data.dart';
 
 class LoginPage extends StatefulWidget {
-  const LoginPage({
-    super.key,
-  });
+  const LoginPage({super.key});
+
   @override
   State<LoginPage> createState() => _LoginPageState();
 }
@@ -35,21 +34,15 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 
-  void _setValidCredentials(bool valid) {
-    if (mounted) {
-      setState(() {
-        _validCredentials = valid;
-      });
-    }
-  }
-
   void _checkCredentials() {
     _setProcessing(true);
-    _setValidCredentials(true);
+    _validCredentials = true;
+
     if (_emailController.text.trim().isEmpty || _passwordController.text.trim().isEmpty) {
       _displaySnackbar(AppLocalizations.of(context)!.emptyFieldMessage);
-      _setValidCredentials(false);
+      _validCredentials = false;
     }
+
     if (_validCredentials) {
       _login();
     } else {
@@ -86,7 +79,7 @@ class _LoginPageState extends State<LoginPage> {
       return AppLocalizations.of(context)!.noConnectionMessage;
     } else if (msg.contains('credentials')) {
       return AppLocalizations.of(context)!.badLoginMessage;
-    } else{
+    } else {
       return AppLocalizations.of(context)!.genericErrorMessage;
     }
   }
@@ -97,7 +90,7 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   bool _profileInitializationRequirement(ProfileData profile) {
-    return (!(profile.firstName==null));
+    return (profile.firstName != null);
   }
 
   Future<void> _checkIfProfileInitialized() async {
@@ -119,111 +112,49 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-      ),
-      body: Column(
-        children: [
-          Flexible(
-            flex: 1,
-            child: _buildPageTitle(),
+      appBar: AppBar(),
+      body: Center(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(24.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              _buildPageHeader(),
+              const SizedBox(height: 40),
+              _buildEmailField(),
+              const SizedBox(height: 20),
+              _buildPasswordField(),
+              const SizedBox(height: 10),
+              _buildForgotPasswordText(),
+              const SizedBox(height: 30),
+              _buildLoginButton(),
+              const SizedBox(height: 20),
+              _buildRegisterText(),
+            ],
           ),
-          Flexible(
-            flex: 2,
-            child: _buildLoginColumn(),
-          ),
-          Flexible(
-            flex: 1,
-            child: _buildSubmitColumn(),
-          ),
-        ],
+        ),
       ),
     );
   }
 
-  Widget _buildLoginColumn() {
+  Widget _buildPageHeader() {
     return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: <Widget>[
-        Flexible(
-          flex: 1,
-          child: SizedBox(
-            width: double.infinity,
-            height: 50,
-            child: _buildEmailField(),
-          ),
+      children: [
+        Icon(
+          Icons.login,
+          size: 80,
+          color: Theme.of(context).primaryColor,
         ),
-        Flexible(
-          flex: 1,
-          child: const SizedBox(
-            width: double.infinity,
-            height: 10,
-          ),
-        ),
-        Flexible(
-          flex: 1,
-          child: SizedBox(
-            width: double.infinity,
-            height: 50,
-            child: _buildPasswordField(),
-          ),
-        ),
-        Flexible(
-          flex: 1,
-          child: const SizedBox(
-            width: double.infinity,
-            height: 10,
-          ),
-        ),
-        Flexible(
-          flex: 1,
-          child: SizedBox(
-            width: double.infinity,
-            height: 50,
-            child: _buildForgotPasswordText(),
+        const SizedBox(height: 16),
+        Text(
+          AppLocalizations.of(context)!.loginPageTitle,
+          style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+            fontWeight: FontWeight.bold,
+            color: Theme.of(context).primaryColor,
           ),
         ),
       ],
-    );
-  }
-
-  Widget _buildSubmitColumn() {
-    return Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: <Widget>[
-          Flexible(
-            flex: 1,
-            child: SizedBox(
-              width: double.infinity,
-              height: 50,
-              child: _buildLoginButton(),
-            ),
-          ),
-          Flexible(
-            flex: 1,
-            child: const SizedBox(
-              width: double.infinity,
-              height: 10,
-            ),
-          ),
-          Flexible(
-            flex: 1,
-            child: SizedBox(
-              width: double.infinity,
-              height: 50,
-              child: _buildRegisterText(),
-            ),
-          ),
-        ],
-    );
-  }
-
-  Widget _buildPageTitle() {
-    return Align(
-      alignment: Alignment.center,
-      child: Text(
-        AppLocalizations.of(context)!.loginPageTitle,
-        style: Theme.of(context).textTheme.bodyLarge,
-      ),
     );
   }
 
@@ -232,9 +163,10 @@ class _LoginPageState extends State<LoginPage> {
       controller: _emailController,
       decoration: InputDecoration(
         labelText: AppLocalizations.of(context)!.emailLabel,
+        prefixIcon: const Icon(Icons.email),
         border: const OutlineInputBorder(),
       ),
-      style: Theme.of(context).textTheme.bodyMedium,
+      keyboardType: TextInputType.emailAddress,
     );
   }
 
@@ -244,8 +176,9 @@ class _LoginPageState extends State<LoginPage> {
       obscureText: _obscurePassword,
       decoration: InputDecoration(
         labelText: AppLocalizations.of(context)!.passwordLabel,
+        prefixIcon: const Icon(Icons.lock),
         suffixIcon: IconButton(
-          icon: Icon(_obscurePassword ? Icons.visibility : Icons.visibility_off, color: Theme.of(context).iconTheme.color),
+          icon: Icon(_obscurePassword ? Icons.visibility : Icons.visibility_off),
           onPressed: () {
             setState(() {
               _obscurePassword = !_obscurePassword;
@@ -253,22 +186,6 @@ class _LoginPageState extends State<LoginPage> {
           },
         ),
         border: const OutlineInputBorder(),
-      ),
-      style: Theme.of(context).textTheme.bodyMedium,
-    );
-  }
-
-  Widget _buildRegisterText() {
-    return Align(
-      alignment: Alignment.center,
-      child: TextButton(
-        onPressed: () {
-          Navigator.pushNamed(context, '/register');
-        },
-        child: Text(
-          AppLocalizations.of(context)!.registerDuringLoginLabel,
-          style: Theme.of(context).textTheme.bodyMedium,
-        ),
       ),
     );
   }
@@ -280,25 +197,37 @@ class _LoginPageState extends State<LoginPage> {
         onPressed: () {
           Navigator.pushNamed(context, '/resetpassword');
         },
-        child: Text(
-          AppLocalizations.of(context)!.forgotPasswordLabel,
-          style: Theme.of(context).textTheme.bodyMedium,
-        ),
+        child: Text(AppLocalizations.of(context)!.forgotPasswordLabel),
       ),
     );
   }
 
   Widget _buildLoginButton() {
-    return SizedBox(
-      width: double.infinity,
-      child: ElevatedButton(
-        onPressed: (){
-          _processing ? null : _checkCredentials();
-        },
-        child: _processing
-            ? const CircularProgressIndicator(color: Colors.white)
-            : Text(AppLocalizations.of(context)!.loginButtonLabel)
+    return ElevatedButton(
+      onPressed: _processing ? null : _checkCredentials,
+      style: ElevatedButton.styleFrom(
+        padding: const EdgeInsets.symmetric(vertical: 16),
+        elevation: 2,
       ),
+      child: _processing
+          ? const SizedBox(
+          height: 20,
+          width: 20,
+          child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white)
+      )
+          : Text(
+        AppLocalizations.of(context)!.loginButtonLabel,
+        style: const TextStyle(fontSize: 16),
+      ),
+    );
+  }
+
+  Widget _buildRegisterText() {
+    return TextButton(
+      onPressed: () {
+        Navigator.pushNamed(context, '/register');
+      },
+      child: Text(AppLocalizations.of(context)!.registerDuringLoginLabel),
     );
   }
 }

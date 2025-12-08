@@ -24,7 +24,7 @@ class AppLocalizationsPl extends AppLocalizations {
   String get registerPageTitle => 'Rejestracja';
 
   @override
-  String get resetPasswordPageTitle => 'Resetuj Hasło';
+  String get resetPasswordPageTitle => 'Reset Hasła';
 
   @override
   String get homePageTitle => 'Strona główna';
@@ -345,4 +345,49 @@ class AppLocalizationsPl extends AppLocalizations {
 
   @override
   String get genericErrorMessage => 'Wystąpił błąd, spróbuj później';
+
+  @override
+  String get tokenLabel => 'Kod z maila';
+
+  @override
+  String get newPasswordLabel => 'Nowe hasło';
+
+  @override
+  String get resetPasswordButton => 'Zmień hasło';
+
+  @override
+  String get sendCodeButton => 'Wyślij kod';
+
+  @override
+  String get invalidEmailError => 'Podaj poprawny email';
+
+  @override
+  String get passwordsDoNotMatch => 'Hasła nie są identyczne';
+
+  @override
+  String get wrongEmailGoBackLabel => 'Zły email? Wróć.';
+
+  @override
+  String get passwordTooShortError => 'Hasło musi mieć min. 6 znaków';
+
+  @override
+  String get codeSentInstructionMessage =>
+      'Wysłaliśmy kod na Twój email. Wpisz go poniżej.';
+
+  @override
+  String get enterCodeError => 'Podaj kod';
+
+  @override
+  String get passwordResetSuccessMessage =>
+      'Hasło zostało zmienione! Zaloguj się.';
+
+  @override
+  String get codeSentSuccessMessage => 'Kod został wysłany! Sprawdź email.';
+
+  @override
+  String get enterEmailInstructionMessage =>
+      'Podaj swój adres email. Wyślemy Ci kod potrzebny do zresetowania hasła.';
+
+  @override
+  String get errorLabel => 'Błąd';
 }

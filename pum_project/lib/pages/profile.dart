@@ -64,10 +64,18 @@ class _ProfilePageState extends State<ProfilePage> {
     }
     if (profile.gender != null) {
       switch (profile.gender) {
-        case "Male": _gender = AppLocalizations.of(context)!.profileGenderMaleLabel; break;
-        case "Female": _gender = AppLocalizations.of(context)!.profileGenderFemaleLabel; break;
-        case "Other": _gender = AppLocalizations.of(context)!.profileGenderOtherLabel; break;
-        default: _gender = profile.gender!; break;
+        case "Male":
+          _gender = AppLocalizations.of(context)!.profileGenderMaleLabel;
+          break;
+        case "Female":
+          _gender = AppLocalizations.of(context)!.profileGenderFemaleLabel;
+          break;
+        case "Other":
+          _gender = AppLocalizations.of(context)!.profileGenderOtherLabel;
+          break;
+        default:
+          _gender = profile.gender!;
+          break;
       }
     }
     if (profile.dateOfBirth != null) {
@@ -102,7 +110,7 @@ class _ProfilePageState extends State<ProfilePage> {
             return Center(
               child: SingleChildScrollView(
                 child: Container(
-                  constraints: BoxConstraints(
+                  constraints: const BoxConstraints(
                     minWidth: 450,
                   ),
                   decoration: BoxDecoration(
@@ -111,11 +119,11 @@ class _ProfilePageState extends State<ProfilePage> {
                   ),
                   child: Column(
                     children: [
-                      SizedBox(height: 35),
+                      const SizedBox(height: 35),
                       _buildProfileHeader(),
-                      SizedBox(height: 20),
+                      const SizedBox(height: 20),
                       _buildProfileInfo(),
-                      SizedBox(height: 35),
+                      const SizedBox(height: 35),
                     ],
                   ),
                 ),
@@ -140,7 +148,9 @@ class _ProfilePageState extends State<ProfilePage> {
             color: Theme.of(context).appBarTheme.foregroundColor as Color,
           ),
         ),
+        const SizedBox(height: 10),
         _buildProfilePicture(),
+        const SizedBox(height: 10),
         Text(
           _firstName,
           textAlign: TextAlign.center,
@@ -163,6 +173,42 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
+  Widget _buildProfilePicture() {
+    if (_avatarUrl.isNotEmpty) {
+      return ClipOval(
+        child: Image.network(
+          _avatarUrl,
+          width: 200,
+          height: 200,
+          fit: BoxFit.cover,
+
+          loadingBuilder: (context, child, loadingProgress) {
+            if (loadingProgress == null) return child;
+            return const SizedBox(
+              width: 200,
+              height: 200,
+              child: Center(child: CircularProgressIndicator()),
+            );
+          },
+
+          errorBuilder: (context, error, stackTrace) {
+            return const Icon(
+              Icons.account_circle_rounded,
+              size: 200,
+              color: Colors.grey,
+            );
+          },
+        ),
+      );
+    }
+
+    return const Icon(
+      Icons.account_circle_rounded,
+      size: 200,
+      color: Colors.grey,
+    );
+  }
+
   Widget _buildProfileInfo() {
     return Card(
       color: Theme.of(context).cardTheme.color,
@@ -173,8 +219,9 @@ class _ProfilePageState extends State<ProfilePage> {
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
-            Text(AppLocalizations.of(context)!.profileDetailsLabel,style: TextStyle(fontSize: 42)),
-            SizedBox(height: 14),
+            Text(AppLocalizations.of(context)!.profileDetailsLabel,
+                style: const TextStyle(fontSize: 42)),
+            const SizedBox(height: 14),
             Text('${AppLocalizations.of(context)!.profileGenderLabel}: $_gender'),
             Text('${AppLocalizations.of(context)!.profileDayOfBirthLabel}: $_dateOfBirth'),
             Text('${AppLocalizations.of(context)!.profileHeightLabel}: $_height'),
@@ -187,16 +234,9 @@ class _ProfilePageState extends State<ProfilePage> {
 
   Widget _buildEditButton() {
     return IconButton(
-      icon: Icon(Icons.edit),
+      icon: const Icon(Icons.edit),
       iconSize: 35,
-      onPressed: () => Navigator.pushNamed(context,'/profile/edit'),
-    );
-  }
-
-  Widget _buildProfilePicture() {
-    return Icon(
-      Icons.account_circle_rounded,
-      size: 200,
+      onPressed: () => Navigator.pushNamed(context, '/profile/edit'),
     );
   }
 }
