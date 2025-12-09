@@ -27,6 +27,7 @@ class AppTheme {
         backgroundColor: appBarBg,
         foregroundColor: appBarFg,
         centerTitle: true,
+        elevation: 0,
       ),
 
       textTheme: const TextTheme(
@@ -41,18 +42,41 @@ class AppTheme {
           backgroundColor: buttonBg,
           textStyle: const TextStyle(fontSize: 24, fontWeight: FontWeight.w600),
           minimumSize: const Size.fromHeight(60),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         ),
       ),
 
-      cardTheme: CardThemeData(color: cardColor),
-
-      iconTheme: IconThemeData(color: iconColor),
-
-      textButtonTheme: TextButtonThemeData(
-        style: TextButton.styleFrom(foregroundColor: iconColor),
+      cardTheme: CardThemeData(
+        color: cardColor,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        elevation: 4,
       ),
 
+      iconTheme: IconThemeData(color: iconColor),
       textSelectionTheme: TextSelectionThemeData(cursorColor: iconColor),
+
+      dialogTheme: DialogThemeData(
+        backgroundColor: cardColor,
+        elevation: 8,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        titleTextStyle: TextStyle(
+          color: textColor,
+          fontSize: 24,
+          fontWeight: FontWeight.bold,
+        ),
+        contentTextStyle: TextStyle(
+          color: textColor,
+          fontSize: 18,
+        ),
+      ),
+
+
+      textButtonTheme: TextButtonThemeData(
+        style: TextButton.styleFrom(
+          foregroundColor: textColor,
+          textStyle: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+        ),
+      ),
 
       inputDecorationTheme: InputDecorationTheme(
         contentPadding: _defaultInputPadding,
@@ -75,15 +99,12 @@ class AppTheme {
           borderRadius: BorderRadius.circular(12),
           borderSide: const BorderSide(color: Colors.red, width: 2),
         ),
-
         prefixIconConstraints: const BoxConstraints(minWidth: 56, minHeight: 56),
       ),
 
       dropdownMenuTheme: DropdownMenuThemeData(
         textStyle: const TextStyle(fontSize: 20),
-        menuStyle: MenuStyle(
-          backgroundColor: WidgetStateProperty.all(cardColor),
-        ),
+        menuStyle: MenuStyle(backgroundColor: WidgetStateProperty.all(cardColor)),
       ),
 
       datePickerTheme: const DatePickerThemeData(
@@ -92,6 +113,7 @@ class AppTheme {
       ),
     );
   }
+
 
   static ThemeData get defaultTheme => _buildTheme(
     colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
@@ -121,7 +143,7 @@ class AppTheme {
 
   static ThemeData get christmasTheme => _buildTheme(
     colorScheme: ColorScheme.fromSeed(seedColor: Colors.red),
-    scaffoldBg: const Color(0xFF8B0000),
+    scaffoldBg: const Color(0xFF8B0000),       
     appBarBg: const Color(0xFF1B5E20),
     appBarFg: const Color(0xFFFFD700),
     textColor: const Color(0xFFFFE082),

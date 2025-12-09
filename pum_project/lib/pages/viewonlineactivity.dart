@@ -4,6 +4,12 @@ import '../l10n/generated/app_localizations.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'dart:convert';
 import 'package:intl/intl.dart';
+import 'dart:io';
+import 'package:http/http.dart' as http;
+import 'package:path_provider/path_provider.dart';
+import 'package:provider/provider.dart';
+import '../services/api_connection.dart';
+import '../providers/auth_provider.dart';
 
 class ViewOnlineActivityScreen extends StatefulWidget {
   const ViewOnlineActivityScreen({
@@ -28,6 +34,7 @@ class _ViewOnlineActivityScreenState extends State<ViewOnlineActivityScreen> {
   String description = "";
   String date = "";
   String? photoUrl;
+  bool _isDownloading = false;
 
   void initiateData() {
     try {
@@ -73,8 +80,108 @@ class _ViewOnlineActivityScreenState extends State<ViewOnlineActivityScreen> {
         date = DateFormat('HH:mm dd.MM.yyyy').format(dateTime);
       }
     } catch (e) {
-      debugPrint('$e');
+      // Ignored
     }
+  }
+
+  Future<void> _downloadGpx() async {
+    if (widget.data['id'] == null) {
+      _displaySnackbar("Error: Missing Activity ID");
+      return;
+    }
+
+    setState(() => _isDownloading = true);
+
+    try {
+      final authProvider = Provider.of<AuthProvider>(context, listen: false);
+      final apiService = Provider.of<ApiService>(context, listen: false);
+
+      if (authProvider.token == null || authProvider.token!.isEmpty) {
+        _displaySnackbar("Error: Not authenticated");
+        return;
+      }
+
+      String baseUrl = apiService.baseUrl;
+      if (baseUrl.endsWith('/')) {
+        baseUrl = baseUrl.substring(0, baseUrl.length - 1);
+      }
+
+      final urlString = '$baseUrl/api/Activities/${widget.data['id']}/gpx';
+
+      final response = await http.get(
+        Uri.parse(urlString),
+        headers: {
+          'Authorization': 'Bearer ${authProvider.token}',
+        },
+      ).timeout(const Duration(seconds: 30));
+
+      if (response.statusCode == 200) {
+        String fileName = "activity_${widget.data['id']}.gpx";
+
+        final contentDisposition = response.headers['content-disposition'];
+        if (contentDisposition != null && contentDisposition.contains('filename=')) {
+          final match = RegExp(r'filename="?([^";]+)"?').firstMatch(contentDisposition);
+          if (match != null && match.group(1) != null) {
+            fileName = match.group(1)!;
+          }
+        } else if (widget.data['activityType'] != null) {
+          String dateTimePart = DateFormat('yyyy-MM-dd_HH-mm').format(DateTime.now());
+
+          if(widget.data['startedAt'] != null) {
+            try {
+              DateTime startDate = DateTime.parse(widget.data['startedAt']);
+              dateTimePart = DateFormat('yyyy-MM-dd_HH-mm').format(startDate);
+            } catch(e) {}
+          }
+          fileName = "${widget.data['activityType']}_$dateTimePart.gpx";
+        }
+
+        Directory? saveDir;
+
+        if (Platform.isAndroid) {
+          saveDir = Directory('/storage/emulated/0/Download');
+          if (!await saveDir.exists()) {
+            saveDir = await getExternalStorageDirectory();
+          }
+        }
+
+        if (saveDir == null) {
+          throw Exception("Could not find save directory.");
+        }
+
+        String filePath = '${saveDir.path}/$fileName';
+        int counter = 1;
+        while (await File(filePath).exists()) {
+          String nameWithoutExt = fileName.replaceAll('.gpx', '');
+          String newName = '$nameWithoutExt($counter).gpx';
+          filePath = '${saveDir.path}/$newName';
+          counter++;
+        }
+
+        final file = File(filePath);
+        await file.writeAsBytes(response.bodyBytes);
+
+        if (Platform.isAndroid) {
+          _displaySnackbar("Saved to Downloads: ${filePath.split('/').last}");
+        }
+
+      } else {
+        if (response.statusCode == 404) {
+          _displaySnackbar("Error 404: Activity not found.");
+        } else {
+          _displaySnackbar("Download failed: ${response.statusCode}");
+        }
+      }
+
+    } catch (e) {
+      _displaySnackbar("Error: $e");
+    } finally {
+      if (mounted) setState(() => _isDownloading = false);
+    }
+  }
+
+  void _displaySnackbar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
   }
 
   String _getActivityName() {
@@ -158,7 +265,33 @@ class _ViewOnlineActivityScreenState extends State<ViewOnlineActivityScreen> {
               const SizedBox(height: 20),
               _buildDescriptionSection(),
             ],
+
+            const SizedBox(height: 40),
+            _buildDownloadButton(),
+            const SizedBox(height: 20),
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDownloadButton() {
+    if (routePoints.isEmpty) return const SizedBox.shrink();
+
+    return SizedBox(
+      height: 60,
+      child: ElevatedButton.icon(
+        onPressed: _isDownloading ? null : _downloadGpx,
+        icon: _isDownloading
+            ? Container(
+            width: 24,
+            height: 24,
+            padding: const EdgeInsets.all(2),
+            child: const CircularProgressIndicator(strokeWidth: 3)
+        )
+            : Icon(Icons.download, color: Theme.of(context).elevatedButtonTheme.style?.foregroundColor?.resolve({})),
+        label: Text(
+          _isDownloading ? "Downloading..." : "Download GPX",
         ),
       ),
     );
@@ -200,7 +333,6 @@ class _ViewOnlineActivityScreenState extends State<ViewOnlineActivityScreen> {
               polylines: [
                 Polyline(
                     points: routePoints,
-                    // Używamy koloru z iconTheme lub primaryColor
                     color: Theme.of(context).iconTheme.color ?? Colors.blue,
                     strokeWidth: 6),
               ],
@@ -254,10 +386,9 @@ class _ViewOnlineActivityScreenState extends State<ViewOnlineActivityScreen> {
         const SizedBox(height: 8),
         Text(
           value,
-          // Używamy stylu z Theme (24px)
           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
               fontWeight: FontWeight.bold,
-              fontSize: 20 // Lekko mniejsze żeby się zmieściło w rzędzie
+              fontSize: 20
           ),
         ),
         Text(
@@ -281,7 +412,6 @@ class _ViewOnlineActivityScreenState extends State<ViewOnlineActivityScreen> {
             Expanded(
               child: Text(
                 title,
-                // Używamy titleLarge lub bodyLarge
                 style: Theme.of(context).textTheme.titleLarge?.copyWith(
                     fontWeight: FontWeight.bold,
                     fontSize: 28
