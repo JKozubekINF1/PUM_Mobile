@@ -8,6 +8,9 @@ class ProfileData {
   double? height;
   double? weight;
   String? avatarUrl;
+  double totalDistanceKm;
+  int totalActivities;
+  double totalDurationSeconds;
 
   ProfileData({
     this.userName,
@@ -19,6 +22,9 @@ class ProfileData {
     this.height,
     this.weight,
     this.avatarUrl,
+    this.totalDistanceKm = 0.0,
+    this.totalActivities = 0,
+    this.totalDurationSeconds = 0.0,
   });
 
   factory ProfileData.fromJson(Map<String, dynamic> json) {
@@ -34,6 +40,9 @@ class ProfileData {
       height: (json['height'] as num?)?.toDouble(),
       weight: (json['weight'] as num?)?.toDouble(),
       avatarUrl: json['avatarUrl'],
+      totalDistanceKm: (json['totalDistanceKm'] as num?)?.toDouble() ?? 0.0,
+      totalActivities: json['totalActivities'] as int? ?? 0,
+      totalDurationSeconds: (json['totalDurationSeconds'] as num?)?.toDouble() ?? 0.0,
     );
   }
 
@@ -47,6 +56,9 @@ class ProfileData {
       'height': height,
       'weight': weight,
       'avatarUrl': avatarUrl,
+      'totalDistanceKm': totalDistanceKm,
+      'totalActivities': totalActivities,
+      'totalDurationSeconds': totalDurationSeconds,
     };
   }
 }

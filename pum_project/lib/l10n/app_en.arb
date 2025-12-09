@@ -200,6 +200,18 @@
         "@profileDetailsLabel": {
             "description": "Label text for the details on user profile"
         },
+    "profileStatsDistance": "Distance",
+        "@profileStatsDistance": {
+            "description": "Label text for the total distance statistic on the profile page"
+        },
+    "profileStatsTime": "Time",
+        "@profileStatsTime": {
+            "description": "Label text for the total time statistic on the profile page"
+        },
+    "profileStatsActivities": "Activities",
+        "@profileStatsActivities": {
+            "description": "Label text for the total activities count statistic on the profile page"
+        },
     "saveChangesLabel": "Save Changes",
         "@saveChangesLabel": {
             "description": "Label text for the save changes button"

@@ -6,7 +6,7 @@ import 'package:pum_project/models/profile_data.dart';
 import 'package:image_picker/image_picker.dart';
 
 class ApiService {
-  final String baseUrl = 'https://activitis.hostingasp.pl.hostingasp.pl';
+  final String baseUrl = 'https://activitis.hostingasp.pl.hostingasp.pl'; //http://10.0.2.2:5123 //https://activitis.hostingasp.pl.hostingasp.pl'
   final FlutterSecureStorage _storage;
   final http.Client _client;
 
@@ -303,7 +303,9 @@ class ApiService {
       final responseBody = json.decode(utf8.decode(response.bodyBytes));
 
       if (response.statusCode == 200) {
-        return (responseBody as List).cast<Map<String, dynamic>>();
+        final List<dynamic> rankingList = responseBody['ranking'] ?? responseBody['Ranking'] ?? [];
+        return List<Map<String, dynamic>>.from(rankingList);
+
       } else if (response.statusCode == 401) {
         throw Exception('Unauthorized. Token expired or invalid.');
       } else {

@@ -9,7 +9,7 @@ class AppLocalizationsPl extends AppLocalizations {
   AppLocalizationsPl([String locale = 'pl']) : super(locale);
 
   @override
-  String get language => 'Polish';
+  String get language => 'Polski';
 
   @override
   String get appTitle => 'App';
@@ -48,7 +48,7 @@ class AppLocalizationsPl extends AppLocalizations {
   String get settingsPageTitle => 'Ustawienia';
 
   @override
-  String get activityHistoryPageTitle => 'Twoja Historia Aktywności';
+  String get activityHistoryPageTitle => 'Historia Aktywności';
 
   @override
   String get leaderboardPageTitle => 'Ranking';
@@ -99,7 +99,7 @@ class AppLocalizationsPl extends AppLocalizations {
   String get settingsButtonLabel => 'Ustawienia';
 
   @override
-  String get offlineModeTextLabel => 'albo otwórz w trybie offline';
+  String get offlineModeTextLabel => 'lub otwórz w trybie offline';
 
   @override
   String get profileNickNameLabel => 'Pseudonim';
@@ -114,22 +114,22 @@ class AppLocalizationsPl extends AppLocalizations {
   String get profileGenderLabel => 'Płeć';
 
   @override
-  String get profileDayOfBirthLabel => 'Data urodzin';
+  String get profileDayOfBirthLabel => 'Data urodzenia';
 
   @override
   String get dateLabel => 'Data';
 
   @override
-  String get sortByLabel => 'Sortuj poprzez';
+  String get sortByLabel => 'Sortuj przez';
 
   @override
-  String get rankedByLabel => 'Ranking Według';
+  String get rankedByLabel => 'Ranking według';
 
   @override
   String get sortByTotalDistanceLabel => 'Całkowity Dystans';
 
   @override
-  String get sortByActivityCountLabel => 'Ilość Aktywności';
+  String get sortByActivityCountLabel => 'Liczba Aktywności';
 
   @override
   String get sortByTotalDurationLabel => 'Całkowity Czas';
@@ -157,6 +157,15 @@ class AppLocalizationsPl extends AppLocalizations {
 
   @override
   String get profileDetailsLabel => 'Szczegóły';
+
+  @override
+  String get profileStatsDistance => 'Dystans';
+
+  @override
+  String get profileStatsTime => 'Czas';
+
+  @override
+  String get profileStatsActivities => 'Aktywności';
 
   @override
   String get saveChangesLabel => 'Zapisz Zmiany';
@@ -240,7 +249,7 @@ class AppLocalizationsPl extends AppLocalizations {
   String get uploadPictureButtonLabel => 'Prześlij zdjęcie';
 
   @override
-  String get uploadQueueLabel => 'aktywności nadal oczekują w kolejce';
+  String get uploadQueueLabel => 'aktywności nadal w kolejce';
 
   @override
   String get welcomeNewUserMessage => 'Zaloguj się lub załóż nowe konto';
@@ -254,7 +263,7 @@ class AppLocalizationsPl extends AppLocalizations {
 
   @override
   String get offlineModePageBlockedMessage =>
-      'Zaloguj się aby odblokować wszystkie funkcje aplikacji';
+      'Zaloguj się, aby odblokować wszystkie funkcje';
 
   @override
   String get logoutWarningMessage => 'Na pewno chcesz się wylogować?';
@@ -287,10 +296,10 @@ class AppLocalizationsPl extends AppLocalizations {
   String get failedToRepeatPasswordMessage => 'Nie udało się powtórzyć hasła';
 
   @override
-  String get enterValidNumberMessage => 'Wprowadź poprawną wartość';
+  String get enterValidNumberMessage => 'Wprowadź poprawną liczbę';
 
   @override
-  String get profileUpdateSuccessfulMessage => 'Profil został zaaktualizowany';
+  String get profileUpdateSuccessfulMessage => 'Profil został zaktualizowany';
 
   @override
   String get profileUpdateFailedMessage =>
@@ -304,22 +313,22 @@ class AppLocalizationsPl extends AppLocalizations {
 
   @override
   String get unsavedChangesWarningMessage =>
-      'Niezapisane zmiany zostaną utracone. Na pewno chcesz kontynuować?';
+      'Niezapisane zmiany zostaną utracone. Kontynuować?';
 
   @override
   String get activityDeletionMessage =>
-      'Usunięta aktywność zostnie utracona na zawsze. Na pewno chcesz kontynuować?';
+      'Usunięta aktywność zostanie utracona bezpowrotnie. Kontynuować?';
 
   @override
   String get activitySentMessage => 'Aktywność została pomyślnie zapisana';
 
   @override
   String get activityQueueCancelDialogMessage =>
-      'Czy na pewno chcesz wyczyścić kolejkę? Twoje lokalne aktywności zostaną przywrócone.';
+      'Czy na pewno chcesz wyczyścić kolejkę? Lokalne aktywności zostaną przywrócone.';
 
   @override
   String get activityQueueCancelledMessage =>
-      'Kolejka przesyłania została anulowana, a pliki lokalne zostały przywrócone';
+      'Kolejka anulowana, pliki lokalne przywrócone';
 
   @override
   String get missingRouteMessage => 'Brak trasy';
@@ -329,19 +338,18 @@ class AppLocalizationsPl extends AppLocalizations {
 
   @override
   String get noConnectionMessage =>
-      'Stracono połączenie z serwerem, sprawdź swoje połączenie internetowe';
+      'Brak połączenia z serwerem, sprawdź internet';
 
   @override
-  String get noLocationServicesMessage =>
-      'Usługi lokalizacyjne są wyłączone, uruchom lokalizacje';
+  String get noLocationServicesMessage => 'Usługi lokalizacyjne wyłączone';
 
   @override
   String get noLocationPermissionsMessage =>
-      'Uprawnienia usług lokalizacyjnych zostały odrzucone';
+      'Odmówiono uprawnień do lokalizacji';
 
   @override
   String get noLocationPermissionsForeverMessage =>
-      'Uprawnienia usług lokalizacyjnych są permamentnie odrzucone, sprawdź ustawienia systemowe';
+      'Uprawnienia do lokalizacji trwale odrzucone';
 
   @override
   String get genericErrorMessage => 'Wystąpił błąd, spróbuj później';
@@ -386,7 +394,7 @@ class AppLocalizationsPl extends AppLocalizations {
 
   @override
   String get enterEmailInstructionMessage =>
-      'Podaj swój adres email. Wyślemy Ci kod potrzebny do zresetowania hasła.';
+      'Podaj swój email. Wyślemy kod do resetu hasła.';
 
   @override
   String get errorLabel => 'Błąd';

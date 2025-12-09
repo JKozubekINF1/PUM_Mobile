@@ -18,16 +18,15 @@ class _ProfilePageState extends State<ProfilePage> {
   String _userName = "";
   String _firstName = "";
   String _lastName = "";
-  String _height = "";
-  String _weight = "";
+  String _height = "-";
+  String _weight = "-";
   String _avatarUrl = "";
-  String _gender = "";
-  String _dateOfBirth = "";
+  String _gender = "-";
+  String _dateOfBirth = "-";
 
-  @override
-  void dispose() {
-    super.dispose();
-  }
+  double _totalDistance = 0.0;
+  int _totalActivities = 0;
+  double _totalDuration = 0.0;
 
   @override
   void initState() {
@@ -38,48 +37,44 @@ class _ProfilePageState extends State<ProfilePage> {
     });
   }
 
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-  }
-
   void _initializeProfile(ProfileData profile) {
-    if (profile.userName != null) {
-      _userName = profile.userName!;
-    }
-    if (profile.firstName != null) {
-      _firstName = profile.firstName!;
-    }
-    if (profile.lastName != null) {
-      _lastName = profile.lastName!;
-    }
-    if (profile.height != null) {
-      _height = (profile.height!).toString();
-    }
-    if (profile.weight != null) {
-      _weight = (profile.weight!).toString();
-    }
-    if (profile.avatarUrl != null) {
-      _avatarUrl = profile.avatarUrl!;
-    }
-    if (profile.gender != null) {
-      switch (profile.gender) {
-        case "Male":
-          _gender = AppLocalizations.of(context)!.profileGenderMaleLabel;
-          break;
-        case "Female":
-          _gender = AppLocalizations.of(context)!.profileGenderFemaleLabel;
-          break;
-        case "Other":
-          _gender = AppLocalizations.of(context)!.profileGenderOtherLabel;
-          break;
-        default:
-          _gender = profile.gender!;
-          break;
-      }
-    }
+    _userName = profile.userName ?? "";
+    _firstName = profile.firstName ?? "";
+    _lastName = profile.lastName ?? "";
+    _height = profile.height?.toString() ?? "-";
+    _weight = profile.weight?.toString() ?? "-";
+    _avatarUrl = profile.avatarUrl ?? "";
+    _gender = profile.gender ?? "-";
+
     if (profile.dateOfBirth != null) {
       _dateOfBirth = DateFormat('dd/MM/yyyy').format(profile.dateOfBirth!);
+    }
+
+    _totalDistance = profile.totalDistanceKm;
+    _totalActivities = profile.totalActivities;
+    _totalDuration = profile.totalDurationSeconds;
+  }
+
+  String _formatDuration(double seconds) {
+    int totalSeconds = seconds.toInt();
+    int hours = totalSeconds ~/ 3600;
+    int minutes = (totalSeconds % 3600) ~/ 60;
+    return '${hours}h ${minutes}m';
+  }
+
+  String _getLocalizedGender(BuildContext context, String rawGender) {
+    final loc = AppLocalizations.of(context);
+    if (loc == null) return rawGender;
+
+    switch (rawGender) {
+      case "Male":
+        return loc.profileGenderMaleLabel;
+      case "Female":
+        return loc.profileGenderFemaleLabel;
+      case "Other":
+        return loc.profileGenderOtherLabel;
+      default:
+        return rawGender == "-" ? rawGender : rawGender;
     }
   }
 
@@ -90,11 +85,15 @@ class _ProfilePageState extends State<ProfilePage> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final textColor = theme.textTheme.bodyMedium?.color ?? Colors.black;
+
     return Scaffold(
       appBar: AppBar(
         title: Text(AppLocalizations.of(context)!.profilePageTitle),
+        elevation: 0,
         actions: [
-          _buildEditButton(),
+          _buildEditButton(theme),
         ],
       ),
       body: FutureBuilder<ProfileData>(
@@ -104,138 +103,259 @@ class _ProfilePageState extends State<ProfilePage> {
             return const Center(child: CircularProgressIndicator());
           }
           if (snapshot.hasError) {
-            return Center(child: Text(snapshot.error.toString()));
+            return Center(
+              child: Text(
+                "${AppLocalizations.of(context)!.errorLabel}: ${snapshot.error}",
+                style: TextStyle(color: textColor),
+              ),
+            );
           }
           if (snapshot.hasData) {
-            return Center(
-              child: SingleChildScrollView(
+            return SingleChildScrollView(
+              child: Center(
                 child: Container(
-                  constraints: const BoxConstraints(
-                    minWidth: 450,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).appBarTheme.backgroundColor,
-                    borderRadius: BorderRadius.circular(30),
-                  ),
+                  constraints: const BoxConstraints(maxWidth: 600),
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
                   child: Column(
                     children: [
-                      const SizedBox(height: 35),
-                      _buildProfileHeader(),
                       const SizedBox(height: 20),
-                      _buildProfileInfo(),
-                      const SizedBox(height: 35),
+                      _buildHeaderSection(context, theme, textColor),
+                      const SizedBox(height: 30),
+                      _buildStatisticsSection(context, theme, textColor),
+                      const SizedBox(height: 30),
+                      _buildDetailsSection(context, theme, textColor),
+                      const SizedBox(height: 40),
                     ],
                   ),
                 ),
               ),
             );
           }
-          return Center(child: Text(AppLocalizations.of(context)!.genericErrorMessage));
+          return Center(
+            child: Text(
+              AppLocalizations.of(context)!.genericErrorMessage,
+              style: TextStyle(color: textColor),
+            ),
+          );
         },
       ),
     );
   }
 
-  Widget _buildProfileHeader() {
+  Widget _buildHeaderSection(
+      BuildContext context, ThemeData theme, Color textColor) {
     return Column(
       children: [
+        Stack(
+          alignment: Alignment.bottomRight,
+          children: [
+            Container(
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(
+                    color:
+                    theme.appBarTheme.backgroundColor ?? theme.primaryColor,
+                    width: 3),
+                boxShadow: [
+                  BoxShadow(
+                      color: Colors.black.withOpacity(0.2),
+                      blurRadius: 10,
+                      offset: const Offset(0, 5))
+                ],
+              ),
+              child: ClipOval(
+                child: _avatarUrl.isNotEmpty
+                    ? Image.network(
+                  _avatarUrl,
+                  width: 140,
+                  height: 140,
+                  fit: BoxFit.cover,
+                  errorBuilder: (_, __, ___) =>
+                      _buildPlaceholderAvatar(theme),
+                )
+                    : _buildPlaceholderAvatar(theme),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 16),
+        if (_userName.isNotEmpty)
+          Text(
+            _userName,
+            style: theme.textTheme.titleLarge?.copyWith(fontSize: 32),
+          ),
+        if (_firstName.isNotEmpty || _lastName.isNotEmpty)
+          Text(
+            "$_firstName $_lastName".trim(),
+            style: theme.textTheme.bodyMedium?.copyWith(
+              fontSize: 20,
+              color: textColor.withOpacity(0.8),
+            ),
+          ),
+      ],
+    );
+  }
+
+  Widget _buildPlaceholderAvatar(ThemeData theme) {
+    return Container(
+      width: 140,
+      height: 140,
+      color: theme.cardTheme.color ?? Colors.grey,
+      child: Icon(Icons.person, size: 80, color: theme.iconTheme.color),
+    );
+  }
+
+  Widget _buildStatisticsSection(
+      BuildContext context, ThemeData theme, Color textColor) {
+    final loc = AppLocalizations.of(context)!;
+
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: theme.cardTheme.color,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            spreadRadius: 2,
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: [
+          _buildStatItem(
+            context,
+            theme: theme,
+            icon: Icons.directions_run,
+            value: "${_totalDistance.toStringAsFixed(1)} km",
+            label: loc.profileStatsDistance,
+            textColor: textColor,
+          ),
+          _buildVerticalDivider(textColor),
+          _buildStatItem(
+            context,
+            theme: theme,
+            icon: Icons.timer,
+            value: _formatDuration(_totalDuration),
+            label: loc.profileStatsTime,
+            textColor: textColor,
+          ),
+          _buildVerticalDivider(textColor),
+          _buildStatItem(
+            context,
+            theme: theme,
+            icon: Icons.local_fire_department,
+            value: "$_totalActivities",
+            label: loc.profileStatsActivities,
+            textColor: textColor,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildVerticalDivider(Color color) {
+    return Container(height: 40, width: 1, color: color.withOpacity(0.3));
+  }
+
+  Widget _buildStatItem(
+      BuildContext context, {
+        required ThemeData theme,
+        required IconData icon,
+        required String value,
+        required String label,
+        required Color textColor,
+      }) {
+    final iconColor = theme.iconTheme.color ?? textColor;
+
+    return Column(
+      children: [
+        Icon(icon, color: iconColor, size: 30),
+        const SizedBox(height: 8),
         Text(
-          _userName,
-          textAlign: TextAlign.center,
-          overflow: TextOverflow.ellipsis,
+          value,
           style: TextStyle(
-            fontSize: 38,
-            color: Theme.of(context).appBarTheme.foregroundColor as Color,
+              fontSize: 18, fontWeight: FontWeight.bold, color: textColor),
+        ),
+        Text(
+          label,
+          style: TextStyle(fontSize: 12, color: textColor.withOpacity(0.7)),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildDetailsSection(
+      BuildContext context, ThemeData theme, Color textColor) {
+    final loc = AppLocalizations.of(context)!;
+
+    final tileBackgroundColor = theme.scaffoldBackgroundColor;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(left: 10, bottom: 10),
+          child: Text(
+            loc.profileDetailsLabel,
+            style: TextStyle(
+                fontSize: 20, fontWeight: FontWeight.bold, color: textColor),
           ),
         ),
-        const SizedBox(height: 10),
-        _buildProfilePicture(),
-        const SizedBox(height: 10),
-        Text(
-          _firstName,
-          textAlign: TextAlign.center,
-          overflow: TextOverflow.ellipsis,
-          style: TextStyle(
-            fontSize: 32,
-            color: Theme.of(context).appBarTheme.foregroundColor as Color,
-          ),
-        ),
-        Text(
-          _lastName,
-          textAlign: TextAlign.center,
-          overflow: TextOverflow.ellipsis,
-          style: TextStyle(
-            fontSize: 32,
-            color: Theme.of(context).appBarTheme.foregroundColor as Color,
+        Card(
+          elevation: 4,
+          shape:
+          RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+          child: Column(
+            children: [
+              _buildDetailTile(theme, Icons.wc, loc.profileGenderLabel,
+                  _getLocalizedGender(context, _gender), textColor, tileBackgroundColor),
+              _buildDivider(textColor),
+              _buildDetailTile(theme, Icons.cake, loc.profileDayOfBirthLabel,
+                  _dateOfBirth, textColor, tileBackgroundColor),
+              _buildDivider(textColor),
+              _buildDetailTile(theme, Icons.height, loc.profileHeightLabel,
+                  "$_height cm", textColor, tileBackgroundColor),
+              _buildDivider(textColor),
+              _buildDetailTile(theme, Icons.monitor_weight,
+                  loc.profileWeightLabel, "$_weight kg", textColor, tileBackgroundColor),
+            ],
           ),
         ),
       ],
     );
   }
 
-  Widget _buildProfilePicture() {
-    if (_avatarUrl.isNotEmpty) {
-      return ClipOval(
-        child: Image.network(
-          _avatarUrl,
-          width: 200,
-          height: 200,
-          fit: BoxFit.cover,
-
-          loadingBuilder: (context, child, loadingProgress) {
-            if (loadingProgress == null) return child;
-            return const SizedBox(
-              width: 200,
-              height: 200,
-              child: Center(child: CircularProgressIndicator()),
-            );
-          },
-
-          errorBuilder: (context, error, stackTrace) {
-            return const Icon(
-              Icons.account_circle_rounded,
-              size: 200,
-              color: Colors.grey,
-            );
-          },
+  Widget _buildDetailTile(ThemeData theme, IconData icon, String title,
+      String value, Color textColor, Color backgroundColor) {
+    return ListTile(
+      leading: Container(
+        padding: const EdgeInsets.all(8),
+        decoration: BoxDecoration(
+          color: backgroundColor.withOpacity(0.5),
+          borderRadius: BorderRadius.circular(10),
         ),
-      );
-    }
-
-    return const Icon(
-      Icons.account_circle_rounded,
-      size: 200,
-      color: Colors.grey,
+        child: Icon(icon, color: theme.iconTheme.color),
+      ),
+      title: Text(title,
+          style: TextStyle(fontSize: 14, color: textColor.withOpacity(0.7))),
+      trailing: Text(value,
+          style: TextStyle(
+              fontSize: 16, fontWeight: FontWeight.w600, color: textColor)),
     );
   }
 
-  Widget _buildProfileInfo() {
-    return Card(
-      color: Theme.of(context).cardTheme.color,
-      shape: BeveledRectangleBorder(
-        borderRadius: BorderRadius.circular(10.0),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          children: [
-            Text(AppLocalizations.of(context)!.profileDetailsLabel,
-                style: const TextStyle(fontSize: 42)),
-            const SizedBox(height: 14),
-            Text('${AppLocalizations.of(context)!.profileGenderLabel}: $_gender'),
-            Text('${AppLocalizations.of(context)!.profileDayOfBirthLabel}: $_dateOfBirth'),
-            Text('${AppLocalizations.of(context)!.profileHeightLabel}: $_height'),
-            Text('${AppLocalizations.of(context)!.profileWeightLabel}: $_weight'),
-          ],
-        ),
-      ),
-    );
+  Widget _buildDivider(Color color) {
+    return Divider(
+        height: 1, indent: 70, endIndent: 20, color: color.withOpacity(0.2));
   }
 
-  Widget _buildEditButton() {
+  Widget _buildEditButton(ThemeData theme) {
     return IconButton(
       icon: const Icon(Icons.edit),
-      iconSize: 35,
       onPressed: () => Navigator.pushNamed(context, '/profile/edit'),
     );
   }

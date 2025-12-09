@@ -159,6 +159,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get profileDetailsLabel => 'Details';
 
   @override
+  String get profileStatsDistance => 'Distance';
+
+  @override
+  String get profileStatsTime => 'Time';
+
+  @override
+  String get profileStatsActivities => 'Activities';
+
+  @override
   String get saveChangesLabel => 'Save Changes';
 
   @override

@@ -398,6 +398,24 @@ abstract class AppLocalizations {
   /// **'Details'**
   String get profileDetailsLabel;
 
+  /// Label text for the total distance statistic on the profile page
+  ///
+  /// In en, this message translates to:
+  /// **'Distance'**
+  String get profileStatsDistance;
+
+  /// Label text for the total time statistic on the profile page
+  ///
+  /// In en, this message translates to:
+  /// **'Time'**
+  String get profileStatsTime;
+
+  /// Label text for the total activities count statistic on the profile page
+  ///
+  /// In en, this message translates to:
+  /// **'Activities'**
+  String get profileStatsActivities;
+
   /// Label text for the save changes button
   ///
   /// In en, this message translates to:
