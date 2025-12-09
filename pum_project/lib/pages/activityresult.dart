@@ -5,9 +5,11 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:pum_project/services/upload_queue.dart';
 import 'package:pum_project/services/local_storage.dart';
 import 'package:pum_project/services/app_settings.dart';
+import 'package:pum_project/services/api_connection.dart';
 import 'package:provider/provider.dart';
 import 'package:pum_project/models/activity.dart';
 import 'package:image_picker/image_picker.dart';
+import 'dart:io';
 
 class ResultScreen extends StatefulWidget {
   const ResultScreen({
@@ -15,7 +17,7 @@ class ResultScreen extends StatefulWidget {
     super.key,
   });
 
-  final Map<String,dynamic> data;
+  final Map<String, dynamic> data;
 
   @override
   State<ResultScreen> createState() => _ResultScreenState();
@@ -32,7 +34,7 @@ class _ResultScreenState extends State<ResultScreen> {
   String activityType = "run";
   bool validForUpload = true;
   bool _hasUnsavedChanges = false;
-  Map<String,String> activityLabels = {};
+  Map<String, String> activityLabels = {};
   bool offlineMode = true;
   String filename = "";
   XFile? image;
@@ -51,55 +53,55 @@ class _ResultScreenState extends State<ResultScreen> {
   void initiateData() {
     final storage = Provider.of<LocalStorage>(context, listen: false);
     try {
-      if (widget.data['routelist']!=null) {
+      if (widget.data['routelist'] != null) {
         routePoints = widget.data['routelist']
-            .map<LatLng>((p) =>
-            LatLng(
-              p['coordinates'][0].toDouble(),
-              p['coordinates'][1].toDouble(),
-            )).toList();
+            .map<LatLng>((p) => LatLng(
+          p['coordinates'][0].toDouble(),
+          p['coordinates'][1].toDouble(),
+        ))
+            .toList();
       } else {
         validForUpload = false;
       }
 
-      if (widget.data['duration']!=null) {
+      if (widget.data['duration'] != null) {
         duration = widget.data['duration'];
       } else {
         validForUpload = false;
       }
 
-      if (widget.data['distance']!=null) {
+      if (widget.data['distance'] != null) {
         distance = widget.data['distance'].toDouble();
       } else {
         validForUpload = false;
       }
 
-      if (widget.data['speedavg']!=null) {
+      if (widget.data['speedavg'] != null) {
         speedavg = widget.data['speedavg'];
       } else {
         validForUpload = false;
       }
 
-      if (widget.data['title']!=null) {
+      if (widget.data['title'] != null) {
         _titleController.value = TextEditingValue(text: widget.data['title']);
       }
 
-      if (widget.data['description']!=null) {
-        _descriptionController.value = TextEditingValue(text: widget.data['description']);
+      if (widget.data['description'] != null) {
+        _descriptionController.value =
+            TextEditingValue(text: widget.data['description']);
       }
 
-      if (widget.data['type']!=null ) {
+      if (widget.data['type'] != null) {
         if (activityIcons.containsKey(widget.data['type'])) {
           activityType = widget.data['type'];
         }
       }
 
-      if (widget.data['filename']!=null) {
+      if (widget.data['filename'] != null) {
         filename = widget.data['filename'];
       } else {
         filename = storage.generateFileName();
       }
-
     } catch (e) {
       debugPrint('$e');
       validForUpload = false;
@@ -107,14 +109,22 @@ class _ResultScreenState extends State<ResultScreen> {
   }
 
   void initiateDropdownMenu() {
-    activityLabels = {
-      "run": AppLocalizations.of(context)!.runActivityTypeLabel,
-      "bike": AppLocalizations.of(context)!.bikeActivityTypeLabel,
-      "walk": AppLocalizations.of(context)!.walkActivityTypeLabel,
-      "gym": AppLocalizations.of(context)!.gymActivityTypeLabel,
-      "swim": AppLocalizations.of(context)!.swimActivityTypeLabel,
-      "other": AppLocalizations.of(context)!.otherActivityTypeLabel,
-    };
+    final loc = AppLocalizations.of(context);
+    if (loc != null) {
+      activityLabels = {
+        "run": loc.runActivityTypeLabel,
+        "bike": loc.bikeActivityTypeLabel,
+        "walk": loc.walkActivityTypeLabel,
+        "gym": loc.gymActivityTypeLabel,
+        "swim": loc.swimActivityTypeLabel,
+        "other": loc.otherActivityTypeLabel,
+      };
+    } else {
+      activityLabels = {
+        "run": "Run", "bike": "Bike", "walk": "Walk",
+        "gym": "Gym", "swim": "Swim", "other": "Other"
+      };
+    }
   }
 
   @override
@@ -140,9 +150,11 @@ class _ResultScreenState extends State<ResultScreen> {
   }
 
   Future<void> _saveActivity() async {
-    _processing = true;
+    setState(() => _processing = true);
+
     final queue = Provider.of<UploadQueue>(context, listen: false);
     final storage = Provider.of<LocalStorage>(context, listen: false);
+    final api = Provider.of<ApiService>(context, listen: false);
 
     try {
       Activity activity = Activity(
@@ -150,62 +162,104 @@ class _ResultScreenState extends State<ResultScreen> {
         distance: distance,
         avgSpeed: speedavg,
         routelist: routePoints,
-        title: _titleController.text.trim().isEmpty ? "No Title" : _titleController.text.trim(),
-        description: _descriptionController.text.trim().isEmpty ? null : _descriptionController.text.trim(),
+        title: _titleController.text.trim().isEmpty
+            ? "No Title"
+            : _titleController.text.trim(),
+        description: _descriptionController.text.trim().isEmpty
+            ? null
+            : _descriptionController.text.trim(),
         activityType: activityType,
         filename: filename,
       );
 
-      final result = await queue.addActivity(activity);
-      await storage.deleteFile(filename);
-      _processing = false;
+      bool saveSuccess = false;
 
-      if (result) {
-        if (mounted) _displaySnackbar(AppLocalizations.of(context)!.activitySentMessage);
+      if (offlineMode) {
+        saveSuccess = await queue.addActivity(activity);
+        if (saveSuccess) {
+          await storage.deleteFile(filename);
+          if (mounted) _displaySnackbar(AppLocalizations.of(context)?.noConnectionMessage ?? "Saved offline");
+        }
       } else {
-        if (mounted) _displaySnackbar(AppLocalizations.of(context)!.noConnectionMessage);
+
+
+        String? newActivityId = await api.saveActivity(
+          durationSeconds: duration,
+          distanceMeters: distance,
+          averageSpeedMs: speedavg,
+          routeCoordinates: routePoints.map((p) => [p.latitude, p.longitude]).toList(),
+          title: _titleController.text,
+          description: _descriptionController.text,
+          activityType: activityType,
+        );
+
+        if (newActivityId != null) {
+          saveSuccess = true;
+          await storage.deleteFile(filename);
+
+          final img = image;
+          if (img != null) {
+            try {
+              await api.uploadActivityPhoto(id: newActivityId, imageFile: img);
+              if (mounted) _displaySnackbar("Activity and photo saved!");
+            } catch (e) {
+              debugPrint("Photo upload error: $e");
+              if (mounted) _displaySnackbar("Activity saved, but photo failed.");
+            }
+          } else {
+            if (mounted) _displaySnackbar(AppLocalizations.of(context)?.activitySentMessage ?? "Activity Sent");
+          }
+        }
+      }
+
+      setState(() => _processing = false);
+
+      if (saveSuccess && mounted) {
+        Navigator.pop(context);
       }
 
     } catch (e) {
-      if (mounted) _displaySnackbar(AppLocalizations.of(context)!.genericErrorMessage);
-      debugPrint("$e");
-      _processing = false;
+      if (mounted)
+        _displaySnackbar(AppLocalizations.of(context)?.genericErrorMessage ?? "Error");
+      debugPrint("Save error: $e");
+      setState(() => _processing = false);
     }
   }
 
   Future<void> _saveLocally() async {
     try {
-      _processing = true;
+      setState(() => _processing = true);
       final localStorage = Provider.of<LocalStorage>(context, listen: false);
-      final Map<String,dynamic> values = {
+      final Map<String, dynamic> values = {
         "title": _titleController.text,
         "description": _descriptionController.text,
         "type": activityType,
       };
-      if (widget.data['filename']!=null) {
-        await localStorage.overwriteFile(widget.data['filename'],values);
+      if (widget.data['filename'] != null) {
+        await localStorage.overwriteFile(widget.data['filename'], values);
       } else {
         debugPrint('File name is missing from json');
       }
-      _processing = false;
+      setState(() => _processing = false);
+      if (mounted) Navigator.pop(context);
     } catch (e) {
       debugPrint('$e');
-      _processing = false;
+      setState(() => _processing = false);
     }
   }
 
   Future<void> _deleteActivity() async {
     try {
-      _processing = true;
+      setState(() => _processing = true);
       final localStorage = Provider.of<LocalStorage>(context, listen: false);
-      if (widget.data['filename']!=null) {
+      if (widget.data['filename'] != null) {
         await localStorage.deleteFile(widget.data['filename']);
       } else {
         debugPrint('File name is missing from json');
       }
     } catch (e) {
       debugPrint('$e');
-      _processing = false;
+      setState(() => _processing = false);
     }
   }
 
@@ -220,32 +274,32 @@ class _ResultScreenState extends State<ResultScreen> {
         barrierDismissible: true,
         builder: (BuildContext context) {
           return AlertDialog(
-            title: Text(AppLocalizations.of(context)!.warningLabel,style:TextStyle(color:Colors.black)),
+            title: Text(AppLocalizations.of(context)?.warningLabel ?? "Warning",
+                style: const TextStyle(color: Colors.black)),
             content: SingleChildScrollView(
               child: ListBody(
                 children: <Widget>[
-                  Text(AppLocalizations.of(context)!.unsavedChangesWarningMessage),
+                  Text(AppLocalizations.of(context)?.unsavedChangesWarningMessage ?? "Unsaved changes"),
                 ],
               ),
             ),
             actions: <Widget>[
               TextButton(
-                child: Text(AppLocalizations.of(context)!.acceptOptionLabel),
+                child: Text(AppLocalizations.of(context)?.acceptOptionLabel ?? "Yes"),
                 onPressed: () {
-                  Navigator.pop(context,true);
-                  Navigator.pop(context,true);
+                  Navigator.pop(context, true);
+                  Navigator.pop(context, true);
                 },
               ),
               TextButton(
-                child: Text(AppLocalizations.of(context)!.declineOptionLabel),
+                child: Text(AppLocalizations.of(context)?.declineOptionLabel ?? "No"),
                 onPressed: () {
-                  Navigator.pop(context,false);
+                  Navigator.pop(context, false);
                 },
               ),
             ],
           );
-        }
-    );
+        });
   }
 
   Future<void> _deletePopup() async {
@@ -254,32 +308,33 @@ class _ResultScreenState extends State<ResultScreen> {
         barrierDismissible: true,
         builder: (BuildContext context) {
           return AlertDialog(
-            title: Text(AppLocalizations.of(context)!.warningLabel,style:TextStyle(color:Colors.black)),
+            title: Text(AppLocalizations.of(context)?.warningLabel ?? "Warning",
+                style: const TextStyle(color: Colors.black)),
             content: SingleChildScrollView(
               child: ListBody(
                 children: <Widget>[
-                  Text(AppLocalizations.of(context)!.activityDeletionMessage),
+                  Text(AppLocalizations.of(context)?.activityDeletionMessage ?? "Delete activity?"),
                 ],
               ),
             ),
             actions: <Widget>[
               TextButton(
-                child: Text(AppLocalizations.of(context)!.acceptOptionLabel),
+                child: Text(AppLocalizations.of(context)?.acceptOptionLabel ?? "Yes"),
                 onPressed: () {
                   _deleteActivity();
-                  Navigator.pushNamedAndRemoveUntil(context,"/home", (_) => false);
+                  Navigator.pushNamedAndRemoveUntil(
+                      context, "/home", (_) => false);
                 },
               ),
               TextButton(
-                child: Text(AppLocalizations.of(context)!.declineOptionLabel),
+                child: Text(AppLocalizations.of(context)?.declineOptionLabel ?? "No"),
                 onPressed: () {
-                  Navigator.pop(context,false);
+                  Navigator.pop(context, false);
                 },
               ),
             ],
           );
-        }
-    );
+        });
   }
 
   Future<void> _checkOfflineMode() async {
@@ -292,7 +347,8 @@ class _ResultScreenState extends State<ResultScreen> {
         });
       }
     } catch (e) {
-      if (mounted) _displaySnackbar(AppLocalizations.of(context)!.genericErrorMessage);
+      if (mounted)
+        _displaySnackbar(AppLocalizations.of(context)?.genericErrorMessage ?? "Error");
       debugPrint('$e');
     }
   }
@@ -311,27 +367,28 @@ class _ResultScreenState extends State<ResultScreen> {
       },
       child: Scaffold(
         appBar: AppBar(
-        title: Text(AppLocalizations.of(context)!.resultPageTitle),
-        actions: [
-          _buildSaveLocallyButton(),
-        ],
-      ),
+          title: Text(AppLocalizations.of(context)?.resultPageTitle ?? "Results"),
+          actions: [
+            _buildSaveLocallyButton(),
+          ],
+        ),
         body: SingleChildScrollView(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               _buildMap(),
-              const SizedBox(height: 20),
+              const SizedBox(height: 24),
               _buildStats(),
               const SizedBox(height: 30),
               _buildTypeField(),
-              const SizedBox(height: 16),
+              const SizedBox(height: 20),
               _buildTitleField(),
-              const SizedBox(height: 16),
+              const SizedBox(height: 20),
               _buildDescriptionField(),
               const SizedBox(height: 30),
               _buildUploadPictureRow(),
-              const SizedBox(height: 45),
+              const SizedBox(height: 50),
               _buildControlRow(),
             ],
           ),
@@ -341,59 +398,102 @@ class _ResultScreenState extends State<ResultScreen> {
   }
 
   Widget _buildMap() {
-    return SizedBox(
+    return Container(
       height: 350,
-      child: routePoints.isEmpty || routePoints.length == 1
-          ? Center(child: Text(AppLocalizations.of(context)!.missingRouteMessage))
-          : FlutterMap(
-        options: MapOptions(initialCenter: routePoints.first, initialZoom: 15),
-        children: [
-          TileLayer(
-            urlTemplate: 'https://{s}.tile-cyclosm.openstreetmap.fr/cyclosm/{z}/{x}/{y}.png',
-            userAgentPackageName: 'Pum_Project/1.0',
-          ),
-          PolylineLayer(
-            polylines: [Polyline(points: routePoints, color: Colors.red, strokeWidth: 8)],
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 10,
+            spreadRadius: 2,
           ),
         ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(20),
+        child: routePoints.isEmpty || routePoints.length == 1
+            ? Container(
+          color: Theme.of(context).cardTheme.color,
+          child: Center(
+              child: Text(
+                  AppLocalizations.of(context)?.missingRouteMessage ?? "No route")),
+        )
+            : FlutterMap(
+          options: MapOptions(
+              initialCenter: routePoints.first, initialZoom: 15),
+          children: [
+            TileLayer(
+              urlTemplate:
+              'https://{s}.tile-cyclosm.openstreetmap.fr/cyclosm/{z}/{x}/{y}.png',
+              userAgentPackageName: 'Pum_Project/1.0',
+            ),
+            PolylineLayer(
+              polylines: [
+                Polyline(
+                    points: routePoints,
+                    color: Theme.of(context).primaryColor,
+                    strokeWidth: 6),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
 
   Widget _buildStats() {
-    return Row(
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Theme.of(context).cardTheme.color,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: [
+          _buildStatItem(Icons.timer, duration.toString(),
+              AppLocalizations.of(context)?.timeUnitLabel ?? "s"),
+          Container(
+              height: 40,
+              width: 1,
+              color: Theme.of(context).dividerColor.withOpacity(0.5)),
+          _buildStatItem(Icons.straighten, distance.toStringAsFixed(2),
+              AppLocalizations.of(context)?.distanceUnitLabel ?? "m"),
+          Container(
+              height: 40,
+              width: 1,
+              color: Theme.of(context).dividerColor.withOpacity(0.5)),
+          _buildStatItem(Icons.speed, speedavg.toStringAsFixed(2),
+              AppLocalizations.of(context)?.speedUnitLabel ?? "m/s"),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStatItem(IconData icon, String value, String unit) {
+    return Column(
       children: [
-        Expanded(child:_buildTimeDisplay()),
-        Expanded(child:_buildDistanceDisplay()),
-        Expanded(child:_buildAvgSpeedDisplay()),
+        Icon(icon, color: Theme.of(context).primaryColor, size: 28),
+        const SizedBox(height: 8),
+        Text(
+          value,
+          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+        ),
+        Text(
+          unit,
+          style: TextStyle(
+              fontSize: 12,
+              color: Theme.of(context).textTheme.bodySmall?.color),
+        ),
       ],
-    );
-  }
-
-  Widget _buildTimeDisplay() {
-    return Card(
-      child: Text(
-        "${AppLocalizations.of(context)!.timeLabel}:\n$duration\n${AppLocalizations.of(context)!.timeUnitLabel}",
-        textAlign: TextAlign.center,
-      ),
-    );
-  }
-
-  Widget _buildDistanceDisplay() {
-    return Card(
-      child: Text(
-        "${AppLocalizations.of(context)!.distanceLabel}\n${distance.toStringAsFixed(2)}\n${AppLocalizations.of(context)!.distanceUnitLabel}",
-        textAlign: TextAlign.center,
-      ),
-    );
-  }
-
-  Widget _buildAvgSpeedDisplay() {
-    return Card(
-      child: Text(
-        "${AppLocalizations.of(context)!.avgSpeedLabel}:\n${speedavg.toStringAsFixed(2)}\n${AppLocalizations.of(context)!.speedUnitLabel}",
-        textAlign: TextAlign.center,
-      ),
     );
   }
 
@@ -401,26 +501,30 @@ class _ResultScreenState extends State<ResultScreen> {
     return DropdownButtonFormField<String>(
       initialValue: activityType,
       dropdownColor: Theme.of(context).cardTheme.color,
-      decoration: InputDecoration(
-        labelText: AppLocalizations.of(context)!.activityTypeLabel,
-        border: OutlineInputBorder(),
-        prefixIcon: Icon(Icons.sports,color: Theme.of(context).iconTheme.color),
-      ),
+      decoration: _inputDecoration(
+          AppLocalizations.of(context)?.activityTypeLabel ?? "Type", Icons.sports),
       items: activityIcons.keys.map((key) {
         return DropdownMenuItem(
           value: key,
           child: Row(
             children: [
-              Icon(activityIcons[key]),
+              Icon(activityIcons[key], size: 20),
               const SizedBox(width: 10),
-              Text(activityLabels[key] ?? key,style:TextStyle(color:Theme.of(context).inputDecorationTheme.hintStyle!.color)),
+              Text(activityLabels[key] ?? key,
+                  style: TextStyle(
+                      color: Theme.of(context)
+                          .inputDecorationTheme
+                          .hintStyle!
+                          .color)),
             ],
           ),
         );
       }).toList(),
       onChanged: (value) {
         _hasUnsavedChanges = true;
-        setState(() => activityType = value!);
+        if (value != null) {
+          setState(() => activityType = value);
+        }
       },
     );
   }
@@ -429,49 +533,110 @@ class _ResultScreenState extends State<ResultScreen> {
     return TextFormField(
       controller: _titleController,
       onChanged: (_) => _hasUnsavedChanges = true,
-      decoration: InputDecoration(
-        labelText: AppLocalizations.of(context)!.titleLabel,
-        hintText: AppLocalizations.of(context)!.exampleTitleHintLabel,
-        border: OutlineInputBorder(),
-      ),
+      decoration: _inputDecoration(
+          AppLocalizations.of(context)?.titleLabel ?? "Title", Icons.title),
     );
   }
 
   Widget _buildDescriptionField() {
-    return TextField(
+    return TextFormField(
       controller: _descriptionController,
       onChanged: (_) => _hasUnsavedChanges = true,
       maxLines: 4,
-      decoration: InputDecoration(
-        labelText: "${AppLocalizations.of(context)!.descriptionLabel} (${AppLocalizations.of(context)!.optionalLabel})",
-        border: OutlineInputBorder(),
+      decoration: _inputDecoration(
+        "${AppLocalizations.of(context)?.descriptionLabel ?? "Description"} (${AppLocalizations.of(context)?.optionalLabel ?? "optional"})",
+        Icons.description_outlined,
       ),
     );
   }
 
-  Widget _buildPicturePicker() {
-    return ElevatedButton(
-      onPressed: () async {
-        XFile? newImage = await picker.pickImage(source: ImageSource.gallery);
-        if (newImage!=null) {
-          image = newImage;
-          _hasUnsavedChanges = true;
-          setState(() {
-            imageName = image?.name;
-          });
-        }
-      },
-      child: Text(AppLocalizations.of(context)!.uploadPictureButtonLabel),
+  InputDecoration _inputDecoration(String label, IconData icon) {
+    return InputDecoration(
+      labelText: label,
+      prefixIcon: Icon(icon,
+          color: Theme.of(context).iconTheme.color?.withOpacity(0.7)),
+      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(color: Theme.of(context).dividerColor),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(color: Theme.of(context).primaryColor, width: 2),
+      ),
+      filled: true,
+      fillColor: Theme.of(context).cardTheme.color?.withOpacity(0.5),
     );
   }
 
   Widget _buildUploadPictureRow() {
-    return Row(
-      children: [
-        Expanded(flex:2,child: _buildPicturePicker()),
-        SizedBox(width:20),
-        Expanded(child:Text(imageName==null ? "" : imageName!, overflow: TextOverflow.ellipsis)),
-      ],
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Theme.of(context).cardTheme.color?.withOpacity(0.5),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Theme.of(context).dividerColor),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            flex: 2,
+            child: ElevatedButton.icon(
+              onPressed: () async {
+                XFile? newImage =
+                await picker.pickImage(source: ImageSource.gallery);
+                if (newImage != null) {
+                  setState(() {
+                    image = newImage;
+                    imageName = image?.name;
+                    _hasUnsavedChanges = true;
+                  });
+                }
+              },
+              icon: const Icon(Icons.photo_camera),
+              label: Text(
+                  AppLocalizations.of(context)?.uploadPictureButtonLabel ?? "Upload Picture",
+                  textAlign: TextAlign.center),
+              style: ElevatedButton.styleFrom(
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10)),
+                padding: const EdgeInsets.symmetric(vertical: 12),
+              ),
+            ),
+          ),
+          const SizedBox(width: 15),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (image != null)
+                  Container(
+                    width: 40,
+                    height: 40,
+                    margin: const EdgeInsets.only(bottom: 4),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(8),
+                      image: DecorationImage(
+                        image: FileImage(File(image!.path)),
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                  ),
+                Text(
+                  imageName ?? "No image selected",
+                  style: TextStyle(
+                    fontStyle: FontStyle.italic,
+                    color: imageName == null
+                        ? Theme.of(context).disabledColor
+                        : Theme.of(context).textTheme.bodyMedium?.color,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -480,41 +645,58 @@ class _ResultScreenState extends State<ResultScreen> {
       onPressed: () async {
         if (!_processing) {
           await _saveLocally();
-          if (mounted) Navigator.pop(context);
         }
       },
-      iconSize: 32,
-      icon: Icon(Icons.save),
+      iconSize: 28,
+      tooltip: "Save Locally",
+      icon: const Icon(Icons.save_outlined),
     );
   }
 
   Widget _buildDeleteButton() {
-    return IconButton(
-      onPressed: () async {
-        if (!_processing) _deletePopup();
-      },
-      iconSize: 32,
-      icon: Icon(Icons.delete_rounded),
+    return SizedBox(
+      height: 50,
+      child: OutlinedButton(
+        onPressed: () async {
+          if (!_processing) _deletePopup();
+        },
+        style: OutlinedButton.styleFrom(
+          side: BorderSide(color: Colors.red.shade400),
+          shape:
+          RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          foregroundColor: Colors.red.shade400,
+        ),
+        child: const Icon(Icons.delete_outline),
+      ),
     );
   }
 
   Widget _buildSubmitButton() {
-    return ElevatedButton(
-      onPressed: () async {
-        if (offlineMode) {
-          _displaySnackbar(AppLocalizations.of(context)!.offlineModePageBlockedMessage);
-        } else {
+    return SizedBox(
+      height: 50,
+      child: ElevatedButton(
+        onPressed: () async {
           if (!_processing) {
             await _saveActivity();
-            if (mounted) Navigator.pop(context);
           }
-        }
-      },
-      style: ElevatedButton.styleFrom(
-        padding: const EdgeInsets.symmetric(vertical: 20),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        },
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Theme.of(context).primaryColor,
+          foregroundColor: Colors.white,
+          shape:
+          RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          elevation: 2,
+        ),
+        child: _processing
+            ? const SizedBox(
+            width: 24,
+            height: 24,
+            child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+            : Text(
+          AppLocalizations.of(context)?.submitLabel.toUpperCase() ?? "SUBMIT",
+          style: const TextStyle(fontWeight: FontWeight.bold, letterSpacing: 1),
+        ),
       ),
-      child: Text(AppLocalizations.of(context)!.submitLabel),
     );
   }
 
@@ -522,14 +704,12 @@ class _ResultScreenState extends State<ResultScreen> {
     return Row(
       children: [
         Expanded(
+          flex: 1,
           child: _buildDeleteButton(),
         ),
+        const SizedBox(width: 16),
         Expanded(
-          flex: 2,
-          child: SizedBox(),
-        ),
-        Expanded(
-          flex: 2,
+          flex: 3,
           child: _buildSubmitButton(),
         ),
       ],

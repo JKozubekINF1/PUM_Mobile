@@ -27,6 +27,7 @@ class _ViewOnlineActivityScreenState extends State<ViewOnlineActivityScreen> {
   String title = "";
   String description = "";
   String date = "";
+  String? photoUrl;
 
   void initiateData() {
     try {
@@ -61,6 +62,10 @@ class _ViewOnlineActivityScreenState extends State<ViewOnlineActivityScreen> {
 
       if (widget.data['activityType'] != null) {
         activityType = widget.data['activityType'];
+      }
+
+      if (widget.data['photoUrl'] != null) {
+        photoUrl = widget.data['photoUrl'];
       }
 
       if (widget.data['startedAt'] != null) {
@@ -112,6 +117,15 @@ class _ViewOnlineActivityScreenState extends State<ViewOnlineActivityScreen> {
     }
   }
 
+  void _openFullScreenImage() {
+    if (photoUrl == null) return;
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => FullScreenImage(imageUrl: photoUrl!),
+      ),
+    );
+  }
+
   @override
   void initState() {
     super.initState();
@@ -134,6 +148,12 @@ class _ViewOnlineActivityScreenState extends State<ViewOnlineActivityScreen> {
             _buildStats(),
             const SizedBox(height: 30),
             _buildHeaderInfo(),
+
+            if (photoUrl != null && photoUrl!.isNotEmpty) ...[
+              const SizedBox(height: 20),
+              _buildPhotoSection(),
+            ],
+
             if (description.isNotEmpty) ...[
               const SizedBox(height: 20),
               _buildDescriptionSection(),
@@ -311,6 +331,58 @@ class _ViewOnlineActivityScreenState extends State<ViewOnlineActivityScreen> {
     );
   }
 
+  Widget _buildPhotoSection() {
+    return GestureDetector(
+      onTap: _openFullScreenImage,
+      child: Container(
+        height: 250,
+        width: double.infinity,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.1),
+              blurRadius: 10,
+              spreadRadius: 1,
+            ),
+          ],
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(20),
+          child: Hero(
+            tag: photoUrl!,
+            child: Image.network(
+              photoUrl!,
+              fit: BoxFit.cover,
+              errorBuilder: (context, error, stackTrace) {
+                return Container(
+                  color: Colors.grey[200],
+                  child: const Center(
+                    child: Icon(Icons.broken_image, size: 50, color: Colors.grey),
+                  ),
+                );
+              },
+              loadingBuilder: (context, child, loadingProgress) {
+                if (loadingProgress == null) return child;
+                return Container(
+                  color: Colors.grey[200],
+                  child: Center(
+                    child: CircularProgressIndicator(
+                      value: loadingProgress.expectedTotalBytes != null
+                          ? loadingProgress.cumulativeBytesLoaded /
+                          loadingProgress.expectedTotalBytes!
+                          : null,
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget _buildDescriptionSection() {
     return Container(
       width: double.infinity,
@@ -345,6 +417,35 @@ class _ViewOnlineActivityScreenState extends State<ViewOnlineActivityScreen> {
             style: Theme.of(context).textTheme.bodyMedium,
           ),
         ],
+      ),
+    );
+  }
+}
+
+class FullScreenImage extends StatelessWidget {
+  final String imageUrl;
+
+  const FullScreenImage({super.key, required this.imageUrl});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.black,
+      appBar: AppBar(
+        backgroundColor: Colors.black,
+        iconTheme: const IconThemeData(color: Colors.white),
+        elevation: 0,
+      ),
+      body: Center(
+        child: Hero(
+          tag: imageUrl,
+          child: InteractiveViewer(
+            panEnabled: true,
+            minScale: 0.5,
+            maxScale: 4,
+            child: Image.network(imageUrl),
+          ),
+        ),
       ),
     );
   }

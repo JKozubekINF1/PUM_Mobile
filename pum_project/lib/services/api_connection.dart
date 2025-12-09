@@ -6,7 +6,7 @@ import 'package:pum_project/models/profile_data.dart';
 import 'package:image_picker/image_picker.dart';
 
 class ApiService {
-  final String baseUrl = 'https://activitis.hostingasp.pl.hostingasp.pl'; //http://10.0.2.2:5123 //https://activitis.hostingasp.pl.hostingasp.pl'
+  final String baseUrl = 'https://activitis.hostingasp.pl.hostingasp.pl';
   final FlutterSecureStorage _storage;
   final http.Client _client;
 
@@ -100,7 +100,6 @@ class ApiService {
     }
   }
 
-
   Future<void> forgotPassword(String email) async {
     final url = Uri.parse('$baseUrl/api/Auth/forgot-password');
     try {
@@ -154,7 +153,6 @@ class ApiService {
     }
   }
 
-
   Future<ProfileData> fetchProfile() async {
     final url = Uri.parse('$baseUrl/api/Profile');
     try {
@@ -205,12 +203,34 @@ class ApiService {
     }
   }
 
-  Future<void> logout() async {
-    await clearAuthData();
+  Future<void> uploadAvatar({
+    required XFile imageFile,
+  }) async {
+    final url = Uri.parse('$baseUrl/api/Profile/upload-avatar');
+    try {
+      final request = http.MultipartRequest("POST", url);
+      final headers = await _getHeaders(requiresAuth: true);
+      request.headers.addAll(headers);
+      request.files.add(
+        await http.MultipartFile.fromPath(
+          'file',
+          imageFile.path,
+        ),
+      );
+      final response = await _client.send(request);
+      if (response.statusCode == 200) {
+        debugPrint('[API] User avatar uploaded successfully');
+      } else if (response.statusCode == 401) {
+        throw Exception('Unauthorized. Token expired or invalid.');
+      } else {
+        throw Exception('Failed to upload avatar: ${response.statusCode}');
+      }
+    } catch (e) {
+      throw Exception('Network error during avatar upload: $e');
+    }
   }
 
-
-  Future<void> saveActivity({
+  Future<String?> saveActivity({
     required int durationSeconds,
     required double distanceMeters,
     required double averageSpeedMs,
@@ -238,8 +258,11 @@ class ApiService {
     );
 
     if (response.statusCode == 200 || response.statusCode == 201) {
-      debugPrint('[API] Activity saved');
-      return;
+      final responseBody = json.decode(utf8.decode(response.bodyBytes));
+      if (responseBody['id'] != null) {
+        return responseBody['id'].toString();
+      }
+      return null;
     } else {
       final error = json.decode(utf8.decode(response.bodyBytes));
       throw Exception(error['message'] ?? 'Error ${response.statusCode}');
@@ -317,10 +340,11 @@ class ApiService {
     }
   }
 
-  Future<void> uploadAvatar({
+  Future<void> uploadActivityPhoto({
+    required String id,
     required XFile imageFile,
   }) async {
-    final url = Uri.parse('$baseUrl/api/Profile/upload-avatar');
+    final url = Uri.parse('$baseUrl/api/Activities/$id/photo');
     try {
       final request = http.MultipartRequest("POST", url);
       final headers = await _getHeaders(requiresAuth: true);
@@ -333,14 +357,18 @@ class ApiService {
       );
       final response = await _client.send(request);
       if (response.statusCode == 200) {
-        debugPrint('[API] User avatar uploaded successfully');
+        debugPrint('[API] Activity photo uploaded successfully');
       } else if (response.statusCode == 401) {
         throw Exception('Unauthorized. Token expired or invalid.');
       } else {
-        throw Exception('Failed to upload avatar: ${response.statusCode}');
+        throw Exception('Failed to upload activity photo: ${response.statusCode}');
       }
     } catch (e) {
-      throw Exception('Network error during avatar upload: $e');
+      throw Exception('Network error during activity photo upload: $e');
     }
+  }
+
+  Future<void> logout() async {
+    await clearAuthData();
   }
 }

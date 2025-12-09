@@ -1,7 +1,7 @@
 import 'package:latlong2/latlong.dart';
-import 'dart:typed_data';
 
 class Activity {
+  final String? id;
   final int duration;
   final double distance;
   final double avgSpeed;
@@ -10,9 +10,10 @@ class Activity {
   final String? description;
   final String activityType;
   final String filename;
-  final Uint8List? imageBytes;
+  final String? photoUrl;
 
   Activity({
+    this.id,
     required this.duration,
     required this.distance,
     required this.avgSpeed,
@@ -21,28 +22,31 @@ class Activity {
     required this.description,
     required this.activityType,
     required this.filename,
-    this.imageBytes,
+    this.photoUrl,
   });
 
   Map<String, dynamic> toJson() => {
     'duration': duration,
     'distance': distance,
     'avgSpeed': avgSpeed,
-    'routelist': routelist.map((latLng) => {'coordinates': [latLng.latitude, latLng.longitude]}).toList(),
+    'routelist': routelist.map((latLng) => [latLng.latitude, latLng.longitude]).toList(),
     'title': title,
     'description': description,
     'activityType': activityType,
     'filename': filename,
   };
 
+
   factory Activity.fromJson(Map<String, dynamic> json) => Activity(
-    duration: json['duration'],
-    distance: json['distance'],
-    avgSpeed: json['avgSpeed'],
-    routelist: (json['routelist'] as List).map<LatLng>((e) => LatLng((e['coordinates'][0] as num).toDouble(), (e['coordinates'][1] as num).toDouble(),)).toList(),
+    id: json['id'],
+    duration: json['durationSeconds'] ?? json['duration'], // Backend czasem zwraca DurationSeconds
+    distance: (json['distanceMeters'] ?? json['distance']).toDouble(),
+    avgSpeed: (json['averageSpeedMs'] ?? json['avgSpeed']).toDouble(),
+    routelist: [],
     title: json['title'],
     description: json['description'],
     activityType: json['activityType'],
-    filename: json['filename'],
+    filename: json['filename'] ?? "",
+    photoUrl: json['photoUrl'],
   );
 }
