@@ -121,8 +121,12 @@ class _ResultScreenState extends State<ResultScreen> {
       };
     } else {
       activityLabels = {
-        "run": "Run", "bike": "Bike", "walk": "Walk",
-        "gym": "Gym", "swim": "Swim", "other": "Other"
+        "run": "Run",
+        "bike": "Bike",
+        "walk": "Walk",
+        "gym": "Gym",
+        "swim": "Swim",
+        "other": "Other"
       };
     }
   }
@@ -178,16 +182,17 @@ class _ResultScreenState extends State<ResultScreen> {
         saveSuccess = await queue.addActivity(activity);
         if (saveSuccess) {
           await storage.deleteFile(filename);
-          if (mounted) _displaySnackbar(AppLocalizations.of(context)?.noConnectionMessage ?? "Saved offline");
+          if (mounted)
+            _displaySnackbar(AppLocalizations.of(context)?.noConnectionMessage ??
+                "Saved offline");
         }
       } else {
-
-
         String? newActivityId = await api.saveActivity(
           durationSeconds: duration,
           distanceMeters: distance,
           averageSpeedMs: speedavg,
-          routeCoordinates: routePoints.map((p) => [p.latitude, p.longitude]).toList(),
+          routeCoordinates:
+          routePoints.map((p) => [p.latitude, p.longitude]).toList(),
           title: _titleController.text,
           description: _descriptionController.text,
           activityType: activityType,
@@ -204,10 +209,14 @@ class _ResultScreenState extends State<ResultScreen> {
               if (mounted) _displaySnackbar("Activity and photo saved!");
             } catch (e) {
               debugPrint("Photo upload error: $e");
-              if (mounted) _displaySnackbar("Activity saved, but photo failed.");
+              if (mounted)
+                _displaySnackbar("Activity saved, but photo failed.");
             }
           } else {
-            if (mounted) _displaySnackbar(AppLocalizations.of(context)?.activitySentMessage ?? "Activity Sent");
+            if (mounted)
+              _displaySnackbar(
+                  AppLocalizations.of(context)?.activitySentMessage ??
+                      "Activity Sent");
           }
         }
       }
@@ -217,10 +226,10 @@ class _ResultScreenState extends State<ResultScreen> {
       if (saveSuccess && mounted) {
         Navigator.pop(context);
       }
-
     } catch (e) {
       if (mounted)
-        _displaySnackbar(AppLocalizations.of(context)?.genericErrorMessage ?? "Error");
+        _displaySnackbar(
+            AppLocalizations.of(context)?.genericErrorMessage ?? "Error");
       debugPrint("Save error: $e");
       setState(() => _processing = false);
     }
@@ -274,12 +283,12 @@ class _ResultScreenState extends State<ResultScreen> {
         barrierDismissible: true,
         builder: (BuildContext context) {
           return AlertDialog(
-            title: Text(AppLocalizations.of(context)?.warningLabel ?? "Warning",
-                style: const TextStyle(color: Colors.black)),
+            title: Text(AppLocalizations.of(context)?.warningLabel ?? "Warning"),
             content: SingleChildScrollView(
               child: ListBody(
                 children: <Widget>[
-                  Text(AppLocalizations.of(context)?.unsavedChangesWarningMessage ?? "Unsaved changes"),
+                  Text(AppLocalizations.of(context)?.unsavedChangesWarningMessage ??
+                      "Unsaved changes"),
                 ],
               ),
             ),
@@ -308,12 +317,12 @@ class _ResultScreenState extends State<ResultScreen> {
         barrierDismissible: true,
         builder: (BuildContext context) {
           return AlertDialog(
-            title: Text(AppLocalizations.of(context)?.warningLabel ?? "Warning",
-                style: const TextStyle(color: Colors.black)),
+            title: Text(AppLocalizations.of(context)?.warningLabel ?? "Warning"),
             content: SingleChildScrollView(
               child: ListBody(
                 children: <Widget>[
-                  Text(AppLocalizations.of(context)?.activityDeletionMessage ?? "Delete activity?"),
+                  Text(AppLocalizations.of(context)?.activityDeletionMessage ??
+                      "Delete activity?"),
                 ],
               ),
             ),
@@ -348,7 +357,8 @@ class _ResultScreenState extends State<ResultScreen> {
       }
     } catch (e) {
       if (mounted)
-        _displaySnackbar(AppLocalizations.of(context)?.genericErrorMessage ?? "Error");
+        _displaySnackbar(
+            AppLocalizations.of(context)?.genericErrorMessage ?? "Error");
       debugPrint('$e');
     }
   }
@@ -417,11 +427,12 @@ class _ResultScreenState extends State<ResultScreen> {
           color: Theme.of(context).cardTheme.color,
           child: Center(
               child: Text(
-                  AppLocalizations.of(context)?.missingRouteMessage ?? "No route")),
+                  AppLocalizations.of(context)?.missingRouteMessage ??
+                      "No route")),
         )
             : FlutterMap(
-          options: MapOptions(
-              initialCenter: routePoints.first, initialZoom: 15),
+          options:
+          MapOptions(initialCenter: routePoints.first, initialZoom: 15),
           children: [
             TileLayer(
               urlTemplate:
@@ -481,16 +492,19 @@ class _ResultScreenState extends State<ResultScreen> {
   Widget _buildStatItem(IconData icon, String value, String unit) {
     return Column(
       children: [
-        Icon(icon, color: Theme.of(context).primaryColor, size: 28),
+        Icon(icon, color: Theme.of(context).iconTheme.color, size: 28),
         const SizedBox(height: 8),
         Text(
           value,
-          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              fontWeight: FontWeight.bold,
+              fontSize: 20
+          ),
         ),
         Text(
           unit,
           style: TextStyle(
-              fontSize: 12,
+              fontSize: 14,
               color: Theme.of(context).textTheme.bodySmall?.color),
         ),
       ],
@@ -501,21 +515,19 @@ class _ResultScreenState extends State<ResultScreen> {
     return DropdownButtonFormField<String>(
       initialValue: activityType,
       dropdownColor: Theme.of(context).cardTheme.color,
+      style: Theme.of(context).textTheme.bodyMedium,
       decoration: _inputDecoration(
-          AppLocalizations.of(context)?.activityTypeLabel ?? "Type", Icons.sports),
+          AppLocalizations.of(context)?.activityTypeLabel ?? "Type",
+          Icons.sports),
       items: activityIcons.keys.map((key) {
         return DropdownMenuItem(
           value: key,
           child: Row(
             children: [
-              Icon(activityIcons[key], size: 20),
+              Icon(activityIcons[key], size: 24, color: Theme.of(context).iconTheme.color),
               const SizedBox(width: 10),
               Text(activityLabels[key] ?? key,
-                  style: TextStyle(
-                      color: Theme.of(context)
-                          .inputDecorationTheme
-                          .hintStyle!
-                          .color)),
+                  style: Theme.of(context).textTheme.bodyMedium),
             ],
           ),
         );
@@ -533,6 +545,7 @@ class _ResultScreenState extends State<ResultScreen> {
     return TextFormField(
       controller: _titleController,
       onChanged: (_) => _hasUnsavedChanges = true,
+      style: Theme.of(context).textTheme.bodyMedium,
       decoration: _inputDecoration(
           AppLocalizations.of(context)?.titleLabel ?? "Title", Icons.title),
     );
@@ -543,6 +556,7 @@ class _ResultScreenState extends State<ResultScreen> {
       controller: _descriptionController,
       onChanged: (_) => _hasUnsavedChanges = true,
       maxLines: 4,
+      style: Theme.of(context).textTheme.bodyMedium,
       decoration: _inputDecoration(
         "${AppLocalizations.of(context)?.descriptionLabel ?? "Description"} (${AppLocalizations.of(context)?.optionalLabel ?? "optional"})",
         Icons.description_outlined,
@@ -553,19 +567,7 @@ class _ResultScreenState extends State<ResultScreen> {
   InputDecoration _inputDecoration(String label, IconData icon) {
     return InputDecoration(
       labelText: label,
-      prefixIcon: Icon(icon,
-          color: Theme.of(context).iconTheme.color?.withOpacity(0.7)),
-      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-      enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: Theme.of(context).dividerColor),
-      ),
-      focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: Theme.of(context).primaryColor, width: 2),
-      ),
-      filled: true,
-      fillColor: Theme.of(context).cardTheme.color?.withOpacity(0.5),
+      prefixIcon: Icon(icon),
     );
   }
 
@@ -595,12 +597,15 @@ class _ResultScreenState extends State<ResultScreen> {
               },
               icon: const Icon(Icons.photo_camera),
               label: Text(
-                  AppLocalizations.of(context)?.uploadPictureButtonLabel ?? "Upload Picture",
+                  AppLocalizations.of(context)?.uploadPictureButtonLabel ??
+                      "Upload Picture",
+                  style: const TextStyle(fontSize: 18),
                   textAlign: TextAlign.center),
               style: ElevatedButton.styleFrom(
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10)),
-                padding: const EdgeInsets.symmetric(vertical: 12),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10)),
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  minimumSize: const Size(0, 50)
               ),
             ),
           ),
@@ -625,10 +630,11 @@ class _ResultScreenState extends State<ResultScreen> {
                 Text(
                   imageName ?? "No image selected",
                   style: TextStyle(
-                    fontStyle: FontStyle.italic,
-                    color: imageName == null
-                        ? Theme.of(context).disabledColor
-                        : Theme.of(context).textTheme.bodyMedium?.color,
+                      fontStyle: FontStyle.italic,
+                      color: imageName == null
+                          ? Theme.of(context).disabledColor
+                          : Theme.of(context).textTheme.bodyMedium?.color,
+                      fontSize: 16
                   ),
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -655,47 +661,36 @@ class _ResultScreenState extends State<ResultScreen> {
 
   Widget _buildDeleteButton() {
     return SizedBox(
-      height: 50,
+      height: 60,
       child: OutlinedButton(
         onPressed: () async {
           if (!_processing) _deletePopup();
         },
         style: OutlinedButton.styleFrom(
-          side: BorderSide(color: Colors.red.shade400),
+          side: BorderSide(color: Colors.red.shade400, width: 2),
           shape:
           RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           foregroundColor: Colors.red.shade400,
         ),
-        child: const Icon(Icons.delete_outline),
+        child: const Icon(Icons.delete_outline, size: 30),
       ),
     );
   }
 
   Widget _buildSubmitButton() {
-    return SizedBox(
-      height: 50,
-      child: ElevatedButton(
-        onPressed: () async {
-          if (!_processing) {
-            await _saveActivity();
-          }
-        },
-        style: ElevatedButton.styleFrom(
-          backgroundColor: Theme.of(context).primaryColor,
-          foregroundColor: Colors.white,
-          shape:
-          RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-          elevation: 2,
-        ),
-        child: _processing
-            ? const SizedBox(
-            width: 24,
-            height: 24,
-            child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-            : Text(
-          AppLocalizations.of(context)?.submitLabel.toUpperCase() ?? "SUBMIT",
-          style: const TextStyle(fontWeight: FontWeight.bold, letterSpacing: 1),
-        ),
+    return ElevatedButton(
+      onPressed: () async {
+        if (!_processing) {
+          await _saveActivity();
+        }
+      },
+      child: _processing
+          ? const SizedBox(
+          width: 24,
+          height: 24,
+          child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+          : Text(
+        AppLocalizations.of(context)?.submitLabel.toUpperCase() ?? "SUBMIT",
       ),
     );
   }

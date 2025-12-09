@@ -1,11 +1,11 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:image_picker/image_picker.dart';
 import '../services/api_connection.dart';
 import '../models/profile_data.dart';
 import '../l10n/generated/app_localizations.dart';
 import '../providers/auth_provider.dart';
-import 'package:image_picker/image_picker.dart';
 
 class EditProfilePage extends StatefulWidget {
   final bool forcedEntry;
@@ -166,8 +166,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
         barrierDismissible: true,
         builder: (BuildContext context) {
           return AlertDialog(
-            title: Text(AppLocalizations.of(context)!.warningLabel,
-                style: const TextStyle(color: Colors.black)),
+            title: Text(AppLocalizations.of(context)!.warningLabel),
             content: SingleChildScrollView(
               child: ListBody(
                 children: <Widget>[
@@ -200,8 +199,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
       barrierDismissible: true,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text(AppLocalizations.of(context)!.warningLabel,
-              style: const TextStyle(color: Colors.black)),
+          title: Text(AppLocalizations.of(context)!.warningLabel),
           content: SingleChildScrollView(
             child: ListBody(
               children: <Widget>[
@@ -262,9 +260,8 @@ class _EditProfilePageState extends State<EditProfilePage> {
                       const SizedBox(height: 30),
                       Text(
                         AppLocalizations.of(context)!.profileDetailsLabel,
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: Theme.of(context).primaryColor,
+                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                          color: Theme.of(context).iconTheme.color,
                         ),
                       ),
                       const SizedBox(height: 16),
@@ -291,6 +288,8 @@ class _EditProfilePageState extends State<EditProfilePage> {
     } else if (_currentAvatarUrl != null && _currentAvatarUrl!.isNotEmpty) {
       avatarImage = NetworkImage(_currentAvatarUrl!);
     }
+    final borderColor = Theme.of(context).iconTheme.color ?? Theme.of(context).primaryColor;
+    final buttonColor = Theme.of(context).appBarTheme.backgroundColor ?? Theme.of(context).primaryColor;
 
     return Center(
       child: Stack(
@@ -299,7 +298,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               border: Border.all(
-                color: Theme.of(context).primaryColor.withOpacity(0.5),
+                color: borderColor.withOpacity(0.8),
                 width: 3,
               ),
             ),
@@ -316,7 +315,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
             bottom: 0,
             right: 4,
             child: Material(
-              color: Theme.of(context).primaryColor,
+              color: buttonColor,
               shape: const CircleBorder(),
               elevation: 2,
               child: InkWell(
@@ -331,9 +330,12 @@ class _EditProfilePageState extends State<EditProfilePage> {
                     });
                   }
                 },
-                child: const Padding(
-                  padding: EdgeInsets.all(8.0),
-                  child: Icon(Icons.camera_alt, color: Colors.white, size: 20),
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Icon(Icons.camera_alt,
+                      color: Theme.of(context).appBarTheme.foregroundColor ?? Colors.white,
+                      size: 20
+                  ),
                 ),
               ),
             ),
@@ -378,18 +380,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
       keyboardType: isNumeric ? TextInputType.number : TextInputType.text,
       decoration: InputDecoration(
         labelText: label,
-        prefixIcon: Icon(icon, color: Theme.of(context).iconTheme.color?.withOpacity(0.7)),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: Theme.of(context).dividerColor),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: Theme.of(context).primaryColor, width: 2),
-        ),
+        prefixIcon: Icon(icon, color: Theme.of(context).iconTheme.color),
         filled: true,
         fillColor: Theme.of(context).cardTheme.color?.withOpacity(0.5),
       ),
@@ -420,12 +411,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
       child: InputDecorator(
         decoration: InputDecoration(
           labelText: '${AppLocalizations.of(context)!.profileDayOfBirthLabel} (${AppLocalizations.of(context)!.optionalLabel})',
-          prefixIcon: Icon(Icons.calendar_today_outlined, color: Theme.of(context).iconTheme.color?.withOpacity(0.7)),
-          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-          enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(color: Theme.of(context).dividerColor),
-          ),
+          prefixIcon: Icon(Icons.calendar_today_outlined, color: Theme.of(context).iconTheme.color),
           filled: true,
           fillColor: Theme.of(context).cardTheme.color?.withOpacity(0.5),
         ),
@@ -450,15 +436,10 @@ class _EditProfilePageState extends State<EditProfilePage> {
     return DropdownButtonFormField<String>(
       initialValue: _gender,
       dropdownColor: Theme.of(context).cardTheme.color,
-      icon: const Icon(Icons.arrow_drop_down),
+      icon: Icon(Icons.arrow_drop_down, color: Theme.of(context).iconTheme.color),
       decoration: InputDecoration(
         labelText: '${l10n.profileGenderLabel} (${l10n.optionalLabel})',
-        prefixIcon: Icon(Icons.wc, color: Theme.of(context).iconTheme.color?.withOpacity(0.7)),
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: Theme.of(context).dividerColor),
-        ),
+        prefixIcon: Icon(Icons.wc, color: Theme.of(context).iconTheme.color),
         filled: true,
         fillColor: Theme.of(context).cardTheme.color?.withOpacity(0.5),
       ),
@@ -471,7 +452,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
       items: genderOptions.entries.map((entry) {
         return DropdownMenuItem<String>(
           value: entry.key,
-          child: Text(entry.value, style: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color)),
+          child: Text(entry.value, style: Theme.of(context).textTheme.bodyMedium),
         );
       }).toList(),
     );
@@ -479,22 +460,15 @@ class _EditProfilePageState extends State<EditProfilePage> {
 
   Widget _buildSubmitButton() {
     return SizedBox(
-      height: 50,
+      height: 60,
       width: double.infinity,
       child: ElevatedButton(
-        style: ElevatedButton.styleFrom(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-          backgroundColor: Theme.of(context).primaryColor,
-          foregroundColor: Colors.white,
-          elevation: 2,
-        ),
         onPressed: () {
           if (image != null) uploadProfilePicture();
           _updateProfile();
         },
         child: Text(
           AppLocalizations.of(context)!.saveChangesLabel,
-          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
         ),
       ),
     );

@@ -1,311 +1,147 @@
 import 'package:flutter/material.dart';
 
 class AppTheme {
-  static ThemeData get defaultTheme {
+  static const EdgeInsets _defaultInputPadding = EdgeInsets.symmetric(
+    vertical: 14.0,
+    horizontal: 16.0,
+  );
+
+  static ThemeData _buildTheme({
+    required ColorScheme colorScheme,
+    required Color scaffoldBg,
+    required Color appBarBg,
+    required Color appBarFg,
+    required Color textColor,
+    required Color iconColor,
+    required Color cardColor,
+    required Color buttonBg,
+    required Color buttonFg,
+    required Color borderColor,
+  }) {
     return ThemeData(
       useMaterial3: false,
-      colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
-      scaffoldBackgroundColor: Colors.white,
-      appBarTheme: const AppBarTheme(
-        backgroundColor: Colors.blue,
-        foregroundColor: Colors.white,
+      colorScheme: colorScheme,
+      scaffoldBackgroundColor: scaffoldBg,
+
+      appBarTheme: AppBarTheme(
+        backgroundColor: appBarBg,
+        foregroundColor: appBarFg,
         centerTitle: true,
       ),
+
       textTheme: const TextTheme(
         bodyMedium: TextStyle(fontSize: 24),
         bodyLarge: TextStyle(fontSize: 72),
         titleLarge: TextStyle(fontWeight: FontWeight.bold),
-      ).apply(
-        bodyColor: Colors.black,
-        displayColor: Colors.black,
-      ),
+      ).apply(bodyColor: textColor, displayColor: textColor),
+
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
-          foregroundColor: Colors.black,
-          backgroundColor: Colors.blueGrey[400],
-          textStyle: TextStyle(fontSize: 24),
+          foregroundColor: buttonFg,
+          backgroundColor: buttonBg,
+          textStyle: const TextStyle(fontSize: 24, fontWeight: FontWeight.w600),
+          minimumSize: const Size.fromHeight(60),
         ),
       ),
-      cardTheme: CardThemeData(
-        color: Colors.blueGrey[200],
+
+      cardTheme: CardThemeData(color: cardColor),
+
+      iconTheme: IconThemeData(color: iconColor),
+
+      textButtonTheme: TextButtonThemeData(
+        style: TextButton.styleFrom(foregroundColor: iconColor),
       ),
-      inputDecorationTheme: InputDecorationThemeData(
-        hintStyle: TextStyle(
-          fontSize: 24,
-          color: Colors.black,
-        ),
-        labelStyle: TextStyle(
-          fontSize: 24,
-          color: Colors.black,
-        ),
+
+      textSelectionTheme: TextSelectionThemeData(cursorColor: iconColor),
+
+      inputDecorationTheme: InputDecorationTheme(
+        contentPadding: _defaultInputPadding,
+        filled: true,
+        fillColor: cardColor.withOpacity(0.5),
+        floatingLabelBehavior: FloatingLabelBehavior.always,
+
+        labelStyle: TextStyle(fontSize: 24, color: textColor),
+        hintStyle: TextStyle(fontSize: 24, color: textColor.withOpacity(0.7)),
+
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
-          borderSide: BorderSide(color: Colors.blue[900]!),
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: borderColor, width: 2),
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
-          borderSide: BorderSide(color: Colors.blue[900]!),
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: borderColor, width: 3),
+        ),
+        errorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: Colors.red, width: 2),
+        ),
+
+        prefixIconConstraints: const BoxConstraints(minWidth: 56, minHeight: 56),
+      ),
+
+      dropdownMenuTheme: DropdownMenuThemeData(
+        textStyle: const TextStyle(fontSize: 20),
+        menuStyle: MenuStyle(
+          backgroundColor: WidgetStateProperty.all(cardColor),
         ),
       ),
-      datePickerTheme: DatePickerThemeData(
+
+      datePickerTheme: const DatePickerThemeData(
         backgroundColor: Colors.white,
         headerBackgroundColor: Colors.blueGrey,
-        headerHelpStyle: TextStyle(fontSize: 18),
-        headerHeadlineStyle: TextStyle(fontSize: 18),
-        dayStyle: TextStyle(fontSize: 18),
-        weekdayStyle: TextStyle(fontSize: 18,color: Colors.black),
-        yearStyle: TextStyle(fontSize: 18,color:Colors.black),
-        inputDecorationTheme: InputDecorationThemeData(
-          floatingLabelStyle: TextStyle(fontSize: 24),
-        ),
-      ),
-      dropdownMenuTheme: DropdownMenuThemeData(
-        textStyle: TextStyle(
-          fontSize: 18,
-        ),
-      ),
-      iconTheme: IconThemeData(
-        color: Colors.blue[900],
-      ),
-      textButtonTheme: TextButtonThemeData(
-        style: TextButton.styleFrom(
-          iconColor: Colors.blue[900],
-        ),
-      ),
-      textSelectionTheme: TextSelectionThemeData(
-        cursorColor: Colors.black,
       ),
     );
   }
 
-  static ThemeData get darkTheme {
-    return ThemeData(
-      useMaterial3: false,
-      colorScheme: ColorScheme.fromSeed(seedColor: Colors.grey),
-      scaffoldBackgroundColor: Colors.grey[900],
-      appBarTheme: const AppBarTheme(
-        backgroundColor: Colors.black,
-        foregroundColor: Colors.white,
-        centerTitle: true,
-      ),
-      textTheme: const TextTheme(
-        bodyMedium: TextStyle(fontSize: 24),
-        bodyLarge: TextStyle(fontSize: 72),
-        titleLarge: TextStyle(fontWeight: FontWeight.bold),
-      ).apply(
-        bodyColor: Colors.white,
-        displayColor: Colors.white,
-      ),
-      elevatedButtonTheme: ElevatedButtonThemeData(
-        style: ElevatedButton.styleFrom(
-          foregroundColor: Colors.white,
-          backgroundColor: Colors.grey[700],
-          textStyle: TextStyle(fontSize: 24),
-        ),
-      ),
-      cardTheme: CardThemeData(
-        color: Colors.grey[800],
-      ),
-      inputDecorationTheme: InputDecorationThemeData(
-        hintStyle: TextStyle(
-            fontSize: 24,
-            color: Colors.white,
-        ),
-        labelStyle: TextStyle(
-            fontSize: 24,
-            color: Colors.white,
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
-          borderSide: BorderSide(color: Colors.white),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
-          borderSide: BorderSide(color: Colors.white),
-        ),
-      ),
-      datePickerTheme: DatePickerThemeData(
-        backgroundColor: Colors.white,
-        headerBackgroundColor: Colors.blueGrey,
-        headerHelpStyle: TextStyle(fontSize: 18),
-        headerHeadlineStyle: TextStyle(fontSize: 18),
-        dayStyle: TextStyle(fontSize: 18),
-        weekdayStyle: TextStyle(fontSize: 18,color: Colors.black),
-        yearStyle: TextStyle(fontSize: 18,color:Colors.black),
-        inputDecorationTheme: InputDecorationThemeData(
-          floatingLabelStyle: TextStyle(fontSize: 24),
-        ),
-      ),
-      dropdownMenuTheme: DropdownMenuThemeData(
-        textStyle: TextStyle(
-          fontSize: 18,
-        ),
-      ),
-      iconTheme: IconThemeData(
-        color: Colors.white,
-      ),
-      textButtonTheme: TextButtonThemeData(
-        style: TextButton.styleFrom(
-          iconColor: Colors.white,
-        ),
-      ),
-      textSelectionTheme: TextSelectionThemeData(
-        cursorColor: Colors.white,
-      ),
-    );
-  }
+  static ThemeData get defaultTheme => _buildTheme(
+    colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
+    scaffoldBg: Colors.white,
+    appBarBg: Colors.blue,
+    appBarFg: Colors.white,
+    textColor: Colors.black,
+    iconColor: Colors.blue[900]!,
+    cardColor: Colors.blueGrey[200]!,
+    buttonBg: Colors.blueGrey[400]!,
+    buttonFg: Colors.black,
+    borderColor: Colors.blue[900]!,
+  );
 
-  static ThemeData get christmasTheme {
-    return ThemeData(
-      useMaterial3: false,
-      colorScheme: ColorScheme.fromSeed(seedColor: Colors.red),
-      scaffoldBackgroundColor: Colors.red[600],
-      appBarTheme: const AppBarTheme(
-        backgroundColor: Color(0xFF0E8919),
-        foregroundColor: Color(0xFFFBEE76),
-        centerTitle: true,
-      ),
-      textTheme: const TextTheme(
-        bodyMedium: TextStyle(fontSize: 24),
-        bodyLarge: TextStyle(fontSize: 72),
-        titleLarge: TextStyle(fontWeight: FontWeight.bold),
-      ).apply(
-        bodyColor: Color(0xFFFBEE76),
-        displayColor: Color(0xFFFBEE76),
-      ),
-      elevatedButtonTheme: ElevatedButtonThemeData(
-        style: ElevatedButton.styleFrom(
-          foregroundColor: Color(0xFFFBEE76),
-          backgroundColor: Color(0xFFFF1F1F),
-          textStyle: TextStyle(fontSize: 24),
-        ),
-      ),
-      cardTheme: CardThemeData(
-        color: Color(0xFF05D30C),
-      ),
-      inputDecorationTheme: InputDecorationThemeData(
-        hintStyle: TextStyle(
-          fontSize: 24,
-          color: Color(0xFFFBEE76),
-        ),
-        labelStyle: TextStyle(
-          fontSize: 24,
-          color: Color(0xFFFBEE76),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
-          borderSide: BorderSide(color: Color(0xFFFBEE76)),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
-          borderSide: BorderSide(color: Color(0xFFFBEE76)),
-        ),
-      ),
-      datePickerTheme: DatePickerThemeData(
-        backgroundColor: Colors.white,
-        headerBackgroundColor: Colors.blueGrey,
-        headerHelpStyle: TextStyle(fontSize: 18),
-        headerHeadlineStyle: TextStyle(fontSize: 18),
-        dayStyle: TextStyle(fontSize: 18),
-        weekdayStyle: TextStyle(fontSize: 18,color: Colors.black),
-        yearStyle: TextStyle(fontSize: 18,color:Colors.black),
-        inputDecorationTheme: InputDecorationThemeData(
-          floatingLabelStyle: TextStyle(fontSize: 24),
-        ),
-      ),
-      dropdownMenuTheme: DropdownMenuThemeData(
-        textStyle: TextStyle(
-          fontSize: 18,
-        ),
-      ),
-      iconTheme: IconThemeData(
-        color: Color(0xFFFBEE76),
-      ),
-      textButtonTheme: TextButtonThemeData(
-        style: TextButton.styleFrom(
-          iconColor: Color(0xFFFBEE76),
-        ),
-      ),
-      textSelectionTheme: TextSelectionThemeData(
-        cursorColor: Color(0xFFFBEE76),
-      ),
-    );
-  }
+  static ThemeData get darkTheme => _buildTheme(
+    colorScheme: ColorScheme.fromSeed(seedColor: Colors.grey),
+    scaffoldBg: Colors.grey[900]!,
+    appBarBg: Colors.black,
+    appBarFg: Colors.white,
+    textColor: Colors.white,
+    iconColor: Colors.white,
+    cardColor: Colors.grey[800]!,
+    buttonBg: Colors.grey[700]!,
+    buttonFg: Colors.white,
+    borderColor: Colors.white,
+  );
 
-  static ThemeData get halloweenTheme {
-    return ThemeData(
-      useMaterial3: false,
-      colorScheme: ColorScheme.fromSeed(seedColor: Colors.orange),
-      scaffoldBackgroundColor: Color(0xFF353535),
-      appBarTheme: const AppBarTheme(
-        backgroundColor: Color(0xFFFF7216),
-        foregroundColor: Color(0xFF000000),
-        centerTitle: true,
-      ),
-      textTheme: const TextTheme(
-        bodyMedium: TextStyle(fontSize: 24),
-        bodyLarge: TextStyle(fontSize: 72),
-        titleLarge: TextStyle(fontWeight: FontWeight.bold),
-      ).apply(
-        bodyColor: Color(0xFFC99BCD),
-        displayColor: Color(0xFFC99BCD),
-      ),
-      elevatedButtonTheme: ElevatedButtonThemeData(
-        style: ElevatedButton.styleFrom(
-          foregroundColor: Color(0xFFC99BCD),
-          backgroundColor: Color(0xFF60147E),
-          textStyle: TextStyle(fontSize: 24),
-        ),
-      ),
-      cardTheme: CardThemeData(
-        color: Color(0xFF1C1C1C),
-      ),
-      inputDecorationTheme: InputDecorationThemeData(
-        hintStyle: TextStyle(
-          fontSize: 24,
-          color: Color(0xFFC99BCD),
-        ),
-        labelStyle: TextStyle(
-          fontSize: 24,
-          color: Color(0xFFC99BCD),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
-          borderSide: BorderSide(color: Color(0xFFC99BCD)),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
-          borderSide: BorderSide(color: Color(0xFFC99BCD)),
-        ),
-      ),
-      datePickerTheme: DatePickerThemeData(
-        backgroundColor: Colors.white,
-        headerBackgroundColor: Colors.blueGrey,
-        headerHelpStyle: TextStyle(fontSize: 18),
-        headerHeadlineStyle: TextStyle(fontSize: 18),
-        dayStyle: TextStyle(fontSize: 18),
-        weekdayStyle: TextStyle(fontSize: 18,color: Colors.black),
-        yearStyle: TextStyle(fontSize: 18,color:Colors.black),
-        inputDecorationTheme: InputDecorationThemeData(
-          floatingLabelStyle: TextStyle(fontSize: 24),
-        ),
-      ),
-      dropdownMenuTheme: DropdownMenuThemeData(
-        textStyle: TextStyle(
-          fontSize: 18,
-        ),
-      ),
-      iconTheme: IconThemeData(
-        color: Color(0xFF973613),
-      ),
-      textButtonTheme: TextButtonThemeData(
-        style: TextButton.styleFrom(
-          iconColor: Color(0xFF973613),
-        ),
-      ),
-      textSelectionTheme: TextSelectionThemeData(
-        cursorColor: Color(0xFF973613),
-      ),
-    );
-  }
+  static ThemeData get christmasTheme => _buildTheme(
+    colorScheme: ColorScheme.fromSeed(seedColor: Colors.red),
+    scaffoldBg: const Color(0xFF8B0000),
+    appBarBg: const Color(0xFF1B5E20),
+    appBarFg: const Color(0xFFFFD700),
+    textColor: const Color(0xFFFFE082),
+    iconColor: const Color(0xFFFFE082),
+    cardColor: const Color(0xFF2E7D32),
+    buttonBg: const Color(0xFFFFFFFF),
+    buttonFg: const Color(0xFF8B0000),
+    borderColor: const Color(0xFFFFD700),
+  );
+
+  static ThemeData get halloweenTheme => _buildTheme(
+    colorScheme: ColorScheme.fromSeed(seedColor: Colors.orange),
+    scaffoldBg: const Color(0xFF353535),
+    appBarBg: const Color(0xFFFF7216),
+    appBarFg: const Color(0xFF000000),
+    textColor: const Color(0xFFC99BCD),
+    iconColor: const Color(0xFF973613),
+    cardColor: const Color(0xFF1C1C1C),
+    buttonBg: const Color(0xFF60147E),
+    buttonFg: const Color(0xFFC99BCD),
+    borderColor: const Color(0xFFC99BCD),
+  );
 }

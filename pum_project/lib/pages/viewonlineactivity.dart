@@ -184,7 +184,8 @@ class _ViewOnlineActivityScreenState extends State<ViewOnlineActivityScreen> {
           color: Theme.of(context).cardTheme.color,
           child: Center(
               child: Text(
-                  AppLocalizations.of(context)!.missingRouteMessage)),
+                  AppLocalizations.of(context)!.missingRouteMessage,
+                  style: Theme.of(context).textTheme.bodyMedium)),
         )
             : FlutterMap(
           options: MapOptions(
@@ -199,7 +200,8 @@ class _ViewOnlineActivityScreenState extends State<ViewOnlineActivityScreen> {
               polylines: [
                 Polyline(
                     points: routePoints,
-                    color: Theme.of(context).primaryColor,
+                    // Używamy koloru z iconTheme lub primaryColor
+                    color: Theme.of(context).iconTheme.color ?? Colors.blue,
                     strokeWidth: 6),
               ],
             ),
@@ -248,17 +250,21 @@ class _ViewOnlineActivityScreenState extends State<ViewOnlineActivityScreen> {
   Widget _buildStatItem(IconData icon, String value, String unit) {
     return Column(
       children: [
-        Icon(icon, color: Theme.of(context).primaryColor, size: 28),
+        Icon(icon, color: Theme.of(context).iconTheme.color, size: 28),
         const SizedBox(height: 8),
         Text(
           value,
-          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+          // Używamy stylu z Theme (24px)
+          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              fontWeight: FontWeight.bold,
+              fontSize: 20 // Lekko mniejsze żeby się zmieściło w rzędzie
+          ),
         ),
         Text(
           unit,
           style: TextStyle(
-              fontSize: 12,
-              color: Theme.of(context).textTheme.bodySmall?.color),
+              fontSize: 14,
+              color: Theme.of(context).textTheme.bodySmall?.color ?? Theme.of(context).textTheme.bodyMedium?.color),
         ),
       ],
     );
@@ -275,8 +281,10 @@ class _ViewOnlineActivityScreenState extends State<ViewOnlineActivityScreen> {
             Expanded(
               child: Text(
                 title,
-                style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
+                // Używamy titleLarge lub bodyLarge
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 28
                 ),
               ),
             ),
@@ -291,12 +299,11 @@ class _ViewOnlineActivityScreenState extends State<ViewOnlineActivityScreen> {
               child: Row(
                 children: [
                   Icon(Icons.calendar_today,
-                      size: 14, color: Theme.of(context).primaryColor),
+                      size: 16, color: Theme.of(context).iconTheme.color),
                   const SizedBox(width: 6),
                   Text(
                     date,
-                    style: const TextStyle(
-                        fontSize: 12, fontWeight: FontWeight.w500),
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontSize: 14),
                   ),
                 ],
               ),
@@ -307,21 +314,22 @@ class _ViewOnlineActivityScreenState extends State<ViewOnlineActivityScreen> {
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
           decoration: BoxDecoration(
-            color: Theme.of(context).primaryColor.withOpacity(0.1),
-            borderRadius: BorderRadius.circular(12),
+              color: Theme.of(context).cardTheme.color?.withOpacity(0.8),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: Theme.of(context).dividerColor)
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
               Icon(_getActivityIcon(),
-                  color: Theme.of(context).primaryColor, size: 20),
+                  color: Theme.of(context).iconTheme.color, size: 24),
               const SizedBox(width: 8),
               Text(
                 _getActivityName().toUpperCase(),
-                style: TextStyle(
-                  color: Theme.of(context).primaryColor,
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: 0.5,
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 0.5,
+                    fontSize: 18
                 ),
               ),
             ],
@@ -356,18 +364,19 @@ class _ViewOnlineActivityScreenState extends State<ViewOnlineActivityScreen> {
               fit: BoxFit.cover,
               errorBuilder: (context, error, stackTrace) {
                 return Container(
-                  color: Colors.grey[200],
-                  child: const Center(
-                    child: Icon(Icons.broken_image, size: 50, color: Colors.grey),
+                  color: Theme.of(context).cardTheme.color,
+                  child: Center(
+                    child: Icon(Icons.broken_image, size: 50, color: Theme.of(context).iconTheme.color),
                   ),
                 );
               },
               loadingBuilder: (context, child, loadingProgress) {
                 if (loadingProgress == null) return child;
                 return Container(
-                  color: Colors.grey[200],
+                  color: Theme.of(context).cardTheme.color,
                   child: Center(
                     child: CircularProgressIndicator(
+                      color: Theme.of(context).iconTheme.color,
                       value: loadingProgress.expectedTotalBytes != null
                           ? loadingProgress.cumulativeBytesLoaded /
                           loadingProgress.expectedTotalBytes!
@@ -399,13 +408,12 @@ class _ViewOnlineActivityScreenState extends State<ViewOnlineActivityScreen> {
           Row(
             children: [
               Icon(Icons.description_outlined,
-                  size: 18,
-                  color: Theme.of(context).textTheme.bodySmall?.color),
+                  size: 24,
+                  color: Theme.of(context).iconTheme.color),
               const SizedBox(width: 8),
               Text(
                 AppLocalizations.of(context)!.descriptionLabel,
-                style: TextStyle(
-                  color: Theme.of(context).textTheme.bodySmall?.color,
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                   fontWeight: FontWeight.bold,
                 ),
               ),

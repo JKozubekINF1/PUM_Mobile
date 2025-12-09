@@ -74,7 +74,9 @@ class _SettingsPageState extends State<SettingsPage> {
         theme: _theme.toString(),
       );
     } catch (e) {
-      if (mounted) _displaySnackbar(AppLocalizations.of(context)!.appSettingsSaveFailedMessage);
+      if (mounted) {
+        _displaySnackbar(AppLocalizations.of(context)!.appSettingsSaveFailedMessage);
+      }
       debugPrint('$e');
     }
   }
@@ -106,9 +108,7 @@ class _SettingsPageState extends State<SettingsPage> {
               icon: Icons.language,
               child: _buildLanguageField(),
             ),
-
             const SizedBox(height: 16),
-
             _buildSettingsCard(
               title: AppLocalizations.of(context)!.settingsThemeLabel,
               icon: Icons.palette,
@@ -122,7 +122,8 @@ class _SettingsPageState extends State<SettingsPage> {
 
   Widget _buildSettingsCard({required String title, required IconData icon, required Widget child}) {
     return Card(
-      elevation: 2,
+      elevation: 4,
+      color: Theme.of(context).cardTheme.color,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -131,15 +132,18 @@ class _SettingsPageState extends State<SettingsPage> {
           children: [
             Row(
               children: [
-                Icon(icon, color: Theme.of(context).primaryColor),
-                const SizedBox(width: 10),
+                Icon(icon, color: Theme.of(context).iconTheme.color, size: 28),
+                const SizedBox(width: 12),
                 Text(
                   title,
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 24,
+                  ),
                 ),
               ],
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 20),
             child,
           ],
         ),
@@ -150,11 +154,10 @@ class _SettingsPageState extends State<SettingsPage> {
   Widget _buildLanguageField() {
     return DropdownButtonFormField<String>(
       value: _language,
-      decoration: InputDecoration(
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
-      ),
+      decoration: const InputDecoration(),
       dropdownColor: Theme.of(context).cardTheme.color,
+      icon: Icon(Icons.arrow_drop_down, color: Theme.of(context).iconTheme.color),
+      style: Theme.of(context).textTheme.bodyMedium,
       onChanged: (String? newValue) {
         if (newValue != null) {
           setState(() {
@@ -167,7 +170,10 @@ class _SettingsPageState extends State<SettingsPage> {
       items: _languageList.map<DropdownMenuItem<String>>((lang) {
         return DropdownMenuItem<String>(
           value: lang['value'],
-          child: Text(lang['name']!),
+          child: Text(
+            lang['name']!,
+            style: Theme.of(context).textTheme.bodyMedium,
+          ),
         );
       }).toList(),
     );
@@ -176,11 +182,10 @@ class _SettingsPageState extends State<SettingsPage> {
   Widget _buildThemeFormField() {
     return DropdownButtonFormField<String>(
       value: _theme,
-      decoration: InputDecoration(
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
-      ),
+      decoration: const InputDecoration(),
       dropdownColor: Theme.of(context).cardTheme.color,
+      icon: Icon(Icons.arrow_drop_down, color: Theme.of(context).iconTheme.color),
+      style: Theme.of(context).textTheme.bodyMedium,
       onChanged: (String? newValue) {
         if (newValue != null) {
           setState(() {
@@ -193,7 +198,10 @@ class _SettingsPageState extends State<SettingsPage> {
       items: _themeList.map<DropdownMenuItem<String>>((theme) {
         return DropdownMenuItem<String>(
           value: theme['value'],
-          child: Text(theme['name']!),
+          child: Text(
+            theme['name']!,
+            style: Theme.of(context).textTheme.bodyMedium,
+          ),
         );
       }).toList(),
     );
