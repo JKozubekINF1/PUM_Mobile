@@ -79,9 +79,7 @@ class _ViewOnlineActivityScreenState extends State<ViewOnlineActivityScreen> {
         DateTime dateTime = DateTime.parse(widget.data['startedAt']);
         date = DateFormat('HH:mm dd.MM.yyyy').format(dateTime);
       }
-    } catch (e) {
-      // Ignored
-    }
+    } catch (e) {}
   }
 
   Future<void> _downloadGpx() async {
@@ -119,19 +117,22 @@ class _ViewOnlineActivityScreenState extends State<ViewOnlineActivityScreen> {
         String fileName = "activity_${widget.data['id']}.gpx";
 
         final contentDisposition = response.headers['content-disposition'];
-        if (contentDisposition != null && contentDisposition.contains('filename=')) {
-          final match = RegExp(r'filename="?([^";]+)"?').firstMatch(contentDisposition);
+        if (contentDisposition != null &&
+            contentDisposition.contains('filename=')) {
+          final match =
+          RegExp(r'filename="?([^";]+)"?').firstMatch(contentDisposition);
           if (match != null && match.group(1) != null) {
             fileName = match.group(1)!;
           }
         } else if (widget.data['activityType'] != null) {
-          String dateTimePart = DateFormat('yyyy-MM-dd_HH-mm').format(DateTime.now());
+          String dateTimePart =
+          DateFormat('yyyy-MM-dd_HH-mm').format(DateTime.now());
 
-          if(widget.data['startedAt'] != null) {
+          if (widget.data['startedAt'] != null) {
             try {
               DateTime startDate = DateTime.parse(widget.data['startedAt']);
               dateTimePart = DateFormat('yyyy-MM-dd_HH-mm').format(startDate);
-            } catch(e) {}
+            } catch (e) {}
           }
           fileName = "${widget.data['activityType']}_$dateTimePart.gpx";
         }
@@ -164,7 +165,6 @@ class _ViewOnlineActivityScreenState extends State<ViewOnlineActivityScreen> {
         if (Platform.isAndroid) {
           _displaySnackbar("Saved to Downloads: ${filePath.split('/').last}");
         }
-
       } else {
         if (response.statusCode == 404) {
           _displaySnackbar("Error 404: Activity not found.");
@@ -172,7 +172,6 @@ class _ViewOnlineActivityScreenState extends State<ViewOnlineActivityScreen> {
           _displaySnackbar("Download failed: ${response.statusCode}");
         }
       }
-
     } catch (e) {
       _displaySnackbar("Error: $e");
     } finally {
@@ -181,7 +180,8 @@ class _ViewOnlineActivityScreenState extends State<ViewOnlineActivityScreen> {
   }
 
   void _displaySnackbar(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text(message)));
   }
 
   String _getActivityName() {
@@ -255,17 +255,14 @@ class _ViewOnlineActivityScreenState extends State<ViewOnlineActivityScreen> {
             _buildStats(),
             const SizedBox(height: 30),
             _buildHeaderInfo(),
-
             if (photoUrl != null && photoUrl!.isNotEmpty) ...[
               const SizedBox(height: 20),
               _buildPhotoSection(),
             ],
-
             if (description.isNotEmpty) ...[
               const SizedBox(height: 20),
               _buildDescriptionSection(),
             ],
-
             const SizedBox(height: 40),
             _buildDownloadButton(),
             const SizedBox(height: 20),
@@ -287,9 +284,13 @@ class _ViewOnlineActivityScreenState extends State<ViewOnlineActivityScreen> {
             width: 24,
             height: 24,
             padding: const EdgeInsets.all(2),
-            child: const CircularProgressIndicator(strokeWidth: 3)
-        )
-            : Icon(Icons.download, color: Theme.of(context).elevatedButtonTheme.style?.foregroundColor?.resolve({})),
+            child: const CircularProgressIndicator(strokeWidth: 3))
+            : Icon(Icons.download,
+            color: Theme.of(context)
+                .elevatedButtonTheme
+                .style
+                ?.foregroundColor
+                ?.resolve({})),
         label: Text(
           _isDownloading ? "Downloading..." : "Download GPX",
         ),
@@ -298,6 +299,31 @@ class _ViewOnlineActivityScreenState extends State<ViewOnlineActivityScreen> {
   }
 
   Widget _buildMap() {
+    if (routePoints.isEmpty) {
+      return Container(
+        height: 350,
+        decoration: BoxDecoration(
+          color: Theme.of(context).cardTheme.color,
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.1),
+              blurRadius: 10,
+              spreadRadius: 2,
+            ),
+          ],
+        ),
+        child: Center(
+          child: Text(
+            AppLocalizations.of(context)!.missingRouteMessage,
+            style: Theme.of(context).textTheme.bodyMedium,
+          ),
+        ),
+      );
+    }
+
+    final bounds = LatLngBounds.fromPoints(routePoints);
+
     return Container(
       height: 350,
       decoration: BoxDecoration(
@@ -312,29 +338,50 @@ class _ViewOnlineActivityScreenState extends State<ViewOnlineActivityScreen> {
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(20),
-        child: routePoints.isEmpty || routePoints.length == 1
-            ? Container(
-          color: Theme.of(context).cardTheme.color,
-          child: Center(
-              child: Text(
-                  AppLocalizations.of(context)!.missingRouteMessage,
-                  style: Theme.of(context).textTheme.bodyMedium)),
-        )
-            : FlutterMap(
+        child: FlutterMap(
           options: MapOptions(
-              initialCenter: routePoints.first, initialZoom: 15),
+            initialCameraFit: CameraFit.bounds(
+              bounds: bounds,
+              padding: const EdgeInsets.all(40.0),
+            ),
+            interactionOptions: const InteractionOptions(
+              flags: InteractiveFlag.all,
+            ),
+          ),
           children: [
             TileLayer(
-              urlTemplate:
-              'https://{s}.tile-cyclosm.openstreetmap.fr/cyclosm/{z}/{x}/{y}.png',
+              urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
               userAgentPackageName: 'Pum_Project/1.0',
             ),
             PolylineLayer(
               polylines: [
                 Polyline(
-                    points: routePoints,
-                    color: Theme.of(context).iconTheme.color ?? Colors.blue,
-                    strokeWidth: 6),
+                  points: routePoints,
+                  color: Theme.of(context).primaryColor,
+                  strokeWidth: 4.0,
+                  strokeCap: StrokeCap.round,
+                  strokeJoin: StrokeJoin.round,
+                ),
+              ],
+            ),
+            MarkerLayer(
+              markers: [
+                if (routePoints.isNotEmpty)
+                  Marker(
+                    point: routePoints.first,
+                    width: 40,
+                    height: 40,
+                    child:
+                    const Icon(Icons.circle, color: Colors.green, size: 12),
+                  ),
+                if (routePoints.isNotEmpty)
+                  Marker(
+                    point: routePoints.last,
+                    width: 40,
+                    height: 40,
+                    child: const Icon(Icons.location_on,
+                        color: Colors.red, size: 30),
+                  ),
               ],
             ),
           ],
@@ -386,16 +433,17 @@ class _ViewOnlineActivityScreenState extends State<ViewOnlineActivityScreen> {
         const SizedBox(height: 8),
         Text(
           value,
-          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              fontWeight: FontWeight.bold,
-              fontSize: 20
-          ),
+          style: Theme.of(context)
+              .textTheme
+              .bodyMedium
+              ?.copyWith(fontWeight: FontWeight.bold, fontSize: 20),
         ),
         Text(
           unit,
           style: TextStyle(
               fontSize: 14,
-              color: Theme.of(context).textTheme.bodySmall?.color ?? Theme.of(context).textTheme.bodyMedium?.color),
+              color: Theme.of(context).textTheme.bodySmall?.color ??
+                  Theme.of(context).textTheme.bodyMedium?.color),
         ),
       ],
     );
@@ -412,10 +460,10 @@ class _ViewOnlineActivityScreenState extends State<ViewOnlineActivityScreen> {
             Expanded(
               child: Text(
                 title,
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 28
-                ),
+                style: Theme.of(context)
+                    .textTheme
+                    .titleLarge
+                    ?.copyWith(fontWeight: FontWeight.bold, fontSize: 28),
               ),
             ),
             Container(
@@ -433,7 +481,10 @@ class _ViewOnlineActivityScreenState extends State<ViewOnlineActivityScreen> {
                   const SizedBox(width: 6),
                   Text(
                     date,
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontSize: 14),
+                    style: Theme.of(context)
+                        .textTheme
+                        .bodyMedium
+                        ?.copyWith(fontSize: 14),
                   ),
                 ],
               ),
@@ -446,8 +497,7 @@ class _ViewOnlineActivityScreenState extends State<ViewOnlineActivityScreen> {
           decoration: BoxDecoration(
               color: Theme.of(context).cardTheme.color?.withOpacity(0.8),
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: Theme.of(context).dividerColor)
-          ),
+              border: Border.all(color: Theme.of(context).dividerColor)),
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -459,8 +509,7 @@ class _ViewOnlineActivityScreenState extends State<ViewOnlineActivityScreen> {
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                     letterSpacing: 0.5,
-                    fontSize: 18
-                ),
+                    fontSize: 18),
               ),
             ],
           ),
@@ -496,7 +545,8 @@ class _ViewOnlineActivityScreenState extends State<ViewOnlineActivityScreen> {
                 return Container(
                   color: Theme.of(context).cardTheme.color,
                   child: Center(
-                    child: Icon(Icons.broken_image, size: 50, color: Theme.of(context).iconTheme.color),
+                    child: Icon(Icons.broken_image,
+                        size: 50, color: Theme.of(context).iconTheme.color),
                   ),
                 );
               },
@@ -538,8 +588,7 @@ class _ViewOnlineActivityScreenState extends State<ViewOnlineActivityScreen> {
           Row(
             children: [
               Icon(Icons.description_outlined,
-                  size: 24,
-                  color: Theme.of(context).iconTheme.color),
+                  size: 24, color: Theme.of(context).iconTheme.color),
               const SizedBox(width: 8),
               Text(
                 AppLocalizations.of(context)!.descriptionLabel,
