@@ -54,6 +54,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get leaderboardPageTitle => 'Leaderboard';
 
   @override
+  String get liveTrackingNotificationTitle => 'Live Tracking is running';
+
+  @override
+  String get liveTrackingNotificationDescription => 'Tap to return to the app';
+
+  @override
   String get warningLabel => 'Warning';
 
   @override

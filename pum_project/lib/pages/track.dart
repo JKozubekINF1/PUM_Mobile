@@ -5,8 +5,11 @@ import 'package:latlong2/latlong.dart';
 import 'package:geolocator/geolocator.dart';
 import 'dart:async';
 import 'dart:ui';
-import '../services/local_storage.dart';
+import 'package:pum_project/services/local_storage.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_foreground_task/flutter_foreground_task.dart';
+import 'package:pum_project/services/foreground_task_service.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 class TrackPage extends StatefulWidget {
   const TrackPage({
@@ -18,32 +21,23 @@ class TrackPage extends StatefulWidget {
 
 class _TrackPageState extends State<TrackPage> {
   final MapController _mapController = MapController();
-  final List<LatLng> _routeList = [];
-  final Distance distance = const Distance();
-  final List<double> _speedList = [];
-
-  LatLng? _currentPosition;
-  LatLng? _lastPosition;
-
+  List<LatLng> _routeList = [];
   bool _permissions = false;
   bool _activityState = false;
-  bool _autoCenter = true;
-  Duration _duration = const Duration();
-  Timer? _timer;
-
-  int _gainedDistance = 0;
+  LatLng? _currentPosition;
+  Duration _duration = Duration();
   int _maxDistance = 0;
-
   double _speed = 0.0;
   double _speedAvg = 0.0;
+  bool _autoCenter = true;
 
   @override
   void dispose() {
+    FlutterForegroundTask.removeTaskDataCallback(_onReceiveTaskData);
+    FlutterForegroundTask.stopService();
     _mapController.dispose();
-    _timer?.cancel();
     super.dispose();
   }
-
 
   void _setPermissions(bool permissions) {
     if (mounted) setState(() => _permissions = permissions);
@@ -56,11 +50,55 @@ class _TrackPageState extends State<TrackPage> {
     }
   }
 
-  void _setActivityState(bool state) {
-    if (mounted) setState(() => _activityState = state);
+  Future<bool> _startForegroundTask() async {
+    String title = "Live Tracking is running";
+    String description = "Tap to return to the app";
+    if (mounted) {
+      title = AppLocalizations.of(context)!.liveTrackingNotificationTitle;
+      description = AppLocalizations.of(context)!.liveTrackingNotificationDescription;
+    }
+    if (!_permissions) return false;
+    final granted = await _requestNotificationPermission();
+    if (!granted) return false;
+    try {
+      await FlutterForegroundTask.startService(
+        notificationTitle: title,
+        notificationText: description,
+        callback: startCallback,
+      );
+      return true;
+    } catch (e) {
+      debugPrint("Error starting foreground task service: $e");
+      return false;
+    }
   }
 
-  Future<void> _requestPermissions() async {
+  Future<void> _changeActivityState(bool running) async {
+    FlutterForegroundTask.sendDataToTask({'startActivity': running});
+  }
+
+  void _onReceiveTaskData(Object data) {
+    if (data is Map<String, dynamic>) {
+      final lat = data['lat'] as double?;
+      final lng = data['lng'] as double?;
+      setState(() {
+        if (lat != null && lng != null) {
+          _currentPosition = LatLng(lat, lng);
+          _centerMap();
+        }
+        _maxDistance = (data['distance'] ?? _maxDistance) as int;
+        _speed = (data['speed'] ?? _speed) as double;
+        _speedAvg = (data['speedAvg'] ?? _speedAvg) as double;
+        _duration = Duration(seconds: (data['duration'] ?? _duration.inSeconds) as int);
+        final routeData = data['routeList'] as List<dynamic>? ?? [];
+        _routeList = routeData
+            .map((p) => LatLng(p['lat'] as double, p['lng'] as double))
+            .toList();
+      });
+    }
+  }
+
+  Future<void> _requestLocationPermissions() async {
     bool serviceEnabled;
     LocationPermission permission;
     bool allow = true;
@@ -84,124 +122,37 @@ class _TrackPageState extends State<TrackPage> {
       allow = false;
       if (mounted) _displaySnackbar(AppLocalizations.of(context)!.noLocationPermissionsForeverMessage);
     }
-    if (allow) _setPermissions(true);
+    if (allow) {
+      _setPermissions(true);
+    }
   }
 
-  void _getPosition() async {
-    final LocationSettings locationSettings = const LocationSettings(
-      accuracy: LocationAccuracy.high,
-      distanceFilter: 5,
-    );
-    try {
-      if (_permissions) {
-        Position position = await Geolocator.getCurrentPosition(locationSettings: locationSettings);
-        setState(() {
-          _currentPosition = LatLng(position.latitude, position.longitude);
-          if (_autoCenter) {
-            _mapController.move(_currentPosition!, _mapController.camera.zoom);
-          }
-        });
+  Future<bool> _requestNotificationPermission() async {
+    if (await Permission.notification.isDenied) {
+      final permission = await Permission.notification.request();
+      if (permission.isGranted) {
+        return true;
       }
-    } catch (e) {
-      setState(() => _currentPosition = null);
+      return false;
     }
-  }
-
-  void _updateLocation() async {
-    _getPosition();
-  }
-
-  void _addToRouteList() async {
-    if (_currentPosition != null) {
-      setState(() {
-        _routeList.add(_currentPosition!);
-      });
-    }
-  }
-
-  void _activity() async {
-    setState(() {
-      _duration = Duration(seconds: _duration.inSeconds + 1);
-    });
-    if (_duration.inSeconds % 5 == 0) {
-      _addToRouteList();
-      _calculateDistance();
-      _calculateSpeed();
-      _getSpeedAverage();
-    }
-    _updateLocation();
-  }
-
-  void _startTimer() async {
-    _timer = Timer.periodic(const Duration(seconds: 1), (_) => _activity());
-  }
-
-  void _stopTimer() async {
-    setState(() => _timer?.cancel());
-  }
-
-  void _calculateDistance() async {
-    if (_currentPosition != null && _lastPosition != null) {
-      _gainedDistance = distance(_lastPosition!, _currentPosition!).toInt();
-      if (_gainedDistance > 2) {
-        _maxDistance += _gainedDistance;
-      }
-      _lastPosition = _currentPosition!;
-    }
-    _lastPosition = _currentPosition;
-  }
-
-  void _calculateSpeed() async {
-    if (_gainedDistance > 0) {
-      _speed = _gainedDistance / 5.0;
-    } else {
-      _speed = 0.0;
-    }
-    _speedList.add(_speed);
-  }
-
-  void _getSpeedAverage() async {
-    if (_speedList.isEmpty) {
-      _speedAvg = 0.0;
-      return;
-    }
-    double sum = _speedList.fold(0, (p, c) => p + c);
-    _speedAvg = sum / _speedList.length;
-  }
-
-  void _resetStats() async {
-    setState(() {
-      _routeList.clear();
-      _speedList.clear();
-      _duration = const Duration(seconds: 0);
-      _gainedDistance = 0;
-      _maxDistance = 0;
-      _speed = 0;
-      _speedAvg = 0;
-      _getPosition();
-    });
+    return true;
   }
 
   void _activityButton() async {
-    _setActivityState(!_activityState);
-    if (_activityState) {
-      _duration = const Duration(seconds: 0);
-      if (_currentPosition != null) {
-        _routeList.add(_currentPosition!);
-        _lastPosition = _currentPosition!;
-      }
-      _startTimer();
-    } else {
-      _stopTimer();
-      _getSpeedAverage();
+    setState(() {
+      _activityState = !_activityState;
+    });
+    _changeActivityState(_activityState);
+    if (!_activityState) {
+      await FlutterForegroundTask.stopService();
       Map? activityContent = await _generateLocalFile();
-      _resetStats();
-      if (mounted) {
-        await Navigator.pushNamed(context, '/results', arguments: {
-          'Data': activityContent,
-        });
-      }
+      if (mounted) Navigator.pushNamed(context, '/results', arguments: {'Data': activityContent});
     }
+    _maxDistance = 0;
+    _speed = 0;
+    _speedAvg = 0;
+    _duration = Duration(seconds: 0);
+    _routeList.clear();
   }
 
   void _displaySnackbar(String message) {
@@ -242,15 +193,19 @@ class _TrackPageState extends State<TrackPage> {
   @override
   void initState() {
     super.initState();
-    _requestPermissions();
+    FlutterForegroundTask.addTaskDataCallback(_onReceiveTaskData);
+    _requestLocationPermissions().then((_) async {
+      bool notificationPermissionGranted = await _requestNotificationPermission();
+      if (_permissions && notificationPermissionGranted) {
+        await _startForegroundTask();
+      }
+    });
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _getPosition();
   }
-
 
   @override
   Widget build(BuildContext context) {

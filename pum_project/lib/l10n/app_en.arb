@@ -60,6 +60,14 @@
         "@leaderboardPageTitle": {
             "description": "Title of leaderboard page that usually appears on the app bar"
         },
+    "liveTrackingNotificationTitle": "Live Tracking is running",
+        "@liveTrackingNotificationTitle": {
+            "description": "Title of a notification that appears when live tracking is active"
+        },
+    "liveTrackingNotificationDescription": "Tap to return to the app",
+        "@liveTrackingNotificationDescription": {
+            "description": "Description of a notification that appears when live tracking is active"
+        },
     "warningLabel": "Warning",
         "@warningLabel": {
             "description": "Label text that appears on a popup window before warning the user"

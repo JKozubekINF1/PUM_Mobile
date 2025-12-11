@@ -188,6 +188,18 @@ abstract class AppLocalizations {
   /// **'Leaderboard'**
   String get leaderboardPageTitle;
 
+  /// Title of a notification that appears when live tracking is active
+  ///
+  /// In en, this message translates to:
+  /// **'Live Tracking is running'**
+  String get liveTrackingNotificationTitle;
+
+  /// Description of a notification that appears when live tracking is active
+  ///
+  /// In en, this message translates to:
+  /// **'Tap to return to the app'**
+  String get liveTrackingNotificationDescription;
+
   /// Label text that appears on a popup window before warning the user
   ///
   /// In en, this message translates to:

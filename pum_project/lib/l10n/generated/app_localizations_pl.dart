@@ -54,6 +54,13 @@ class AppLocalizationsPl extends AppLocalizations {
   String get leaderboardPageTitle => 'Ranking';
 
   @override
+  String get liveTrackingNotificationTitle => 'Śledzenie na żywo jest aktywne';
+
+  @override
+  String get liveTrackingNotificationDescription =>
+      'Dotknij, aby wrócić do aplikacji';
+
+  @override
   String get warningLabel => 'Uwaga';
 
   @override

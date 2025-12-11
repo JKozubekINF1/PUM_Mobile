@@ -16,19 +16,23 @@ import 'package:pum_project/services/app_settings.dart';
 import 'package:pum_project/services/local_storage.dart';
 import 'package:pum_project/services/upload_queue.dart';
 import 'package:pum_project/services/route_observer.dart';
+import 'package:pum_project/services/foreground_task_service.dart';
 import 'package:pum_project/theme/app_theme.dart';
 import 'package:provider/provider.dart';
 import 'providers/auth_provider.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
+import 'package:flutter_foreground_task/flutter_foreground_task.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   LocalStorage.init();
   // NEEDED FOR WINDOWS TESTING
-  sqfliteFfiInit();
-  databaseFactory = databaseFactoryFfi;
+  //sqfliteFfiInit();
+  //databaseFactory = databaseFactoryFfi;
   // COMMENT WHEN TESTING ON ANDROID
-  // await UploadQueue.instance.init();
+  await UploadQueue.instance.init();
+  await ForegroundTaskService.init();
+  FlutterForegroundTask.initCommunicationPort();
   runApp(
       MultiProvider(
           providers: [
@@ -37,6 +41,7 @@ void main() async {
             Provider<AppSettings>(create: (context) => AppSettings()),
             Provider<LocalStorage>(create: (context) => LocalStorage()),
             Provider<UploadQueue>(create: (context) => UploadQueue.instance),
+            Provider<ForegroundTaskService>(create: (context) => ForegroundTaskService()),
           ],
         child: Builder(
           builder: (context) {
@@ -119,7 +124,7 @@ class _MyAppState extends State<MyApp> {
         '/login' : (BuildContext context)=>const LoginPage(),
         '/register' : (BuildContext context)=>const RegisterPage(),
         '/resetpassword' : (BuildContext context)=>const ResetPage(),
-        '/track' : (BuildContext context)=>const TrackPage(),
+        '/track' : (BuildContext context)=>const WithForegroundTask(child: TrackPage()),
         '/profile' : (BuildContext context)=>const ProfilePage(),
         '/profile/edit' : (BuildContext context)=>const EditProfilePage(),
         '/settings' : (BuildContext context)=>const SettingsPage(),
