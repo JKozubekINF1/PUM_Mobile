@@ -144,15 +144,20 @@ class _TrackPageState extends State<TrackPage> {
     });
     _changeActivityState(_activityState);
     if (!_activityState) {
-      await FlutterForegroundTask.stopService();
       Map? activityContent = await _generateLocalFile();
+      _maxDistance = 0;
+      _speed = 0;
+      _speedAvg = 0;
+      _duration = Duration(seconds: 0);
+      _routeList.clear();
       if (mounted) Navigator.pushNamed(context, '/results', arguments: {'Data': activityContent});
+    } else {
+      _maxDistance = 0;
+      _speed = 0;
+      _speedAvg = 0;
+      _duration = Duration(seconds: 0);
+      _routeList.clear();
     }
-    _maxDistance = 0;
-    _speed = 0;
-    _speedAvg = 0;
-    _duration = Duration(seconds: 0);
-    _routeList.clear();
   }
 
   void _displaySnackbar(String message) {
