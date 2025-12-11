@@ -157,6 +157,8 @@ class _RegisterPageState extends State<RegisterPage> {
   Widget _buildEmailField() {
     return TextField(
       controller: _emailController,
+      // --- ZMIANA: Styl z motywu ---
+      style: Theme.of(context).textTheme.bodyMedium,
       decoration: InputDecoration(
         labelText: AppLocalizations.of(context)!.emailLabel,
         prefixIcon: const Icon(Icons.email),
@@ -169,6 +171,7 @@ class _RegisterPageState extends State<RegisterPage> {
   Widget _buildUsernameField() {
     return TextField(
       controller: _usernameController,
+      style: Theme.of(context).textTheme.bodyMedium,
       decoration: InputDecoration(
         labelText: AppLocalizations.of(context)!.usernameLabel,
         prefixIcon: const Icon(Icons.person),
@@ -181,6 +184,7 @@ class _RegisterPageState extends State<RegisterPage> {
     return TextField(
       controller: _passwordController,
       obscureText: _obscurePassword1,
+      style: Theme.of(context).textTheme.bodyMedium,
       decoration: InputDecoration(
         labelText: AppLocalizations.of(context)!.passwordLabel,
         prefixIcon: const Icon(Icons.lock),
@@ -201,6 +205,7 @@ class _RegisterPageState extends State<RegisterPage> {
     return TextField(
       controller: _confirmPasswordController,
       obscureText: _obscurePassword2,
+      style: Theme.of(context).textTheme.bodyMedium,
       decoration: InputDecoration(
         labelText: AppLocalizations.of(context)!.confirmPasswordLabel,
         prefixIcon: const Icon(Icons.lock_outline),

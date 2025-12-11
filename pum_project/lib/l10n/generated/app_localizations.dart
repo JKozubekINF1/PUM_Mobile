@@ -853,6 +853,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Error'**
   String get errorLabel;
+
+  /// Label text for the gallery option in image picker
+  ///
+  /// In en, this message translates to:
+  /// **'Gallery'**
+  String get galleryOptionLabel;
+
+  /// Label text for the camera option in image picker
+  ///
+  /// In en, this message translates to:
+  /// **'Camera'**
+  String get cameraOptionLabel;
+
+  /// Message displayed when the activity history list is empty
+  ///
+  /// In en, this message translates to:
+  /// **'No activities found'**
+  String get noActivitiesFoundMessage;
+
+  /// Label showing the number of pending items in the upload queue
+  ///
+  /// In en, this message translates to:
+  /// **'Pending:'**
+  String get pendingQueueLabel;
 }
 
 class _AppLocalizationsDelegate

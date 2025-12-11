@@ -503,5 +503,21 @@
     "errorLabel": "Error",
         "@errorLabel": {
             "description": "Label for generic error prefix"
+        },
+    "galleryOptionLabel": "Gallery",
+        "@galleryOptionLabel": {
+            "description": "Label text for the gallery option in image picker"
+        },
+    "cameraOptionLabel": "Camera",
+        "@cameraOptionLabel": {
+            "description": "Label text for the camera option in image picker"
+        },
+    "noActivitiesFoundMessage": "No activities found",
+        "@noActivitiesFoundMessage": {
+            "description": "Message displayed when the activity history list is empty"
+        },
+    "pendingQueueLabel": "Pending:",
+        "@pendingQueueLabel": {
+            "description": "Label showing the number of pending items in the upload queue"
         }
 }

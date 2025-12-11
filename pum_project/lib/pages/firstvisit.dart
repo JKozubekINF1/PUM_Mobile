@@ -17,13 +17,16 @@ class FirstVisitPage extends StatefulWidget {
 class _FirstVisitPageState extends State<FirstVisitPage> {
   bool _loadingSettings = true;
   bool _loadingAccount = true;
+
+
   Future<void> _offlineMode() async {
     return showDialog<void>(
         context: context,
         barrierDismissible: true,
         builder: (BuildContext context) {
           return AlertDialog(
-            title: Text(AppLocalizations.of(context)!.warningLabel,style:TextStyle(color:Colors.black)),
+            title: Text(AppLocalizations.of(context)!.warningLabel,
+                style: const TextStyle(color: Colors.black)),
             content: SingleChildScrollView(
               child: ListBody(
                 children: <Widget>[
@@ -53,8 +56,7 @@ class _FirstVisitPageState extends State<FirstVisitPage> {
               ),
             ],
           );
-        }
-    );
+        });
   }
 
   Future<void> _setOfflineMode() async {
@@ -71,11 +73,6 @@ class _FirstVisitPageState extends State<FirstVisitPage> {
     super.initState();
     _checkOfflineMode();
     _checkIfProfileInitialized();
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
   }
 
   Future<void> _checkOfflineMode() async {
@@ -98,20 +95,26 @@ class _FirstVisitPageState extends State<FirstVisitPage> {
   }
 
   Future<bool> _profileInitializationRequirement(ProfileData profile) async {
-    return (profile.firstName=='' || profile.firstName==null);
+    return (profile.firstName == '' || profile.firstName == null);
   }
 
   Future<void> _checkIfProfileInitialized() async {
     try {
       final apiService = Provider.of<ApiService>(context, listen: false);
       final profile = await apiService.fetchProfile();
-      if (profile.userName!=null) {
+      if (profile.userName != null) {
         final notInitialized = await _profileInitializationRequirement(profile);
 
         if (notInitialized) {
-          if (mounted) Navigator.pushNamedAndRemoveUntil(context, '/profile/edit', (_) => false, arguments: {'forcedEntry':true});
+          if (mounted) {
+            Navigator.pushNamedAndRemoveUntil(
+                context, '/profile/edit', (_) => false,
+                arguments: {'forcedEntry': true});
+          }
         } else {
-          if (mounted) Navigator.pushNamedAndRemoveUntil(context, '/home', (_) => false);
+          if (mounted) {
+            Navigator.pushNamedAndRemoveUntil(context, '/home', (_) => false);
+          }
         }
       }
     } catch (e) {
@@ -124,184 +127,229 @@ class _FirstVisitPageState extends State<FirstVisitPage> {
     }
   }
 
+
   @override
   Widget build(BuildContext context) {
     if (_loadingAccount || _loadingSettings) {
       return Scaffold(
         backgroundColor: const Color(0xff01bafd),
         body: Center(
-          child: Image.asset("assets/logo.png"),
+          child: CircularProgressIndicator(color: Colors.white),
         ),
       );
     }
 
-    return Consumer<AuthProvider>(
-        builder: (context, auth, child) {
-          return Scaffold(
-            appBar: AppBar(
-                backgroundColor: Colors.transparent,
-                elevation: 0,
-                automaticallyImplyLeading: false,
-                actions: [
-                  _buildSettingsIcon(),
+    return Consumer<AuthProvider>(builder: (context, auth, child) {
+      return Scaffold(
+        body: Stack(
+          children: [
+            _buildBackground(),
+            SafeArea(
+              child: Column(
+                children: [
+                  _buildHeader(context),
+                  const Spacer(flex: 2),
+                  _buildLogoAndTitle(),
+                  const Spacer(flex: 3),
+                  _buildActionButtons(),
+                  const SizedBox(height: 20),
+                  _buildOfflineLink(),
+                  const SizedBox(height: 20),
                 ],
+              ),
             ),
-            backgroundColor: const Color(0xff01bafd),
-            body: Column(
-              children: [
-                Flexible(
-                  flex: 1,
-                  child: _buildLogo(),
-                ),
-                Flexible(
-                  flex: 1,
-                  child: _buildTextPadding(),
-                ),
-                Flexible(
-                  flex: 1,
-                  child: Container(
-                    child: _buildButtonCollumn(),
-                  ),
-                ),
-                Flexible(
-                  flex: 1,
-                  child: Container(
-                    child: _buildOfflineModeText(),
-                  ),
+          ],
+        ),
+      );
+    });
+  }
+
+  Widget _buildBackground() {
+    return Container(
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            Color(0xff00c6ff),
+            Color(0xff0072ff),
+          ],
+        ),
+      ),
+      child: Stack(
+        children: [
+          Positioned(
+            top: -50,
+            right: -50,
+            child: Container(
+              width: 200,
+              height: 200,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.white.withValues(alpha: 0.1),
+              ),
+            ),
+          ),
+          Positioned(
+            bottom: 100,
+            left: -30,
+            child: Container(
+              width: 150,
+              height: 150,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.white.withValues(alpha: 0.05),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildHeader(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          IconButton(
+            icon: const Icon(Icons.settings),
+            iconSize: 32,
+            color: Colors.white.withValues(alpha: 0.9),
+            onPressed: () {
+              Navigator.pushNamed(context, "/settings");
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLogoAndTitle() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 30.0),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            decoration: BoxDecoration(
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.2),
+                  blurRadius: 20,
+                  offset: const Offset(0, 10),
                 ),
               ],
             ),
-          );
-        }
-    );
-  }
-
-  Widget _buildLogo() {
-    return Align(
-      alignment: Alignment.center,
-      child: Image(
-        image: AssetImage("assets/logo.png"),
+            child: const Image(
+              image: AssetImage("assets/logo.png"),
+              height: 100,
+            ),
+          ),
+          const SizedBox(height: 20),
+          Text(
+            AppLocalizations.of(context)!.firstVisitPageTitle.toUpperCase(),
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 48,
+              fontWeight: FontWeight.bold,
+              letterSpacing: 2.0,
+              shadows: [
+                Shadow(
+                  offset: Offset(0, 2),
+                  blurRadius: 4.0,
+                  color: Color.fromRGBO(0, 0, 0, 0.25),
+                ),
+              ],
+            ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 10),
+          Text(
+            AppLocalizations.of(context)!.welcomeNewUserMessage,
+            style: TextStyle(
+              color: Colors.white.withValues(alpha: 0.9),
+              fontSize: 16,
+              height: 1.5,
+            ),
+            textAlign: TextAlign.center,
+          ),
+        ],
       ),
     );
   }
 
-  Widget _buildTextPadding() {
+  Widget _buildActionButtons() {
     return Padding(
-      padding: const EdgeInsets.all(4.0),
+      padding: const EdgeInsets.symmetric(horizontal: 40.0),
       child: Column(
         children: [
-          Flexible(
-            flex: 2,
-            child: SizedBox(
-              child: _buildWelcomeTitle(),
+          SizedBox(
+            width: double.infinity,
+            height: 55,
+            child: ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.white,
+                foregroundColor: const Color(0xff0072ff),
+                elevation: 5,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(30),
+                ),
+              ),
+              child: Text(
+                AppLocalizations.of(context)!.loginButtonLabel,
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              onPressed: () {
+                Navigator.pushNamed(context, '/login');
+              },
             ),
           ),
-          Flexible(
-            flex: 1,
-            child: SizedBox(
-              child: _buildWelcomeText(),
+          const SizedBox(height: 20),
+          SizedBox(
+            width: double.infinity,
+            height: 55,
+            child: OutlinedButton(
+              style: OutlinedButton.styleFrom(
+                side: const BorderSide(color: Colors.white, width: 2),
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(30),
+                ),
+              ),
+              child: Text(
+                AppLocalizations.of(context)!.registerButtonLabel,
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              onPressed: () {
+                Navigator.pushNamed(context, '/register');
+              },
             ),
           ),
-        ]
+        ],
       ),
     );
   }
 
-  Widget _buildButtonCollumn() {
-    return Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        spacing: 20,
-        children: [
-          Flexible(
-            flex: 2,
-            child: SizedBox(
-              width: double.infinity,
-              height: 50,
-              child: _buildLoginButton(),
-            ),
-          ),
-          Flexible(
-            flex: 2,
-            child: SizedBox(
-              width: double.infinity,
-              height: 50,
-              child: _buildRegisterButton(),
-            ),
-          ),
-        ]
-    );
-  }
-
-  Widget _buildWelcomeTitle() {
-    return Align(
-      alignment: Alignment.center,
+  Widget _buildOfflineLink() {
+    return TextButton(
+      onPressed: _offlineMode,
       child: Text(
-        AppLocalizations.of(context)!.firstVisitPageTitle, style: TextStyle(color: Color(0xFFFFFFFF), fontSize:72),
-      ),
-    );
-  }
-
-  Widget _buildWelcomeText() {
-    return Align(
-      alignment: Alignment.center,
-      child: Text(
-        AppLocalizations.of(context)!.welcomeNewUserMessage, style: TextStyle(color: Color(0xFFFFFFFF)),
-      ),
-    );
-  }
-
-  Widget _buildLoginButton() {
-    return ElevatedButton(
-      style: ElevatedButton.styleFrom(
-        backgroundColor: Colors.blueGrey,
-      ),
-      child: Text(AppLocalizations.of(context)!.loginButtonLabel, style: TextStyle(color: Color(0xFFFFFFFF))),
-      onPressed: () {
-        Navigator.pushNamed(
-          context,
-          '/login',
-        );
-      },
-    );
-  }
-
-  Widget _buildRegisterButton() {
-    return ElevatedButton(
-      style: ElevatedButton.styleFrom(
-        backgroundColor: Colors.blueGrey,
-      ),
-      child: Text(AppLocalizations.of(context)!.registerButtonLabel, style: TextStyle(color: Color(0xFFFFFFFF))),
-      onPressed: () {
-        Navigator.pushNamed(
-          context,
-          '/register',
-        );
-      },
-    );
-  }
-
-  Widget _buildOfflineModeText() {
-    return Align(
-      alignment: Alignment.center,
-      child: TextButton(
-        onPressed: () {
-          _offlineMode();
-        },
-        child: Text(
-            AppLocalizations.of(context)!.offlineModeTextLabel, style: TextStyle(color: Color(0xFFFFFFFF), fontSize:24),
+        AppLocalizations.of(context)!.offlineModeTextLabel,
+        style: TextStyle(
+          color: Colors.white.withValues(alpha: 0.7),
+          fontSize: 16,
+          decoration: TextDecoration.underline,
+          decorationColor: Colors.white.withValues(alpha: 0.5),
         ),
       ),
-    );
-  }
-
-  Widget _buildSettingsIcon() {
-    return IconButton(
-      icon: Icon(Icons.settings),
-      iconSize: 45,
-      color: Colors.white,
-      onPressed: () {
-        Navigator.pushNamed(context,"/settings");
-      },
     );
   }
 }

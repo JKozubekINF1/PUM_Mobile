@@ -4,6 +4,7 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:geolocator/geolocator.dart';
 import 'dart:async';
+import 'dart:ui';
 import '../services/local_storage.dart';
 import 'package:provider/provider.dart';
 
@@ -18,49 +19,45 @@ class TrackPage extends StatefulWidget {
 class _TrackPageState extends State<TrackPage> {
   final MapController _mapController = MapController();
   final List<LatLng> _routeList = [];
-  final Distance distance = Distance();
+  final Distance distance = const Distance();
   final List<double> _speedList = [];
+
   LatLng? _currentPosition;
   LatLng? _lastPosition;
+
   bool _permissions = false;
   bool _activityState = false;
-  Duration _duration = Duration();
+  bool _autoCenter = true;
+  Duration _duration = const Duration();
   Timer? _timer;
+
   int _gainedDistance = 0;
   int _maxDistance = 0;
+
   double _speed = 0.0;
   double _speedAvg = 0.0;
 
   @override
   void dispose() {
     _mapController.dispose();
+    _timer?.cancel();
     super.dispose();
   }
 
+
   void _setPermissions(bool permissions) {
-    if (mounted) {
-      setState(() {
-        _permissions = permissions;
-      });
-    }
+    if (mounted) setState(() => _permissions = permissions);
   }
 
-  void _resetMap() {
-    if (_currentPosition!=null) {
-      if (mounted) {
-        setState(() {
-          _mapController.move(_currentPosition!,16);
-        });
-      }
+  void _centerMap() {
+    if (_currentPosition != null) {
+      _mapController.move(_currentPosition!, 16);
+      setState(() => _autoCenter = true);
     }
   }
 
   void _setActivityState(bool state) {
-    if (mounted) {
-      setState(() {
-        _activityState = state;
-      });
-    }
+    if (mounted) setState(() => _activityState = state);
   }
 
   Future<void> _requestPermissions() async {
@@ -91,7 +88,7 @@ class _TrackPageState extends State<TrackPage> {
   }
 
   void _getPosition() async {
-    final LocationSettings locationSettings = LocationSettings(
+    final LocationSettings locationSettings = const LocationSettings(
       accuracy: LocationAccuracy.high,
       distanceFilter: 5,
     );
@@ -100,32 +97,33 @@ class _TrackPageState extends State<TrackPage> {
         Position position = await Geolocator.getCurrentPosition(locationSettings: locationSettings);
         setState(() {
           _currentPosition = LatLng(position.latitude, position.longitude);
-          _resetMap();
+          if (_autoCenter) {
+            _mapController.move(_currentPosition!, _mapController.camera.zoom);
+          }
         });
       }
     } catch (e) {
-      setState(() {
-        _currentPosition = null;
-      });
+      setState(() => _currentPosition = null);
     }
   }
 
   void _updateLocation() async {
     _getPosition();
-    _resetMap();
   }
 
   void _addToRouteList() async {
-    if (_currentPosition!=null) {
-      _routeList.add(_currentPosition!);
+    if (_currentPosition != null) {
+      setState(() {
+        _routeList.add(_currentPosition!);
+      });
     }
   }
 
   void _activity() async {
-    setState((){
+    setState(() {
       _duration = Duration(seconds: _duration.inSeconds + 1);
     });
-    if (_duration.inSeconds % 10 == 0) {
+    if (_duration.inSeconds % 5 == 0) {
       _addToRouteList();
       _calculateDistance();
       _calculateSpeed();
@@ -135,29 +133,30 @@ class _TrackPageState extends State<TrackPage> {
   }
 
   void _startTimer() async {
-    _timer = Timer.periodic(Duration(seconds: 1), (_) => _activity());
+    _timer = Timer.periodic(const Duration(seconds: 1), (_) => _activity());
   }
 
   void _stopTimer() async {
-    setState((){
-      _timer?.cancel();
-    });
+    setState(() => _timer?.cancel());
   }
 
   void _calculateDistance() async {
-    if (_currentPosition!=null || _lastPosition!=null) {
-      _gainedDistance = distance(
-          _lastPosition!,
-          _currentPosition!
-      ).toInt();
-      _maxDistance += _gainedDistance;
+    if (_currentPosition != null && _lastPosition != null) {
+      _gainedDistance = distance(_lastPosition!, _currentPosition!).toInt();
+      if (_gainedDistance > 2) {
+        _maxDistance += _gainedDistance;
+      }
       _lastPosition = _currentPosition!;
     }
     _lastPosition = _currentPosition;
   }
 
   void _calculateSpeed() async {
-    _speed = _gainedDistance / 10;
+    if (_gainedDistance > 0) {
+      _speed = _gainedDistance / 5.0;
+    } else {
+      _speed = 0.0;
+    }
     _speedList.add(_speed);
   }
 
@@ -166,19 +165,15 @@ class _TrackPageState extends State<TrackPage> {
       _speedAvg = 0.0;
       return;
     }
-    int x = 0;
-    double sum = 0.0;
-    for(x;x<_speedList.length;x++) {
-      sum += _speedList[x];
-    }
+    double sum = _speedList.fold(0, (p, c) => p + c);
     _speedAvg = sum / _speedList.length;
   }
 
   void _resetStats() async {
-    setState((){
+    setState(() {
       _routeList.clear();
       _speedList.clear();
-      _duration = Duration(seconds: 0);
+      _duration = const Duration(seconds: 0);
       _gainedDistance = 0;
       _maxDistance = 0;
       _speed = 0;
@@ -190,8 +185,8 @@ class _TrackPageState extends State<TrackPage> {
   void _activityButton() async {
     _setActivityState(!_activityState);
     if (_activityState) {
-      _duration = Duration(seconds: 0);
-      if (_currentPosition!=null) {
+      _duration = const Duration(seconds: 0);
+      if (_currentPosition != null) {
         _routeList.add(_currentPosition!);
         _lastPosition = _currentPosition!;
       }
@@ -201,9 +196,11 @@ class _TrackPageState extends State<TrackPage> {
       _getSpeedAverage();
       Map? activityContent = await _generateLocalFile();
       _resetStats();
-      await Navigator.pushNamed(context, '/results', arguments: {
-        'Data': activityContent,
-      });
+      if (mounted) {
+        await Navigator.pushNamed(context, '/results', arguments: {
+          'Data': activityContent,
+        });
+      }
     }
   }
 
@@ -220,7 +217,7 @@ class _TrackPageState extends State<TrackPage> {
         "coordinates": [p.latitude, p.longitude],
       }).toList();
 
-      Map<String,dynamic> fileContent = {
+      Map<String, dynamic> fileContent = {
         'duration': _duration.inSeconds,
         'routelist': fixedRoute,
         'distance': _maxDistance,
@@ -235,6 +232,13 @@ class _TrackPageState extends State<TrackPage> {
     return null;
   }
 
+  String _formatDuration(Duration duration) {
+    String twoDigits(int n) => n.toString().padLeft(2, "0");
+    String twoDigitMinutes = twoDigits(duration.inMinutes.remainder(60));
+    String twoDigitSeconds = twoDigits(duration.inSeconds.remainder(60));
+    return "${twoDigits(duration.inHours)}:$twoDigitMinutes:$twoDigitSeconds";
+  }
+
   @override
   void initState() {
     super.initState();
@@ -247,46 +251,44 @@ class _TrackPageState extends State<TrackPage> {
     _getPosition();
   }
 
+
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Scaffold(
+      extendBodyBehindAppBar: true,
       appBar: AppBar(
-        title: Text(AppLocalizations.of(context)!.trackPageTitle),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              Expanded(
-                flex: 3,
-                child: SizedBox(
-                  width: double.infinity,
-                  child: _buildMap(),
-                ),
-              ),
-              Expanded(
-                child: SizedBox(
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: _buildStopwatch(),
-                      ),
-                      Expanded(
-                        child: _buildSpeedMeter(),
-                      ),
-                      Expanded(
-                        child: _buildDistanceMeter(),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              Expanded(
-                child: _buildStartStopButton(),
-              ),
-            ],
+        title: Text(AppLocalizations.of(context)!.trackPageTitle, style: const TextStyle(fontWeight: FontWeight.bold),),
+        backgroundColor: theme.appBarTheme.backgroundColor?.withValues(alpha: 0.8),
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => Navigator.pop(context),
         ),
+      ),
+      body: Stack(
+        children: [
+          Positioned.fill(
+            child: _buildMap(),
+          ),
+
+          Positioned(
+            right: 20,
+            bottom: 300,
+            child: FloatingActionButton(
+              heroTag: "centerBtn",
+              backgroundColor: theme.cardTheme.color,
+              child: Icon(Icons.my_location, color: theme.iconTheme.color),
+              onPressed: _centerMap,
+            ),
+          ),
+
+          Align(
+            alignment: Alignment.bottomCenter,
+            child: _buildBottomPanel(theme),
+          ),
+        ],
       ),
     );
   }
@@ -294,88 +296,194 @@ class _TrackPageState extends State<TrackPage> {
   Widget _buildMap() {
     return FlutterMap(
       mapController: _mapController,
-      options:
-      MapOptions(
-        initialCenter: _currentPosition ?? LatLng(0,0),
+      options: MapOptions(
+        initialCenter: _currentPosition ?? const LatLng(0, 0),
         initialZoom: 16,
-        interactionOptions: InteractionOptions(
-          flags: InteractiveFlag.none,
+        interactionOptions: const InteractionOptions(
+          flags: InteractiveFlag.all,
         ),
+        onPositionChanged: (pos, hasGesture) {
+          if (hasGesture) {
+            setState(() => _autoCenter = false);
+          }
+        },
       ),
       children: [
         TileLayer(
           urlTemplate: 'https://{s}.tile-cyclosm.openstreetmap.fr/cyclosm/{z}/{x}/{y}.png',
           userAgentPackageName: 'Pum_Project/1.0',
         ),
-        MarkerLayer(
-          markers: [
-            Marker(
-              point: _currentPosition ?? LatLng(0,0),
-              width: 50,
-              height: 80,
-              child: Icon(
-                Icons.location_on,
-                color: Colors.red,
-                size: 50.0,
+
+        PolylineLayer(
+          polylines: [
+            if (_routeList.isNotEmpty)
+              Polyline(
+                points: _routeList,
+                strokeWidth: 5.0,
+                color: Colors.blueAccent,
               ),
-            ),
           ],
         ),
-        RichAttributionWidget(
-          attributions: [
-            TextSourceAttribution(
-              'OpenStreetMap contributors',
-            ),
+
+
+        MarkerLayer(
+          markers: [
+            if (_currentPosition != null)
+              Marker(
+                point: _currentPosition!,
+                width: 60,
+                height: 60,
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.blue.withValues(alpha: 0.2),
+                    shape: BoxShape.circle,
+                    border: Border.all(color: Colors.white, width: 2),
+                  ),
+                  child: const Icon(
+                    Icons.circle,
+                    color: Colors.blue,
+                    size: 20,
+                  ),
+                ),
+              ),
           ],
         ),
       ],
     );
   }
 
-  Widget _buildStartStopButton() {
-    return Flexible(
-      child: SizedBox(
-        width: double.infinity,
-        child: ElevatedButton(
-          onPressed: (){
-            _activityButton();
-          },
-          style: ElevatedButton.styleFrom(
-            padding: const EdgeInsets.symmetric(vertical: 14),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
+  Widget _buildBottomPanel(ThemeData theme) {
+    return Container(
+      height: 280,
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: theme.scaffoldBackgroundColor,
+        borderRadius: const BorderRadius.only(
+          topLeft: Radius.circular(30),
+          topRight: Radius.circular(30),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.15),
+            blurRadius: 20,
+            offset: const Offset(0, -5),
           ),
-          child: _activityState ? Text(AppLocalizations.of(context)!.stopActivityButtonLabel) : Text(AppLocalizations.of(context)!.beginActivityButtonLabel),
+        ],
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(24.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Column(
+              children: [
+                Text(
+                  AppLocalizations.of(context)!.timeLabel.toUpperCase(),
+                  style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                      color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.6)
+                  ),
+                ),
+                Text(
+                  _formatDuration(_duration),
+                  style: const TextStyle(
+                    fontSize: 48,
+                    fontWeight: FontWeight.w300,
+                    fontFeatures: [FontFeature.tabularFigures()],
+                  ),
+                ),
+              ],
+            ),
+
+            const SizedBox(height: 10),
+
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                _buildStatItem(
+                  theme,
+                  Icons.straighten,
+                  (_maxDistance / 1000).toStringAsFixed(2),
+                  "km",
+                  AppLocalizations.of(context)!.distanceLabel,
+                ),
+                Container(width: 1, height: 40, color: Colors.grey.withValues(alpha: 0.3)),
+                _buildStatItem(
+                  theme,
+                  Icons.speed,
+                  _speed.toStringAsFixed(1),
+                  AppLocalizations.of(context)!.speedUnitLabel,
+                  AppLocalizations.of(context)!.speedLabel,
+                ),
+              ],
+            ),
+
+            const SizedBox(height: 10),
+            SizedBox(
+              width: double.infinity,
+              height: 55,
+              child: ElevatedButton(
+                onPressed: _activityButton,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: _activityState ? Colors.redAccent : const Color(0xff0072ff),
+                  foregroundColor: Colors.white,
+                  elevation: 5,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(_activityState ? Icons.stop_rounded : Icons.play_arrow_rounded, size: 32),
+                    const SizedBox(width: 10),
+                    Text(
+                      _activityState
+                          ? AppLocalizations.of(context)!.stopActivityButtonLabel.toUpperCase()
+                          : AppLocalizations.of(context)!.beginActivityButtonLabel.toUpperCase(),
+                      style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, letterSpacing: 1),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );
   }
 
-  Widget _buildStopwatch() {
-    return Card(
-      child: Text(
-        "${AppLocalizations.of(context)!.timeLabel}:\n${_duration.inSeconds}\n${AppLocalizations.of(context)!.timeUnitLabel}",
-        textAlign: TextAlign.center,
-      ),
-    );
-  }
-
-  Widget _buildDistanceMeter() {
-    return Card(
-      child: Text(
-        "${AppLocalizations.of(context)!.distanceLabel}\n$_maxDistance\n${AppLocalizations.of(context)!.distanceUnitLabel}",
-        textAlign: TextAlign.center,
-      ),
-    );
-  }
-
-  Widget _buildSpeedMeter() {
-    return Card(
-      child: Text(
-        "${AppLocalizations.of(context)!.speedLabel}:\n$_speed\n${AppLocalizations.of(context)!.speedUnitLabel}",
-        textAlign: TextAlign.center,
-      ),
+  Widget _buildStatItem(ThemeData theme, IconData icon, String value, String unit, String label) {
+    return Column(
+      children: [
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.baseline,
+          textBaseline: TextBaseline.alphabetic,
+          children: [
+            Text(
+              value,
+              style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(width: 4),
+            Text(
+              unit,
+              style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.6)
+              ),
+            ),
+          ],
+        ),
+        Text(
+          label.toUpperCase(),
+          style: TextStyle(
+              fontSize: 10,
+              color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.5)
+          ),
+        ),
+      ],
     );
   }
 }

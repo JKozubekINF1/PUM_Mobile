@@ -153,6 +153,63 @@ class _ResultScreenState extends State<ResultScreen> {
     super.dispose();
   }
 
+  Future<void> _pickImage(ImageSource source) async {
+    try {
+      final XFile? newImage = await picker.pickImage(source: source);
+      if (newImage != null) {
+        setState(() {
+          image = newImage;
+          imageName = image?.name;
+          _hasUnsavedChanges = true;
+        });
+      }
+    } catch (e) {
+      debugPrint("Error picking image: $e");
+    }
+  }
+
+  void _showImageSourceOptions() {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Theme.of(context).cardTheme.color,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (BuildContext context) {
+        return SafeArea(
+          child: Wrap(
+            children: <Widget>[
+              ListTile(
+                leading: Icon(Icons.photo_library,
+                    color: Theme.of(context).iconTheme.color),
+                title: Text(
+                  AppLocalizations.of(context)?.galleryOptionLabel ?? "Gallery",
+                  style: Theme.of(context).textTheme.bodyMedium,
+                ),
+                onTap: () {
+                  Navigator.of(context).pop();
+                  _pickImage(ImageSource.gallery);
+                },
+              ),
+              ListTile(
+                leading: Icon(Icons.photo_camera,
+                    color: Theme.of(context).iconTheme.color),
+                title: Text(
+                  AppLocalizations.of(context)?.cameraOptionLabel ?? "Camera",
+                  style: Theme.of(context).textTheme.bodyMedium,
+                ),
+                onTap: () {
+                  Navigator.of(context).pop();
+                  _pickImage(ImageSource.camera);
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
   Future<void> _saveActivity() async {
     setState(() => _processing = true);
 
@@ -182,9 +239,10 @@ class _ResultScreenState extends State<ResultScreen> {
         saveSuccess = await queue.addActivity(activity);
         if (saveSuccess) {
           await storage.deleteFile(filename);
-          if (mounted)
+          if (mounted) {
             _displaySnackbar(AppLocalizations.of(context)?.noConnectionMessage ??
                 "Saved offline");
+          }
         }
       } else {
         String? newActivityId = await api.saveActivity(
@@ -206,17 +264,21 @@ class _ResultScreenState extends State<ResultScreen> {
           if (img != null) {
             try {
               await api.uploadActivityPhoto(id: newActivityId, imageFile: img);
-              if (mounted) _displaySnackbar("Activity and photo saved!");
+              if (mounted) {
+                _displaySnackbar("Activity and photo saved!");
+              }
             } catch (e) {
               debugPrint("Photo upload error: $e");
-              if (mounted)
+              if (mounted) {
                 _displaySnackbar("Activity saved, but photo failed.");
+              }
             }
           } else {
-            if (mounted)
+            if (mounted) {
               _displaySnackbar(
                   AppLocalizations.of(context)?.activitySentMessage ??
                       "Activity Sent");
+            }
           }
         }
       }
@@ -227,9 +289,10 @@ class _ResultScreenState extends State<ResultScreen> {
         Navigator.pop(context);
       }
     } catch (e) {
-      if (mounted)
+      if (mounted) {
         _displaySnackbar(
             AppLocalizations.of(context)?.genericErrorMessage ?? "Error");
+      }
       debugPrint("Save error: $e");
       setState(() => _processing = false);
     }
@@ -250,7 +313,9 @@ class _ResultScreenState extends State<ResultScreen> {
         debugPrint('File name is missing from json');
       }
       setState(() => _processing = false);
-      if (mounted) Navigator.pop(context);
+      if (mounted) {
+        Navigator.pop(context);
+      }
     } catch (e) {
       debugPrint('$e');
       setState(() => _processing = false);
@@ -287,21 +352,24 @@ class _ResultScreenState extends State<ResultScreen> {
             content: SingleChildScrollView(
               child: ListBody(
                 children: <Widget>[
-                  Text(AppLocalizations.of(context)?.unsavedChangesWarningMessage ??
+                  Text(AppLocalizations.of(context)
+                      ?.unsavedChangesWarningMessage ??
                       "Unsaved changes"),
                 ],
               ),
             ),
             actions: <Widget>[
               TextButton(
-                child: Text(AppLocalizations.of(context)?.acceptOptionLabel ?? "Yes"),
+                child: Text(
+                    AppLocalizations.of(context)?.acceptOptionLabel ?? "Yes"),
                 onPressed: () {
                   Navigator.pop(context, true);
                   Navigator.pop(context, true);
                 },
               ),
               TextButton(
-                child: Text(AppLocalizations.of(context)?.declineOptionLabel ?? "No"),
+                child: Text(
+                    AppLocalizations.of(context)?.declineOptionLabel ?? "No"),
                 onPressed: () {
                   Navigator.pop(context, false);
                 },
@@ -328,7 +396,8 @@ class _ResultScreenState extends State<ResultScreen> {
             ),
             actions: <Widget>[
               TextButton(
-                child: Text(AppLocalizations.of(context)?.acceptOptionLabel ?? "Yes"),
+                child: Text(
+                    AppLocalizations.of(context)?.acceptOptionLabel ?? "Yes"),
                 onPressed: () {
                   _deleteActivity();
                   Navigator.pushNamedAndRemoveUntil(
@@ -336,7 +405,8 @@ class _ResultScreenState extends State<ResultScreen> {
                 },
               ),
               TextButton(
-                child: Text(AppLocalizations.of(context)?.declineOptionLabel ?? "No"),
+                child: Text(
+                    AppLocalizations.of(context)?.declineOptionLabel ?? "No"),
                 onPressed: () {
                   Navigator.pop(context, false);
                 },
@@ -356,9 +426,10 @@ class _ResultScreenState extends State<ResultScreen> {
         });
       }
     } catch (e) {
-      if (mounted)
+      if (mounted) {
         _displaySnackbar(
             AppLocalizations.of(context)?.genericErrorMessage ?? "Error");
+      }
       debugPrint('$e');
     }
   }
@@ -414,7 +485,7 @@ class _ResultScreenState extends State<ResultScreen> {
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
+            color: Colors.black.withValues(alpha: 0.1),
             blurRadius: 10,
             spreadRadius: 2,
           ),
@@ -431,8 +502,8 @@ class _ResultScreenState extends State<ResultScreen> {
                       "No route")),
         )
             : FlutterMap(
-          options:
-          MapOptions(initialCenter: routePoints.first, initialZoom: 15),
+          options: MapOptions(
+              initialCenter: routePoints.first, initialZoom: 15),
           children: [
             TileLayer(
               urlTemplate:
@@ -461,7 +532,7 @@ class _ResultScreenState extends State<ResultScreen> {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -475,13 +546,13 @@ class _ResultScreenState extends State<ResultScreen> {
           Container(
               height: 40,
               width: 1,
-              color: Theme.of(context).dividerColor.withOpacity(0.5)),
+              color: Theme.of(context).dividerColor.withValues(alpha: 0.5)),
           _buildStatItem(Icons.straighten, distance.toStringAsFixed(2),
               AppLocalizations.of(context)?.distanceUnitLabel ?? "m"),
           Container(
               height: 40,
               width: 1,
-              color: Theme.of(context).dividerColor.withOpacity(0.5)),
+              color: Theme.of(context).dividerColor.withValues(alpha: 0.5)),
           _buildStatItem(Icons.speed, speedavg.toStringAsFixed(2),
               AppLocalizations.of(context)?.speedUnitLabel ?? "m/s"),
         ],
@@ -496,10 +567,10 @@ class _ResultScreenState extends State<ResultScreen> {
         const SizedBox(height: 8),
         Text(
           value,
-          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              fontWeight: FontWeight.bold,
-              fontSize: 20
-          ),
+          style: Theme.of(context)
+              .textTheme
+              .bodyMedium
+              ?.copyWith(fontWeight: FontWeight.bold, fontSize: 20),
         ),
         Text(
           unit,
@@ -524,7 +595,8 @@ class _ResultScreenState extends State<ResultScreen> {
           value: key,
           child: Row(
             children: [
-              Icon(activityIcons[key], size: 24, color: Theme.of(context).iconTheme.color),
+              Icon(activityIcons[key],
+                  size: 24, color: Theme.of(context).iconTheme.color),
               const SizedBox(width: 10),
               Text(activityLabels[key] ?? key,
                   style: Theme.of(context).textTheme.bodyMedium),
@@ -575,7 +647,7 @@ class _ResultScreenState extends State<ResultScreen> {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Theme.of(context).cardTheme.color?.withOpacity(0.5),
+        color: Theme.of(context).cardTheme.color?.withValues(alpha: 0.5),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: Theme.of(context).dividerColor),
       ),
@@ -584,29 +656,20 @@ class _ResultScreenState extends State<ResultScreen> {
           Expanded(
             flex: 2,
             child: ElevatedButton.icon(
-              onPressed: () async {
-                XFile? newImage =
-                await picker.pickImage(source: ImageSource.gallery);
-                if (newImage != null) {
-                  setState(() {
-                    image = newImage;
-                    imageName = image?.name;
-                    _hasUnsavedChanges = true;
-                  });
-                }
+              onPressed: () {
+                _showImageSourceOptions();
               },
-              icon: const Icon(Icons.photo_camera),
+              icon: const Icon(Icons.add_a_photo),
               label: Text(
                   AppLocalizations.of(context)?.uploadPictureButtonLabel ??
-                      "Upload Picture",
+                      "Add Picture",
                   style: const TextStyle(fontSize: 18),
                   textAlign: TextAlign.center),
               style: ElevatedButton.styleFrom(
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10)),
                   padding: const EdgeInsets.symmetric(vertical: 12),
-                  minimumSize: const Size(0, 50)
-              ),
+                  minimumSize: const Size(0, 50)),
             ),
           ),
           const SizedBox(width: 15),
@@ -634,8 +697,7 @@ class _ResultScreenState extends State<ResultScreen> {
                       color: imageName == null
                           ? Theme.of(context).disabledColor
                           : Theme.of(context).textTheme.bodyMedium?.color,
-                      fontSize: 16
-                  ),
+                      fontSize: 16),
                   overflow: TextOverflow.ellipsis,
                 ),
               ],
@@ -664,7 +726,9 @@ class _ResultScreenState extends State<ResultScreen> {
       height: 60,
       child: OutlinedButton(
         onPressed: () async {
-          if (!_processing) _deletePopup();
+          if (!_processing) {
+            _deletePopup();
+          }
         },
         style: OutlinedButton.styleFrom(
           side: BorderSide(color: Colors.red.shade400, width: 2),
@@ -688,9 +752,11 @@ class _ResultScreenState extends State<ResultScreen> {
           ? const SizedBox(
           width: 24,
           height: 24,
-          child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+          child: CircularProgressIndicator(
+              color: Colors.white, strokeWidth: 2))
           : Text(
-        AppLocalizations.of(context)?.submitLabel.toUpperCase() ?? "SUBMIT",
+        AppLocalizations.of(context)?.submitLabel.toUpperCase() ??
+            "SUBMIT",
       ),
     );
   }

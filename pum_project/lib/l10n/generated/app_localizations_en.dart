@@ -397,4 +397,16 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get errorLabel => 'Error';
+
+  @override
+  String get galleryOptionLabel => 'Gallery';
+
+  @override
+  String get cameraOptionLabel => 'Camera';
+
+  @override
+  String get noActivitiesFoundMessage => 'No activities found';
+
+  @override
+  String get pendingQueueLabel => 'Pending:';
 }

@@ -125,5 +125,9 @@
     "passwordResetSuccessMessage": "Hasło zostało zmienione! Zaloguj się.",
     "codeSentSuccessMessage": "Kod został wysłany! Sprawdź email.",
     "enterEmailInstructionMessage": "Podaj swój email. Wyślemy kod do resetu hasła.",
-    "errorLabel": "Błąd"
+    "errorLabel": "Błąd",
+    "galleryOptionLabel": "Galeria",
+    "cameraOptionLabel": "Aparat",
+    "noActivitiesFoundMessage": "Nie znaleziono aktywności",
+    "pendingQueueLabel": "Oczekujące:"
 }

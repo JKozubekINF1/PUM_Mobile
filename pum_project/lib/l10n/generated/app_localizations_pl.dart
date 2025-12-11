@@ -398,4 +398,16 @@ class AppLocalizationsPl extends AppLocalizations {
 
   @override
   String get errorLabel => 'Błąd';
+
+  @override
+  String get galleryOptionLabel => 'Galeria';
+
+  @override
+  String get cameraOptionLabel => 'Aparat';
+
+  @override
+  String get noActivitiesFoundMessage => 'Nie znaleziono aktywności';
+
+  @override
+  String get pendingQueueLabel => 'Oczekujące:';
 }

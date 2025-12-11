@@ -161,6 +161,7 @@ class _LoginPageState extends State<LoginPage> {
   Widget _buildEmailField() {
     return TextField(
       controller: _emailController,
+      style: Theme.of(context).textTheme.bodyMedium,
       decoration: InputDecoration(
         labelText: AppLocalizations.of(context)!.emailLabel,
         prefixIcon: const Icon(Icons.email),
@@ -174,6 +175,7 @@ class _LoginPageState extends State<LoginPage> {
     return TextField(
       controller: _passwordController,
       obscureText: _obscurePassword,
+      style: Theme.of(context).textTheme.bodyMedium,
       decoration: InputDecoration(
         labelText: AppLocalizations.of(context)!.passwordLabel,
         prefixIcon: const Icon(Icons.lock),
