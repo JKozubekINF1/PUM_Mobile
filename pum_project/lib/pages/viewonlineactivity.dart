@@ -136,21 +136,10 @@ class _ViewOnlineActivityScreenState extends State<ViewOnlineActivityScreen> {
           }
           fileName = "${widget.data['activityType']}_$dateTimePart.gpx";
         }
-
-        Directory? saveDir;
-
-        if (Platform.isAndroid) {
-          saveDir = Directory('/storage/emulated/0/Download');
-          if (!await saveDir.exists()) {
-            saveDir = await getExternalStorageDirectory();
-          }
-        }
-
-        if (saveDir == null) {
-          throw Exception("Could not find save directory.");
-        }
+        final Directory saveDir = await getApplicationDocumentsDirectory();
 
         String filePath = '${saveDir.path}/$fileName';
+
         int counter = 1;
         while (await File(filePath).exists()) {
           String nameWithoutExt = fileName.replaceAll('.gpx', '');
@@ -162,9 +151,9 @@ class _ViewOnlineActivityScreenState extends State<ViewOnlineActivityScreen> {
         final file = File(filePath);
         await file.writeAsBytes(response.bodyBytes);
 
-        if (Platform.isAndroid) {
-          _displaySnackbar("Saved to Downloads: ${filePath.split('/').last}");
-        }
+        _displaySnackbar("Saved to App Documents: $fileName");
+        print("File saved at: $filePath");
+
       } else {
         if (response.statusCode == 404) {
           _displaySnackbar("Error 404: Activity not found.");
