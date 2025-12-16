@@ -99,7 +99,7 @@ class UploadQueue {
 
   Future<bool> _upload(Activity activity) async {
     try {
-      await _api.saveActivity(
+      String? newActivityId = await _api.saveActivity(
         durationSeconds: activity.duration,
         distanceMeters: activity.distance,
         averageSpeedMs: activity.avgSpeed,
@@ -108,6 +108,13 @@ class UploadQueue {
         description: activity.description,
         activityType: activity.activityType,
       );
+
+      if (newActivityId != null) {
+        final img = activity.image;
+        if (img != null) {
+          await _api.uploadActivityPhoto(id: newActivityId, imageFile: img);
+        }
+      }
 
       debugPrint("[QUEUE] UPLOAD SUCCESSFUL");
       return true;

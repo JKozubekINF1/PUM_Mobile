@@ -20,16 +20,11 @@ import 'package:pum_project/services/foreground_task_service.dart';
 import 'package:pum_project/theme/app_theme.dart';
 import 'package:provider/provider.dart';
 import 'providers/auth_provider.dart';
-import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:flutter_foreground_task/flutter_foreground_task.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   LocalStorage.init();
-  // NEEDED FOR WINDOWS TESTING
-  //sqfliteFfiInit();
-  //databaseFactory = databaseFactoryFfi;
-  // COMMENT WHEN TESTING ON ANDROID
   await UploadQueue.instance.init();
   await ForegroundTaskService.init();
   FlutterForegroundTask.initCommunicationPort();

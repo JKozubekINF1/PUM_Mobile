@@ -30,6 +30,7 @@ class _TrackPageState extends State<TrackPage> {
   double _speed = 0.0;
   double _speedAvg = 0.0;
   bool _autoCenter = true;
+  bool _serviceInitiated = false;
 
   @override
   void dispose() {
@@ -78,6 +79,11 @@ class _TrackPageState extends State<TrackPage> {
   }
 
   void _onReceiveTaskData(Object data) {
+    if (_serviceInitiated == false) {
+      setState(() {
+        _serviceInitiated = true;
+      });
+    }
     if (data is Map<String, dynamic>) {
       final lat = data['lat'] as double?;
       final lng = data['lng'] as double?;
@@ -144,13 +150,21 @@ class _TrackPageState extends State<TrackPage> {
     });
     _changeActivityState(_activityState);
     if (!_activityState) {
-      Map? activityContent = await _generateLocalFile();
-      _maxDistance = 0;
-      _speed = 0;
-      _speedAvg = 0;
-      _duration = Duration(seconds: 0);
-      _routeList.clear();
-      if (mounted) Navigator.pushNamed(context, '/results', arguments: {'Data': activityContent});
+      if (_duration != Duration(seconds: 0)) {
+        Map? activityContent = await _generateLocalFile();
+        _maxDistance = 0;
+        _speed = 0;
+        _speedAvg = 0;
+        _duration = Duration(seconds: 0);
+        _routeList.clear();
+        if (mounted) Navigator.pushNamed(context, '/results', arguments: {'Data': activityContent});
+      } else {
+        _maxDistance = 0;
+        _speed = 0;
+        _speedAvg = 0;
+        _duration = Duration(seconds: 0);
+        _routeList.clear();
+      }
     } else {
       _maxDistance = 0;
       _speed = 0;
@@ -215,7 +229,6 @@ class _TrackPageState extends State<TrackPage> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: AppBar(
@@ -254,6 +267,9 @@ class _TrackPageState extends State<TrackPage> {
   }
 
   Widget _buildMap() {
+    final theme = Theme.of(context);
+    final markerColor = theme.appBarTheme.backgroundColor ?? Colors.red;
+    final trailColor = theme.colorScheme.primary;
     return FlutterMap(
       mapController: _mapController,
       options: MapOptions(
@@ -280,7 +296,7 @@ class _TrackPageState extends State<TrackPage> {
               Polyline(
                 points: _routeList,
                 strokeWidth: 5.0,
-                color: Colors.blueAccent,
+                color: trailColor,
               ),
           ],
         ),
@@ -299,9 +315,9 @@ class _TrackPageState extends State<TrackPage> {
                     shape: BoxShape.circle,
                     border: Border.all(color: Colors.white, width: 2),
                   ),
-                  child: const Icon(
+                  child: Icon(
                     Icons.circle,
-                    color: Colors.blue,
+                    color: markerColor,
                     size: 20,
                   ),
                 ),
@@ -384,7 +400,9 @@ class _TrackPageState extends State<TrackPage> {
               width: double.infinity,
               height: 55,
               child: ElevatedButton(
-                onPressed: _activityButton,
+                onPressed: () {
+                  if (_serviceInitiated) _activityButton();
+                  },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: _activityState ? Colors.redAccent : const Color(0xff0072ff),
                   foregroundColor: Colors.white,

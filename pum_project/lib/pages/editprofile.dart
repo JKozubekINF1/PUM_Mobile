@@ -224,6 +224,9 @@ class _EditProfilePageState extends State<EditProfilePage> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final textColor = theme.textTheme.bodyMedium?.color ?? Colors.black;
+
     return PopScope(
       canPop: false,
       onPopInvokedWithResult: (didPop, result) async {
@@ -246,7 +249,13 @@ class _EditProfilePageState extends State<EditProfilePage> {
               return const Center(child: CircularProgressIndicator());
             }
             if (snapshot.hasError) {
-              return Center(child: Text(snapshot.error.toString()));
+              return Center(
+                child: Text(
+                  AppLocalizations.of(context)!.noConnectionMessage,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(color: textColor),
+                ),
+              );
             }
             if (snapshot.hasData) {
               return SingleChildScrollView(

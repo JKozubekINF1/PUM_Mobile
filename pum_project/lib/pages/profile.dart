@@ -105,7 +105,8 @@ class _ProfilePageState extends State<ProfilePage> {
           if (snapshot.hasError) {
             return Center(
               child: Text(
-                "${AppLocalizations.of(context)!.errorLabel}: ${snapshot.error}",
+                AppLocalizations.of(context)!.noConnectionMessage,
+                textAlign: TextAlign.center,
                 style: TextStyle(color: textColor),
               ),
             );

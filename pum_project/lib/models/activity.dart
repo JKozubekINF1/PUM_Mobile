@@ -1,4 +1,5 @@
 import 'package:latlong2/latlong.dart';
+import 'package:image_picker/image_picker.dart';
 
 class Activity {
   final String? id;
@@ -10,7 +11,7 @@ class Activity {
   final String? description;
   final String activityType;
   final String filename;
-  final String? photoUrl;
+  final XFile? image;
 
   Activity({
     this.id,
@@ -22,7 +23,7 @@ class Activity {
     required this.description,
     required this.activityType,
     required this.filename,
-    this.photoUrl,
+    this.image,
   });
 
   Map<String, dynamic> toJson() => {
@@ -39,7 +40,7 @@ class Activity {
 
   factory Activity.fromJson(Map<String, dynamic> json) => Activity(
     id: json['id'],
-    duration: json['durationSeconds'] ?? json['duration'], // Backend czasem zwraca DurationSeconds
+    duration: json['durationSeconds'] ?? json['duration'],
     distance: (json['distanceMeters'] ?? json['distance']).toDouble(),
     avgSpeed: (json['averageSpeedMs'] ?? json['avgSpeed']).toDouble(),
     routelist: [],
@@ -47,6 +48,5 @@ class Activity {
     description: json['description'],
     activityType: json['activityType'],
     filename: json['filename'] ?? "",
-    photoUrl: json['photoUrl'],
   );
 }

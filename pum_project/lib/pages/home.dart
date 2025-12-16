@@ -1213,7 +1213,9 @@ class _HomePageState extends State<HomePage> with RouteAware {
     String text = "${list[index][_sortOption]}";
     if (_sortOption == "distanceMeters") text += " m";
     if (_sortOption == "durationSeconds") text += " s";
-    if (_sortOption == "averageSpeedMs") text += " m/s";
+    if (_sortOption == "averageSpeedMs") {
+      text = "${list[index]['averageSpeedMs'].toString().substring(0,4)} m/s";
+    }
 
     return Text(
       text,

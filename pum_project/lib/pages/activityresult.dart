@@ -231,18 +231,17 @@ class _ResultScreenState extends State<ResultScreen> {
             : _descriptionController.text.trim(),
         activityType: activityType,
         filename: filename,
+        image: image,
       );
 
       bool saveSuccess = false;
 
       if (offlineMode) {
-        saveSuccess = await queue.addActivity(activity);
-        if (saveSuccess) {
-          await storage.deleteFile(filename);
-          if (mounted) {
-            _displaySnackbar(AppLocalizations.of(context)?.noConnectionMessage ??
-                "Saved offline");
-          }
+        await queue.addActivity(activity);
+        await storage.deleteFile(filename);
+        if (mounted) {
+          _displaySnackbar(AppLocalizations.of(context)?.noConnectionMessage ?? "Saved offline");
+          Navigator.pushReplacementNamed(context,'/home');
         }
       } else {
         String? newActivityId = await api.saveActivity(
@@ -479,6 +478,8 @@ class _ResultScreenState extends State<ResultScreen> {
   }
 
   Widget _buildMap() {
+    final theme = Theme.of(context);
+    final trailColor = theme.colorScheme.primary;
     return Container(
       height: 350,
       decoration: BoxDecoration(
@@ -514,7 +515,7 @@ class _ResultScreenState extends State<ResultScreen> {
               polylines: [
                 Polyline(
                     points: routePoints,
-                    color: Theme.of(context).primaryColor,
+                    color: trailColor,
                     strokeWidth: 6),
               ],
             ),

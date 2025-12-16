@@ -288,6 +288,9 @@ class _ViewOnlineActivityScreenState extends State<ViewOnlineActivityScreen> {
   }
 
   Widget _buildMap() {
+    final theme = Theme.of(context);
+    final markerColor = theme.appBarTheme.backgroundColor ?? Colors.red;
+    final trailColor = theme.colorScheme.primary;
     if (routePoints.isEmpty) {
       return Container(
         height: 350,
@@ -346,7 +349,7 @@ class _ViewOnlineActivityScreenState extends State<ViewOnlineActivityScreen> {
               polylines: [
                 Polyline(
                   points: routePoints,
-                  color: Theme.of(context).primaryColor,
+                  color: trailColor,
                   strokeWidth: 4.0,
                   strokeCap: StrokeCap.round,
                   strokeJoin: StrokeJoin.round,
@@ -361,15 +364,15 @@ class _ViewOnlineActivityScreenState extends State<ViewOnlineActivityScreen> {
                     width: 40,
                     height: 40,
                     child:
-                    const Icon(Icons.circle, color: Colors.green, size: 12),
+                    Icon(Icons.circle, color: markerColor, size: 12),
                   ),
                 if (routePoints.isNotEmpty)
                   Marker(
                     point: routePoints.last,
                     width: 40,
                     height: 40,
-                    child: const Icon(Icons.location_on,
-                        color: Colors.red, size: 30),
+                    child: Icon(Icons.location_on,
+                        color: markerColor, size: 30),
                   ),
               ],
             ),
