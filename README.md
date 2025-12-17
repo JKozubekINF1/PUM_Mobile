@@ -45,13 +45,13 @@ System służy do rejestrowania i analizy aktywności fizycznych użytkowników 
 
 ## Uruchomienie lokalne w środowisku testowym
 
-Pobierz zawartość folderu "pum_project"
+Pobierz zawartość folderu "pum_project".
 
 ### Do uruchomienia wymagane są:
-- Flutter SDK (3.35.5+)
-- Dart SDK (3.9.2+)
-- Wybrane IDE, przykładowo Android Studio Narwhal+
-- Urządzenie lub emulator obsługujący Androida
+- Flutter SDK (3.35.5+).
+- Dart SDK (3.9.2+).
+- Wybrane IDE, przykładowo Android Studio Narwhal+.
+- Urządzenie lub emulator obsługujący Androida.
 
 ### W IDE pobierz wszystkie zależności projektu:
 ```
@@ -62,3 +62,7 @@ flutter pub get
 ```
 flutter run
 ```
+
+## Uruchomienie aplikacji
+
+Pobierz Activis.apk na swoje urządzenie Android i zainstaluj aplikację.

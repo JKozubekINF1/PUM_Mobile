@@ -11,6 +11,7 @@ import 'package:provider/provider.dart';
 import '../services/api_connection.dart';
 import '../providers/auth_provider.dart';
 import 'package:file_picker/file_picker.dart';
+
 class ViewOnlineActivityScreen extends StatefulWidget {
   const ViewOnlineActivityScreen({
     required this.data,
