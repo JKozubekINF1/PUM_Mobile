@@ -10,7 +10,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 import '../services/api_connection.dart';
 import '../providers/auth_provider.dart';
-
+import 'package:file_picker/file_picker.dart';
 class ViewOnlineActivityScreen extends StatefulWidget {
   const ViewOnlineActivityScreen({
     required this.data,
@@ -84,7 +84,7 @@ class _ViewOnlineActivityScreenState extends State<ViewOnlineActivityScreen> {
 
   Future<void> _downloadGpx() async {
     if (widget.data['id'] == null) {
-      _displaySnackbar("Error: Missing Activity ID");
+      _displaySnackbar("Błąd: Brak ID aktywności");
       return;
     }
 
@@ -95,7 +95,7 @@ class _ViewOnlineActivityScreenState extends State<ViewOnlineActivityScreen> {
       final apiService = Provider.of<ApiService>(context, listen: false);
 
       if (authProvider.token == null || authProvider.token!.isEmpty) {
-        _displaySnackbar("Error: Not authenticated");
+        _displaySnackbar("Błąd: Brak autoryzacji");
         return;
       }
 
@@ -116,18 +116,8 @@ class _ViewOnlineActivityScreenState extends State<ViewOnlineActivityScreen> {
       if (response.statusCode == 200) {
         String fileName = "activity_${widget.data['id']}.gpx";
 
-        final contentDisposition = response.headers['content-disposition'];
-        if (contentDisposition != null &&
-            contentDisposition.contains('filename=')) {
-          final match =
-          RegExp(r'filename="?([^";]+)"?').firstMatch(contentDisposition);
-          if (match != null && match.group(1) != null) {
-            fileName = match.group(1)!;
-          }
-        } else if (widget.data['activityType'] != null) {
-          String dateTimePart =
-          DateFormat('yyyy-MM-dd_HH-mm').format(DateTime.now());
-
+        if (widget.data['activityType'] != null) {
+          String dateTimePart = DateFormat('yyyy-MM-dd_HH-mm').format(DateTime.now());
           if (widget.data['startedAt'] != null) {
             try {
               DateTime startDate = DateTime.parse(widget.data['startedAt']);
@@ -136,33 +126,32 @@ class _ViewOnlineActivityScreenState extends State<ViewOnlineActivityScreen> {
           }
           fileName = "${widget.data['activityType']}_$dateTimePart.gpx";
         }
-        final Directory saveDir = await getApplicationDocumentsDirectory();
 
-        String filePath = '${saveDir.path}/$fileName';
+        final fileBytes = response.bodyBytes;
+        final String? outputFile = await FilePicker.platform.saveFile(
+          dialogTitle: 'Wybierz gdzie zapisać plik GPX',
+          fileName: fileName,
+          type: FileType.any,
+          bytes: fileBytes,
+        );
 
-        int counter = 1;
-        while (await File(filePath).exists()) {
-          String nameWithoutExt = fileName.replaceAll('.gpx', '');
-          String newName = '$nameWithoutExt($counter).gpx';
-          filePath = '${saveDir.path}/$newName';
-          counter++;
+        if (outputFile == null) {
+          _displaySnackbar("Anulowano zapisywanie");
+        } else {
+          _displaySnackbar("Pomyślnie zapisano plik!");
+          print("Plik zapisany w: $outputFile");
         }
-
-        final file = File(filePath);
-        await file.writeAsBytes(response.bodyBytes);
-
-        _displaySnackbar("Saved to App Documents: $fileName");
-        print("File saved at: $filePath");
 
       } else {
         if (response.statusCode == 404) {
-          _displaySnackbar("Error 404: Activity not found.");
+          _displaySnackbar("Błąd 404: Nie znaleziono aktywności.");
         } else {
-          _displaySnackbar("Download failed: ${response.statusCode}");
+          _displaySnackbar("Błąd pobierania: ${response.statusCode}");
         }
       }
     } catch (e) {
-      _displaySnackbar("Error: $e");
+      _displaySnackbar("Wystąpił błąd: $e");
+      print("Download error: $e");
     } finally {
       if (mounted) setState(() => _isDownloading = false);
     }
